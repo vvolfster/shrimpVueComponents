@@ -1,0 +1,19 @@
+{
+  "name": "fbAdminPanel",
+  "version": "0.0.1",
+  "description": "Vue fbAdminPanel",
+  "author": "Imagishrimp Team",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "firebase": "^3.9.0",
+    "lodash": "^4.17.4",
+    "chance": "^1.0.10",
+    "moment": "^2.15.0",
+    "quasar-framework": "^0.13.2",
+    "font-awesome": "^4.7.0",
+    "sweet-modal-vue": "^1.1.2"
+  },
+  "peerDependencies": {
+    "vue": "2.2.2"
+  }
+}
