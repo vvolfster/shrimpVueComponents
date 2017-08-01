@@ -1,54 +1,63 @@
 <template>
     <div style="position:relative;overflow-y:auto;">
-        <!-- if a custom delegate component is provided, we will just use a list of that component instead of the default table view -->
-        <table v-if="!delegateComponent" class="ztable" style="margin:auto;">
-            <thead class="zthead">
-                <th class="ztableHeader" v-if="page" :colspan="columns.length ? columns.length : 1">
-                    {{ page ? page.name : "" }}
-                    <div class="ztableWideActions">
-                        <div class="btn btn--tableHeader" v-if="addSteps" @click="add"><i class="fa fa-plus"/></div>
-                    </div>
-                </th>
-                <tr class="ztr">
-                    <th v-for="field in columns" class="zth" :style="getFieldStyle(field)" :key="field">
-                        {{ field }}
+
+        <div v-if="page">
+            <!-- if a custom delegate component is provided, we will just use a list of that component instead of the default table view -->
+            <table v-if="!delegateComponent" class="ztable" style="margin:auto;">
+                <thead class="zthead">
+                    <th class="ztableHeader" :colspan="columns.length ? columns.length : 1">
+                        {{ page ? page.name : "" }}
+                        <div class="ztableWideActions">
+                            <button class="btn btn--tableHeader" v-if="addSteps" @click="add"><i class="fa fa-plus"/>
+                            &nbsp New
+                            </button>
+                        </div>
                     </th>
-                </tr>
-            </thead>
-            <tbody class="ztbody" v-if="pageData && columns">
-                <tr v-for="(entry, id) in pageData" :key="id" class="ztr">
-                    <td v-for="field in columns" :key="field" class="ztd">
-                        <div v-if="field !== '★'" @click="edit(id, field, entry[field])">
-                            {{ entry ? entry[field] : '?' }}
-                        </div>
-                        <div v-else class="specialActionsColumn">
-                            <button class="btn btn--detail" @click="magic(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></button>
-                            <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div v-else>
-            <div class="ztableHeader ztableHeader--fill" v-if="page">
-                {{ page ? page.name : "" }}
-                <div class="ztableWideActions">
-                    <button class="btn btn--tableHeader" v-if="addSteps" @click="add"><i class="fa fa-plus"/></i></button>
+                    <tr class="ztr">
+                        <th v-for="field in columns" class="zth" :style="getFieldStyle(field)" :key="field">
+                            {{ field }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="ztbody" v-if="pageData && columns">
+                    <tr v-for="(entry, id) in pageData" :key="id" class="ztr">
+                        <td v-for="field in columns" :key="field" class="ztd">
+                            <div v-if="field !== '★'" @click="edit(id, field, entry[field])">
+                                {{ entry ? entry[field] : '?' }}
+                            </div>
+                            <div v-else class="specialActionsColumn">
+                                <button class="btn btn--detail" @click="magic(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></button>
+                                <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div v-else>
+                <div class="ztableHeader--custom">
+                    <button class="btn btn--tableHeaderCustom" v-if="addSteps" @click="add">
+                        <i class="fa fa-plus"></i>
+                        &nbsp New
+                    </button>
                 </div>
-            </div>
-            <div style="position:relative;margin-bottom:10px;" v-for="(entry, id, index) in pageData" :key="id">
-                <div class="componentHeader">
-                    <div class="componentHeader__index">
-                        #{{ index }}
+                <div style="position:relative;margin-bottom:10px;" v-for="(entry, id, index) in pageData" :key="id">
+                    <div class="componentHeader">
+                        <div class="componentHeader__index">
+                            #{{ index }}
+                        </div>
+                        <div class="componentHeader__actions">
+                            <button class="btn btn--detail" @click="magic(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'></i></button>
+                            <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'></i></button>
+                        </div>
                     </div>
-                    <div class="componentHeader__actions">
-                        <button class="btn btn--detail" @click="magic(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
-                        <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'></i></button>
-                    </div>
+                    <component :is="delegateComponent" :id="id" :value="entry" :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"/>
                 </div>
-                <component :is="delegateComponent" :id="id" :value="entry" :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"/>
             </div>
         </div>
+        <div v-else class="emptyDiv">
+            Please select a table
+        </div>
+        
         
         <q-modal ref="magicModal" position="bottom">
             <div class="magicModal">
@@ -87,7 +96,7 @@
     import lodash from 'lodash'
     import fbase from '../../fbase'
     import imageStorage from '../imageStorage'
-    import tabView from '../tabView'
+    import tabView from '../../../layout/tabView'
     import adder from './adder'
 
     const functions = {
@@ -483,8 +492,10 @@
 
 <style scoped>
 /* customComponent css */
-.scrollingContent {
-    overflow-y: auto;
+.emptyDiv {
+    font-size: 20px;
+    color: gray;
+    flex-flow: column;
 }
 
 .componentHeader {
@@ -541,15 +552,18 @@
     right: 2px;
 }
 
-.ztableWideActions {
-    position: absolute;
-    top: 0;
-    right: 0;
-}
-
 .btn--tableHeader {
     border-style: solid;
     border-width: 0 0 0 1px;
+    height: 100%;
+}
+
+.btn--tableHeaderCustom {
+    border: solid 1px black;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    background-color: #42b983;
 }
 
 /* table css */
@@ -563,9 +577,25 @@
     position: relative;
 }
 
-.ztableHeader--fill {
-    display: flex;
+.ztableHeader--custom {
+    align-items: center;
+    justify-content: start;
+    background: transparent;    
+    text-transform: uppercase;
+    color: white;
+    height: 40px;
+    position: relative;
 }
+
+.ztableWideActions {
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
 
 .specialActionsColumn {
     text-align: center;

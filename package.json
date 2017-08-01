@@ -1,9 +1,9 @@
 {
   "name": "shrimp-vue-components",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Imagishrimp's Vue Component Emporium",
   "author": "Shahan <shahan@iii.global>",
-  "private": true,
+  "private": false,
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
@@ -18,6 +18,8 @@
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "quasar-framework": "^0.13.10",
+    "material-design-icons": "^3.0.1",
+    "roboto-fontface": "^0.8.0",
     "vue": "^2.3.3"
   },
   "devDependencies": {

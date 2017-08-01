@@ -1,15 +1,20 @@
 <template>
-    <div class="row justify-between">
-        <q-select :options="uitables" v-model="input_table" placeholder="Select a table" style="margin-right:1vw;"/>
-        <q-pagination v-model="input_page" :max="totalPages" v-show="totalPages > 0" style="margin-left:1vw;"/>
+    <div class="navigationBar" style="padding:5px;">
+        <combobox :options="tables" @value="input_table = $event"/>
+        Firebase Admin Panel
+        <pageControls :total="totalPages" @value="input_page = $event"/>
     </div>
 </template>
 
 <script>
 import lodash from 'lodash'
-import fbase from '../fbase'
+import combobox from '../../../input/combobox'
+import fbase from '../../fbase'
+import pageControls from "./pageControls"
+
 
 export default {
+    components: { combobox, pageControls },
     props: ["tables", "pageSize"],
     data() {
         return {
@@ -50,12 +55,6 @@ export default {
             const self = this;
             const pageIdx = self.input_page >= 1 ? self.input_page - 1 : 0;
             return self.pages ? self.pages[pageIdx] : null;
-        },
-        uitables() {
-            return lodash.reduce(this.tables, (a, v) => {
-                a.push({ label: v, value: v })
-                return a;
-            }, [])
         },
     },
     watch: {
@@ -182,3 +181,16 @@ export default {
     },
 }
 </script>
+
+<style>
+    .navigationBar {
+        display: flex;
+        flex-flow: row;
+        align-items: center;
+        justify-content: space-between;
+        background: #a45;
+        color: white;
+        font-size: 20px;
+        font-style: bold;
+    }
+</style>

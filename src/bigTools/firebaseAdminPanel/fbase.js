@@ -1,5 +1,5 @@
-import lodash from 'lodash'
 import Firebase from 'firebase'
+import lodash from 'lodash'
 import axios from 'axios'
 import Chance from 'chance'
 import { Dialog, Toast } from 'quasar-framework'
@@ -86,8 +86,6 @@ const functions = {
                         type: "password"
                     }
                 },
-                noEscDismiss: true,
-                noBackdropDismiss: true,
                 buttons: [
                     {
                         label: "Submit",
@@ -161,8 +159,7 @@ export default {
                     })
                 }
 
-                // console.log(`currentUser`, app.auth().currentUser)
-                if(fbConfig.requiresAuth)
+                if(fbConfig.requiresAuth && !app.auth().currentUser)
                     return functions.doAuth(app).then(doInit).then(resolve).catch(reject);
 
                 return doInit().then(resolve).catch(reject);
@@ -219,6 +216,14 @@ export default {
             const storage = state.appVars.storage || state.app.storage();
             return resolve(storage.ref(path));
         })
-    }
+    },
+    signOut() {
+        return new Promise((resolve, reject) => {
+            if(!state.appVars)
+                return reject("app is not init")
 
+            const auth = state.appVars.auth || state.app.auth();
+            return auth.signOut().then(resolve).catch(reject);
+        })
+    }
 }

@@ -8,14 +8,14 @@
         <div v-for="(url, key, index) in collection" :key="key" style="display:inline-block; position:relative;">
             <img :src="url" class="cell" :style="ui.cellStyle">
             <div v-if="typeof removeFn === 'function'" class="cell__remove" :style="ui.removeStyle" @click.stop.prevent="removeFn({ url, key, index })">
-                <i class="fa fa-trash cell__removeIcon"/>
+                <i class="fa fa-trash cell__removeIcon"></i>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-    import fileDropper from './fileDropper'
+    import fileDropper from '../../misc/fileDropper'
 
     function getCellStyle(sz) {
         const size = isNaN(sz) ? sz : `${sz}px`

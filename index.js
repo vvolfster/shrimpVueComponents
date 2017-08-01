@@ -1,13 +1,15 @@
-/* eslint-disable */
-// require all the components
-const buttons = {
-    toggleButton: require('./src/button/ToggleButton.vue')
-}
+import bigTools from './src/bigTools'
+import button from './src/button'
+import image from './src/image'
+import input from './src/input'
+import layout from './src/layout'
+import misc from './src/misc'
 
-const firebaseAdminPanel = require('./src/firebaseAdminPanel/index.vue')
-
-
-module.exports =  {
-    buttons,
-    firebaseAdminPanel
+export default {
+    bigTools,
+    button,
+    image,
+    input,
+    layout,
+    misc
 }

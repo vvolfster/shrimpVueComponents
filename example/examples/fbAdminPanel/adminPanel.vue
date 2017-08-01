@@ -9,11 +9,11 @@
 </template>
 
 <script>
-import fbAdminPanel from '@/firebaseAdminPanel'
-import openHousePosting from './openHousePosting'
+import fbAdminPanel from '@/bigTools/firebaseAdminPanel'
+import person from './person'
 
 export default {
-    components: { fbAdminPanel, openHousePosting },
+    components: { fbAdminPanel, person },
     data() {
         return {
             fbConfig: {
@@ -41,7 +41,7 @@ export default {
                             console.warn("herp", id, value);
                         },
                     },
-                    delegateComponent: openHousePosting,
+                    delegateComponent: person,
                     add: [
                         {
                             description: "First and Last",

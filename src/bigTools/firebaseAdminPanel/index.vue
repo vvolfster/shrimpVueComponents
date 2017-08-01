@@ -1,23 +1,27 @@
 <template>
-    <div class="fbAdminPanel" style="height:90vh;">
-        <div>
-            <button v-if="fbConfig && fbConfig.requiresAuth && !fb.app" @click="fbConfigChanged()">Login</button>
+    <div class="fbAdminPanel">
+        <div v-if="fbConfig && fbConfig.requiresAuth && !username" class="fbAdminPanelLogin">
+            <button @click="fbConfigChanged()" class="fbAdminPanelLoginBtn">Login</button>
+            <br>
+            Your Firebase config requires you log in.
         </div>
-        <navigation
-            :tables="fb.tables"
-            :pageSize="tableConfig.pageSize || 25"
-            @pageLoaded="currentPage = $event"
-            class="tableSelector"
-        />
-        <tableEditor 
-            :tableConfig="currentTableConfig"
-            :page="currentPage"
-            class="tableEditor"
-        >
-            <div :slot="currentPage ? currentPage.name : 'undefined'">
-                <slot :name="currentPage ? currentPage.name : 'undefined'"/>
+        <div v-else>
+            <div class="fbAdminPanel__topBar">
+                <button class="topBar__user" @click="login">
+                    {{ username || "Login..." }}
+                </button>
+                <navigation :tables="fb.tables" :pageSize="tableConfig.pageSize || 25" @pageLoaded="currentPage = $event" class="topBar__navigation"/>
             </div>
-        </tableEditor>
+            <tableEditor 
+                :tableConfig="currentTableConfig"
+                :page="currentPage"
+                class="tableEditor"
+            >
+                <div :slot="currentPage ? currentPage.name : 'undefined'">
+                    <slot :name="currentPage ? currentPage.name : 'undefined'"/>
+                </div>
+            </tableEditor>
+        </div>
     </div>
 </template>
 
@@ -26,7 +30,6 @@
 import fbase from './fbase'
 import tableEditor from "./components/tableEditor"
 import navigation from './components/navigation'
-
 
 export default {
     components: { navigation, tableEditor },
@@ -41,6 +44,7 @@ export default {
                 storage: null,
                 tables: null,
             },
+            username: null,
             currentPage: null
         }
     },
@@ -65,6 +69,7 @@ export default {
     },
     methods: {
         fbConfigChanged() {
+            const self = this;
             const fb   = this.fb;
             const fbConfig = this.fbConfig;
             function clearData(err) {
@@ -94,7 +99,15 @@ export default {
                     fb.messaging = messaging;
                     fb.storage = storage;
                     fb.tables = tables;
+                    fb.auth.onAuthStateChanged((authe) => {
+                        self.username = authe ? (authe.displayName || authe.email) : null
+                    })
                 }).catch(clearData)
+            })
+        },
+        login() {
+            return new Promise((resolve, reject) => {
+                fbase.signOut().then(this.fbConfigChanged).then(resolve).catch(reject);
             })
         }
     }
@@ -103,14 +116,51 @@ export default {
 
 <style scoped>
 .fbAdminPanel {
-    /* overflow-y: hidden; */
+    height: 100vh;
 }
 
-.tableSelector {
-    padding: 0;
-    margin: 0;
-    height: 5vh;
+.fbAdminPanel__topBar {
+    display: flex;
+    background: #945;
 }
+
+.topBar__user {
+    background: transparent;
+    color: white;
+    font-size: 20px;
+    text-transform: none;
+}
+
+.topBar__navigation {
+    flex: 1 1 auto;
+    border-width: 0 0 0 1px;
+    border-style: solid;
+    margin-left: 10px;
+}
+
+.fbAdminPanelLogin {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.fbAdminPanelLoginBtn {
+    font-size: 40px;
+    border: solid 1px;
+    padding: 10px;
+    border-radius: 10px;
+    color: white;
+    border-color: gray;
+    background: #fa0;
+}
+
+.fbAdminPanelLoginBtn:hover {
+    background: #5a0;
+}
+
+
 
 .tableEditor {
     width: 100%;
