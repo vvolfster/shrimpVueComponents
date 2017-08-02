@@ -1,6 +1,6 @@
 // Documentation: https://github.com/Imagination-International-Inc/vue4vendetta/blob/IIIG-646_Student_Course_Home_CMS/src/vuePlugins/cms/docs/readme.md
-/* eslint global-require: "off"*/
-import $ from 'jquery'
+/* eslint global-require: "off" */
+import $ from 'jquery' // TODO - remove this dependency when you come back to it.
 import lodash from 'lodash';
 import Vue from 'vue';
 import cmsStyle from './cms.css';
@@ -18,7 +18,10 @@ const config = {
     activatedByPropagate: `cmsInfestPropagate`,
     components: {}, // these are used in cmsForm.vue
     componentsInline: {}, // these are used in cmsInlineLoader.vue
-    toastFn(){}
+    toastFn(msg){ // if our toast is installed, we can just use that as default.
+        if(lodash.isFunction(Vue.toast))
+            Vue.toast(msg);
+    }
 }
 
 const cssClasses = {
