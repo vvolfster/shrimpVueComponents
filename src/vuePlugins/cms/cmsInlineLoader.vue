@@ -18,7 +18,7 @@ import pbar from './helpers/progressBar'
 // our great inline components. Add them here :)
 import string from './componentsInline/string'
 import paragraph from './componentsInline/paragraph'
-import { extendComponentsInline } from './cms'
+import { extendComponentsInline } from './'
 
 function getComponents() {
     const localComponents = { string, paragraph }

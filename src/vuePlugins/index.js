@@ -11,10 +11,12 @@ export default {
     install(vue, config) {
         lodash.each(plugins, (plugin, pluginName) => {
             const disabled = lodash.get(config, `${pluginName}.disable`, false) === true;
-            if(disabled || !plugin || !lodash.isFunction(plugin.install))
+            if(disabled || !plugin || !lodash.isFunction(plugin))
                 return;
 
-            plugin.install(vue, config[pluginName] || config)
+            plugin(vue, lodash.get(config, pluginName, config || {}))
+            // console.warn(`shrimp-vue-components plugin ${pluginName} installed`);
         })
     }
 }
+

@@ -7,12 +7,13 @@ require(`quasar-framework/dist/quasar.mat.css`)
 import Vue from 'vue';
 import Quasar from 'quasar-framework'
 import 'font-awesome/css/font-awesome.css'
+import svt from '../'
 // import App from './App';
 
 Vue.use(Quasar);
+Vue.use(svt);
 Vue.config.productionTip = false;
 
-/* eslint-disable no-new */
 Quasar.start(() => {
     /* eslint-disable no-new */
     window.app = new Vue({

@@ -21,7 +21,9 @@ export default {
     image,
     input,
     layout,
-    misc
+    misc,
+    install(vue, config) {
+        // console.log(`shrimp-vue-components . starting install`)
+        _vuePlugins.install(vue, config);
+    }
 };
-
-export const install = _vuePlugins.install;

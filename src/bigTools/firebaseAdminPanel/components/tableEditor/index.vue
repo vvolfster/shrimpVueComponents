@@ -400,7 +400,7 @@
                         return reject("no pageName or adderRef or adderRef.start is not a function");
 
                     return adderRef.start().then((val) => {
-                        console.log(val);
+                        // console.log(val);
                         fbase.getTableRef(tblName).then((ref) => {
                             ref.push(val);
                         }).catch(reject);

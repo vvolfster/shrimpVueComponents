@@ -48,7 +48,7 @@ close - emitted when the user successfully submits or hits close. In Cms.js , th
     import voverlay from './helpers/validatorOverlay';
     import pbar from './helpers/progressBar';
     import string from './components/string';
-    import { extendComponents } from './cms';
+    import { extendComponents } from './';
     
     function getComponents() {
         const localComponents = { string }
