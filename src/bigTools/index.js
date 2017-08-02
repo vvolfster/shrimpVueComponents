@@ -1,5 +1,7 @@
 import firebaseAdminPanel from './firebaseAdminPanel'
+import firebaseAdminPanelFb from './firebaseAdminPanel/fbase'
 
 export default {
-    firebaseAdminPanel
+    firebaseAdminPanel,
+    firebaseAdminPanelFb
 }
