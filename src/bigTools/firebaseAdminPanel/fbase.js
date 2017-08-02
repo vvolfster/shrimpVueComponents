@@ -21,7 +21,8 @@ const state = {
     app: null,
     fbConfig: null,
     appVars: null,
-    dialog: null
+    dialog: null,
+    token: null
 }
 
 const functions = {
@@ -31,7 +32,19 @@ const functions = {
     },
     shallowGet(url) {
         return new Promise((resolve, reject) => {
-            return axios.get(`${url}.json?shallow=true`).then(res =>  resolve(res.data)).catch(reject);
+            axios.get(`${url}.json?shallow=true`).then(res =>  resolve(res.data)).catch(reject);
+            // const auth =  lodash.get(state.appVars, "auth") || (state.app ? state.app.auth() : null)
+            // if(!auth || !auth.currentUser)
+            //     return axios.get(`${url}.json?shallow=true`).then(res =>  resolve(res.data)).catch(reject);
+
+            // if(state.token) {
+            //     return axios.get(`${url}.json?access_token=${state.token}&shallow=true`).then(res =>  resolve(res.data)).catch(reject);
+            // }
+            // return auth.currentUser.getIdToken().then((token) => {
+            //     console.log(`received token`, token);
+            //     state.token = token;
+            //     return axios.get(`${url}.json?access_token=${state.token}&shallow=true`).then(res =>  resolve(res.data)).catch(reject);
+            // }).catch(reject);
         })
     },
     /**
@@ -145,6 +158,7 @@ export default {
                         const database = state.app.database();
                         // functions.populateDummyData(database, 100);
 
+                        // console.log(`resolving`, state.app.auth().currentUser);
                         functions.getTableNames(fbConfig.databaseURL).then((tables) => {
                             state.appVars = {
                                 app: state.app,

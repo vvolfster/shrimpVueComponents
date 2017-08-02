@@ -8,7 +8,7 @@
 
 <script>
 import lodash from 'lodash'
-import combobox from '../../../input/combobox'
+import combobox from '../../../../input/combobox'
 import fbase from '../../fbase'
 import pageControls from "./pageControls"
 
@@ -45,7 +45,7 @@ export default {
             const pages = [];
             lodash.times(totalPages, (idx) => {
                 const startingIdx = Math.floor(idx * pageSize);
-                const endingIdx = Math.min(ids.length - 1, startingIdx + pageSize)
+                const endingIdx = Math.min(ids.length, startingIdx + pageSize)
                 const slice = self.ids.slice(startingIdx, endingIdx);
                 pages.push(slice);
             })
@@ -53,7 +53,7 @@ export default {
         },
         selectedPage() {
             const self = this;
-            const pageIdx = self.input_page >= 1 ? self.input_page - 1 : 0;
+            const pageIdx = self.input_page;
             return self.pages ? self.pages[pageIdx] : null;
         },
     },
@@ -66,9 +66,11 @@ export default {
         },
         selectedPage(ids, oldIds) {
             const isEqual =  lodash.isEqualWith(ids, oldIds, (a, b) => { return a === b })
-            const idx = self.input_page >= 1 ? self.input_page - 1 : 0;
+            const idx = this.input_page;
+            const pageSize = this.pageSize;
+            // console.log('idx', this.input_page);
             if(!isEqual) {
-                this.$emit("pageLoaded", { ids, idx, name: this.input_table });
+                this.$emit("pageLoaded", { ids, idx, pageSize, name: this.input_table });
             }
         }
     },
@@ -108,7 +110,7 @@ export default {
             const self = this;
             const numIds = self.ids ? self.ids.length : 0;
             return new Promise((resolve) => {
-                self.input_page = numIds === 0 ? -1 : 1;
+                self.input_page = numIds === 0 ? -1 : 0;
                 // console.log(`resolve initPages`)
                 resolve();
             })

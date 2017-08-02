@@ -116,6 +116,7 @@ export default {
 
 <style scoped>
 .fbAdminPanel {
+    /* overflow-y: hidden; */
     height: 100vh;
 }
 

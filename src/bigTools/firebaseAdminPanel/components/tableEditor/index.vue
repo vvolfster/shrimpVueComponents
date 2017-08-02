@@ -5,7 +5,7 @@
             <!-- if a custom delegate component is provided, we will just use a list of that component instead of the default table view -->
             <table v-if="!delegateComponent" class="ztable" style="margin:auto;">
                 <thead class="zthead">
-                    <th class="ztableHeader" :colspan="columns.length ? columns.length : 1">
+                    <th class="ztableHeader" :colspan="columns.length ? columns.length + 1 : 1">
                         {{ page ? page.name : "" }}
                         <div class="ztableWideActions">
                             <button class="btn btn--tableHeader" v-if="addSteps" @click="add"><i class="fa fa-plus"/>
@@ -14,15 +14,19 @@
                         </div>
                     </th>
                     <tr class="ztr">
-                        <th v-for="field in columns" class="zth" :style="getFieldStyle(field)" :key="field">
+                        <th class='zth idx'>#</th>
+                        <th v-for="field in columns" :key="field" class="zth" :style="getFieldStyle(field)">
                             {{ field }}
                         </th>
                     </tr>
                 </thead>
                 <tbody class="ztbody" v-if="pageData && columns">
-                    <tr v-for="(entry, id) in pageData" :key="id" class="ztr">
-                        <td v-for="field in columns" :key="field" class="ztd">
-                            <div v-if="field !== '★'" @click="edit(id, field, entry[field])">
+                    <tr v-for="(entry, id, index) in pageData" :key="id" class="ztr">
+                        <td class="ztd idx">
+                            #{{ (page.idx * page.pageSize) + index + 1  }}
+                        </tv>
+                        <td v-for="field in columns" :key="field" class="ztd" @click="field !== '★' ? edit(id, field, entry[field]) : null">
+                            <div v-if="field !== '★'">
                                 {{ entry ? entry[field] : '?' }}
                             </div>
                             <div v-else class="specialActionsColumn">
@@ -36,18 +40,18 @@
             <div v-else>
                 <div class="ztableHeader--custom">
                     <button class="btn btn--tableHeaderCustom" v-if="addSteps" @click="add">
-                        <i class="fa fa-plus"></i>
+                        <i class="fa fa-plus"/></i>
                         &nbsp New
                     </button>
                 </div>
                 <div style="position:relative;margin-bottom:10px;" v-for="(entry, id, index) in pageData" :key="id">
                     <div class="componentHeader">
                         <div class="componentHeader__index">
-                            #{{ index }}
+                            #{{ (page.idx * page.pageSize) + index + 1  }}
                         </div>
                         <div class="componentHeader__actions">
-                            <button class="btn btn--detail" @click="magic(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'></i></button>
-                            <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'></i></button>
+                            <button class="btn btn--detail" @click="magic(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
+                            <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></i></button>
                         </div>
                     </div>
                     <component :is="delegateComponent" :id="id" :value="entry" :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"/>
@@ -64,7 +68,7 @@
                 <!-- actions -->
                 <div class="magicModal__actions" v-if="typeof actions === 'object' && Object.keys(actions).length">
                     <h5>Actions</h5>
-                    <button v-for="(action, name) in actions" @click="performAction(name, selectedItem)" class="magicModal__button shrimpTabView__header" :key="name">
+                    <button v-for="(action, name) in actions" :key="name" @click="performAction(name, selectedItem)" class="magicModal__button shrimpTabView__header">
                         {{ name }}
                     </button>
                 </div>
@@ -96,7 +100,7 @@
     import lodash from 'lodash'
     import fbase from '../../fbase'
     import imageStorage from '../imageStorage'
-    import tabView from '../../../layout/tabView'
+    import tabView from '../../../../layout/tabView'
     import adder from './adder'
 
     const functions = {
@@ -627,6 +631,10 @@
 .zth, .ztd {
     min-width: 120px;
     padding: 10px 20px;
+}
+
+.idx {
+    min-width: unset;
 }
 
 /* modal css */

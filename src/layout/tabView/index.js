@@ -93,6 +93,23 @@ export default Vue.component('tabview',  {
         index() {
             this.idx = this.index;
         },
+        idx() {
+            this.$emit('indexChanged', this.idx);
+        }
+    },
+    methods: {
+        next() {
+            this.goTo(this.idx + 1);
+        },
+        prev() {
+            this.goTo(this.idx - 1);
+        },
+        goTo(idx) {
+            const tabSlots = this.$slots.tab;
+            if(idx >= 0 && idx < tabSlots.length) {
+                this.idx = idx;
+            }
+        }
     },
     render(createElement) {
         // const self = this;

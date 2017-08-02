@@ -10,8 +10,8 @@
                 <input ref="input" class="box__file" type="file" name="files[]" id="fileDropperInput" multiple :accept="extensions"/>
                 <label for="fileDropperInput" class="box__fileLabel">
                     <div class="box__inputContainer">
-                        <i class="fa fa-plus box__inputIcon" v-show="!busy"/>
-                        <i class="fa fa-circle-o-notch box__inputIcon box__inputIcon--spinning" v-show="busy" @click.stop.prevent="doNothing"/>
+                        <i class="fa fa-plus box__inputIcon" v-show="!busy"></i>
+                        <i class="fa fa-circle-o-notch box__inputIcon box__inputIcon--spinning" v-show="busy" @click.stop.prevent="doNothing"></i>
                     </div>
                 </label>
             </div>

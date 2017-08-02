@@ -6,7 +6,7 @@
 
 <script>
     import lodash from 'lodash'
-    import imageGrid from '../../../image/imageGrid'
+    import imageGrid from '../../../../image/imageGrid'
     import fbase from '../../fbase'
 
     export default {
