@@ -18,18 +18,20 @@
 <script>
 import toggleButton from "@/button/toggleButton"
 import fbAdminPanel from "./examples/fbAdminPanel/adminPanel"
+import toast from './examples/toast/toast'
 
 export default {
     name: 'app',
     data() {
         return {
             myComponent: null,
-            examples: ["fbAdminPanel"]
+            examples: ["fbAdminPanel", "toast"]
         }
     },
     components: {
         toggleButton,
-        fbAdminPanel
+        fbAdminPanel,
+        toast
     },
 };
 </script>
@@ -61,6 +63,7 @@ export default {
 .drawer__btn {
     width: 90%;
     height: 40px;
+    margin-top: 20px;
 }
 
 .viewport {

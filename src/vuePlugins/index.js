@@ -14,7 +14,7 @@ export default {
             if(disabled || !plugin)
                 return;
 
-            const pluginInstallFn = lodash.isObject(plugin) ? plugin.install : plugin;
+            const pluginInstallFn = plugin.install || plugin;
             if(lodash.isFunction(pluginInstallFn))
                 pluginInstallFn(vue, lodash.get(config, pluginName, config || {}))
             // console.warn(`shrimp-vue-components plugin ${pluginName} installed`);

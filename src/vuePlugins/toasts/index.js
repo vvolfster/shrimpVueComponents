@@ -178,25 +178,27 @@ publicToastFn.dismissAll = () => {
     })
 }
 
-export default {
-    Toast(...args) {
-        publicToastFn.apply(this, args);
-    },
-    install(VuePtr, opts) {
-        // window.Vue = VuePtr;
-        // unpack args
-        const containerId = lodash.get(opts, "containerId");
-        const duration = lodash.get(opts, "duration");
-        const style = lodash.get(opts, "style");
+publicToastFn.install = (VuePtr, opts) => {
+    // window.Vue = VuePtr;
+    // unpack args
+    const containerId = lodash.get(opts, "containerId");
+    const duration = lodash.get(opts, "duration");
+    const style = lodash.get(opts, "style");
 
-        // figure out if we need to create a container or if one was provided
-        state.container = document.getElementById(containerId) || functions.createToastContainer();
-        if(duration && typeof duration === 'number')
-            state.duration = duration;
+    // figure out if we need to create a container or if one was provided
+    state.container = document.getElementById(containerId) || functions.createToastContainer();
+    if(duration && typeof duration === 'number')
+        state.duration = duration;
 
-        if(style && typeof style === 'object')
-            state.style.default = style;
+    if(style && typeof style === 'object')
+        state.style.default = style;
 
-        VuePtr.toast = publicToastFn;
-    }
+    VuePtr.toast = publicToastFn;
 }
+
+export default publicToastFn;
+// export default {
+//     Toast(...args) {
+//         publicToastFn.apply(this, args);
+//     },
+// }
