@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 import lodash from 'lodash'
 import Velocity from 'velocity-animate'
 
@@ -33,6 +34,13 @@ const state = {
         },
     }
 }
+
+// create aliases for styles.
+state.style.warning = state.style.warn;
+state.style.positive = state.style.success;
+state.style.negative = state.style.danger;
+state.style.alert = state.style.danger;
+
 
 const functions = {
     createToastContainer() {
@@ -127,33 +135,32 @@ const functions = {
     }
 }
 
-/* eslint-disable no-plusplus */
-export default function install(VuePtr, opts) {
-    // window.Vue = VuePtr;
-    // unpack args
-    const containerId = lodash.get(opts, "containerId");
-    const duration = lodash.get(opts, "duration");
-    const style = lodash.get(opts, "style");
+// this function is the one that is exported.
+const publicToastFn = (msg, params) => {
+    if(!state.container)
+        state.container = functions.createToastContainer();
 
-    // figure out if we need to create a container or if one was provided
-    state.container = document.getElementById(containerId) || functions.createToastContainer();
-    if(duration && typeof duration === 'number')
-        state.duration = duration;
+    const p = {
+        style: lodash.assign(lodash.cloneDeep(state.style.default), lodash.get(params, "style", {})),
+        duration: lodash.get(params, "duration", state.duration),
+        id: state.id++,
+        msg
+    }
 
-    if(style && typeof style === 'object')
-        state.style.default = style;
+    state.toastStack.push(p);
+    if(!state.showingAToast)
+        functions.startToast(p);
+}
 
-    // create aliases for styles
-    state.style.warning = state.style.warn;
-    state.style.positive = state.style.success;
-    state.style.negative = state.style.danger;
-    state.style.alert = state.style.danger;
+// create functions for each style
+lodash.each(state.style, (v, k) => {
+    if(k === 'default')
+        return;
 
-    // create generic toast
-    VuePtr.toast = (msg, params) => {
+    publicToastFn[k] = (msg, params) => {
         const p = {
-            style: lodash.assign(lodash.cloneDeep(state.style.default), lodash.get(params, "style", {})),
             duration: lodash.get(params, "duration", state.duration),
+            style: lodash.assign(lodash.cloneDeep(state.style.default), v, lodash.get(params, "style", {})),
             id: state.id++,
             msg
         }
@@ -162,30 +169,34 @@ export default function install(VuePtr, opts) {
         if(!state.showingAToast)
             functions.startToast(p);
     }
+})
 
-    // create functions for each style
-    lodash.each(state.style, (v, k) => {
-        if(k === 'default')
-            return;
-
-        VuePtr.toast[k] = (msg, params) => {
-            const p = {
-                duration: lodash.get(params, "duration", state.duration),
-                style: lodash.assign(lodash.cloneDeep(state.style.default), v, lodash.get(params, "style", {})),
-                id: state.id++,
-                msg
-            }
-
-            state.toastStack.push(p);
-            if(!state.showingAToast)
-                functions.startToast(p);
-        }
+// create a dismissAll function
+publicToastFn.dismissAll = () => {
+    lodash.eachRight(state.toastStack, (v, k) => {
+        functions.dismissToast(null, k);
     })
+}
 
-    // create a dismissAll function
-    VuePtr.toast.dismissAll = () => {
-        lodash.eachRight(state.toastStack, (v, k) => {
-            functions.dismissToast(null, k);
-        })
+export default {
+    Toast(...args) {
+        publicToastFn.apply(this, args);
+    },
+    install(VuePtr, opts) {
+        // window.Vue = VuePtr;
+        // unpack args
+        const containerId = lodash.get(opts, "containerId");
+        const duration = lodash.get(opts, "duration");
+        const style = lodash.get(opts, "style");
+
+        // figure out if we need to create a container or if one was provided
+        state.container = document.getElementById(containerId) || functions.createToastContainer();
+        if(duration && typeof duration === 'number')
+            state.duration = duration;
+
+        if(style && typeof style === 'object')
+            state.style.default = style;
+
+        VuePtr.toast = publicToastFn;
     }
 }
