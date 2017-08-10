@@ -9,6 +9,7 @@
 </template>
 
 <script>
+import lodash from 'lodash'
 import fbAdminPanel from '@/bigTools/firebaseAdminPanel'
 import person from './person'
 
@@ -41,6 +42,16 @@ export default {
                             console.warn("herp", id, value);
                         },
                     },
+                    actionsTableRoot: {
+                        incrementAge(tableRef) {
+                            tableRef.once('value').then((snap) => {
+                                lodash.each(snap.val(), (v, k) => {
+                                    const curAge = v.age;
+                                    tableRef.child(k).child('age').set(curAge + 1);
+                                })
+                            })
+                        }
+                    },
                     delegateComponent: person,
                     add: [
                         {
@@ -67,6 +78,14 @@ export default {
                             }
                         }
                     ],
+                    // fields: {
+                    //     siblings: {
+                    //         linksTo: 'data',
+                    //         render(v) {
+                    //             return v.name;
+                    //         }
+                    //     }
+                    // },
                     storageKey: "storage"
                 },
                 data: {

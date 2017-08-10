@@ -3,45 +3,23 @@
 
         <div v-if="page">
             <!-- if a custom delegate component is provided, we will just use a list of that component instead of the default table view -->
-            <table v-if="!delegateComponent" class="ztable" style="margin:auto;">
-                <thead class="zthead">
-                    <th class="ztableHeader" :colspan="columns.length ? columns.length + 1 : 1">
-                        {{ page ? page.name : "" }}
-                        <div class="ztableWideActions">
-                            <button class="btn btn--tableHeader" v-if="addSteps" @click="add"><i class="fa fa-plus"/>
-                            &nbsp New
-                            </button>
-                        </div>
-                    </th>
-                    <tr class="ztr">
-                        <th class='zth idx'>#</th>
-                        <th v-for="field in columns" :key="field" class="zth" :style="getFieldStyle(field)">
-                            {{ field }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="ztbody" v-if="pageData && columns">
-                    <tr v-for="(entry, id, index) in pageData" :key="id" class="ztr">
-                        <td class="ztd idx">
-                            #{{ (page.idx * page.pageSize) + index + 1  }}
-                        </tv>
-                        <td v-for="field in columns" :key="field" class="ztd" @click="field !== '★' ? edit(id, field, entry[field]) : null">
-                            <div v-if="field !== '★'">
-                                {{ entry ? entry[field] : '?' }}
-                            </div>
-                            <div v-else class="specialActionsColumn">
-                                <button class="btn btn--detail" @click="magic(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></button>
-                                <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <tableView v-if="!delegateComponent" class="ztable" style="margin:auto;"
+                :columns="columns"
+                :page="page"
+                :pageData="pageData"
+                :actions="actionsTableRoot"
+                :hasMenu="hasDetailView"
+
+                @callAction="callTableRootAction($event.name)"
+                @openDetailView="openDetailView($event.id, $event.entry, pageFbRefs[$event.id])"
+                @delete="remove($event.id)"
+                @edit="edit($event.id, $event.field, $event.value)"
+            >
+            </tableView>
             <div v-else>
                 <div class="ztableHeader--custom">
-                    <button class="btn btn--tableHeaderCustom" v-if="addSteps" @click="add">
-                        <i class="fa fa-plus"/></i>
-                        &nbsp New
+                    <button class="btn btn--tableHeaderCustom" v-for="(action,name) in actionsTableRoot" :key="name" @click="callTableRootAction(name)">
+                        {{ name }}
                     </button>
                 </div>
                 <div style="position:relative;margin-bottom:10px;" v-for="(entry, id, index) in pageData" :key="id">
@@ -50,7 +28,7 @@
                             #{{ (page.idx * page.pageSize) + index + 1  }}
                         </div>
                         <div class="componentHeader__actions">
-                            <button class="btn btn--detail" @click="magic(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
+                            <button class="btn btn--detail" @click="openDetailView(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
                             <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></i></button>
                         </div>
                     </div>
@@ -101,6 +79,7 @@
     import fbase from '../../fbase'
     import imageStorage from '../imageStorage'
     import tabView from '../../../../layout/tabView'
+    import tableView from './tableView'
     import adder from './adder'
 
     const functions = {
@@ -144,11 +123,18 @@
     }
 
     export default {
-        components: { imageStorage, tabView, adder },
+        components: { imageStorage, tabView, adder, tableView },
         props: ["page", "tableConfig"],
         computed: {
             actions() {
                 return this.tableConfig && this.tableConfig.actions ? this.tableConfig.actions : {}
+            },
+            actionsTableRoot() {
+                if(!this.tableConfig)
+                    return {};
+
+                const obj = this.tableConfig.add ? { new: this.add } : {}
+                return Object.assign(obj, this.tableConfig.actionsTableRoot || {});
             },
             columns() {
                 const self = this;
@@ -293,34 +279,9 @@
                     resolve();
                 })
             },
-            restoreScroll() {
-                const self = this;
-                return new Promise((resolve) => {
-                    // console.log(`scrollinfo is`, self.scrollInfo);
-                    const pageName = lodash.get(self, "page.name");
-                    const pageIdx = lodash.get(self, "page.idx");
-                    const scrollObject = self.scrollInfo.object;
-                    if(!scrollObject) {
-                        self.scrollInfo.listen = true;
-                        return resolve();
-                    }
-
-                    // console.log(pageName, scrollObject.pageName, "-----", pageIdx, scrollObject.pageIdx, scrollObject.scrollTop);
-                    if(pageName === scrollObject.pageName && pageIdx === scrollObject.pageIdx) {
-                        // we must restore!
-                        const srcEl = scrollObject.srcElement;
-                        if(srcEl) {
-                            srcEl.scrollTop = scrollObject.scrollTop;
-                        }
-                    }
-
-                    self.scrollInfo.listen = true;
-                    return resolve();
-                })
-            },
 
             // detail modal related
-            magic(id, value, fbRef) {
+            openDetailView(id, value, fbRef) {
                 const self = this;
                 const name = this.page.name;
                 const storageKey = lodash.get(this.tableConfig, "storageKey");
@@ -391,6 +352,20 @@
                     }).catch(reject);
                 })
             },
+            remove(id) {
+                const self = this;
+                return new Promise((resolve, reject) => {
+                    const name = lodash.get(self, "page.name");
+                    if(!name)
+                        return reject("no page.name when deleting")
+
+                    return fbase.getTableRef(self.page.name).then((ref) => {
+                        ref.child(id).remove().then(resolve).catch(reject);
+                    }).catch(reject);
+                })
+            },
+
+            // db opts table root
             add() {
                 const self = this;
                 return new Promise((resolve, reject) => {
@@ -407,20 +382,25 @@
                     }).catch(reject);
                 })
             },
-            remove(id) {
+            // call table root action. add() is added to the computed property actionsTableRoot
+            callTableRootAction(name) {
                 const self = this;
+                const pageName = lodash.get(self, "page.name");
                 return new Promise((resolve, reject) => {
-                    const name = lodash.get(self, "page.name");
-                    if(!name)
-                        return reject("no page.name when deleting")
+                    const action = lodash.get(self.actionsTableRoot, name);
+                    if(!pageName)
+                        return reject(`no table. Cannot call action`)
 
-                    return fbase.getTableRef(self.page.name).then((ref) => {
-                        ref.child(id).remove().then(resolve).catch(reject);
+                    if(!lodash.isFunction(action))
+                        return reject(`no such action to call: ${name}`);
+
+                    return fbase.getTableRef(pageName).then((ref) => {
+                        Promise.resolve(action(ref)).then(resolve).catch(reject);
                     }).catch(reject);
                 })
             },
 
-            // scroll handler
+            // scroll related
             scrollHandler(e) {
                 const self = this;
                 if(!self.scrollInfo.listen)
@@ -437,16 +417,32 @@
                     scrollTop: e.srcElement.scrollTop,
                 })
             },
+            restoreScroll() {
+                const self = this;
+                return new Promise((resolve) => {
+                    // console.log(`scrollinfo is`, self.scrollInfo);
+                    const pageName = lodash.get(self, "page.name");
+                    const pageIdx = lodash.get(self, "page.idx");
+                    const scrollObject = self.scrollInfo.object;
+                    if(!scrollObject) {
+                        self.scrollInfo.listen = true;
+                        return resolve();
+                    }
 
-            // ui
-            getFieldStyle(fieldName) {
-                if(fieldName !== "★")
-                    return {};
+                    // console.log(pageName, scrollObject.pageName, "-----", pageIdx, scrollObject.pageIdx, scrollObject.scrollTop);
+                    if(pageName === scrollObject.pageName && pageIdx === scrollObject.pageIdx) {
+                        // we must restore!
+                        const srcEl = scrollObject.srcElement;
+                        if(srcEl) {
+                            srcEl.scrollTop = scrollObject.scrollTop;
+                        }
+                    }
 
-                return {
-                    'background-color': 'orange'
-                }
+                    self.scrollInfo.listen = true;
+                    return resolve();
+                })
             },
+
             // useful function if we need it later
             // loadStorage(value) {
             //     const self = this;
@@ -570,69 +566,6 @@
     background-color: #42b983;
 }
 
-/* table css */
-.ztableHeader {
-    align-items: center;
-    justify-content: center;
-    background-color: #42b983;
-    text-transform: uppercase;
-    color: white;
-    height: 40px;
-    position: relative;
-}
-
-.ztableHeader--custom {
-    align-items: center;
-    justify-content: start;
-    background: transparent;    
-    text-transform: uppercase;
-    color: white;
-    height: 40px;
-    position: relative;
-}
-
-.ztableWideActions {
-    height: 100%;
-    display: flex;
-    justify-content: flex-end;
-    position: absolute;
-    top: 0;
-    right: 0;
-}
-
-
-.specialActionsColumn {
-    text-align: center;
-    vertical-align: center;
-}
-
-.ztable {
-    border: 2px solid #42b983;
-    border-radius: 3px;
-    background-color: #fff;
-}
-
-.zth {
-    background-color: #42b983;
-    color: #fff;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-.ztd {
-    background-color: #f9f9f9;
-    cursor: pointer;
-}
-
-
-.zth, .ztd {
-    min-width: 120px;
-    padding: 10px 20px;
-}
-
 .idx {
     min-width: unset;
 }
@@ -699,6 +632,18 @@
     font-size: 50pt;
     margin-bottom: 10px;
 }
+
+.ztableHeader--custom {
+    align-items: center;
+    justify-content: start;
+    background: transparent;    
+    text-transform: uppercase;
+    color: white;
+    height: 40px;
+    position: relative;
+    display: flex;
+}
+
 @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
