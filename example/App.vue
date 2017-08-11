@@ -17,21 +17,24 @@
 
 <script>
 import toggleButton from "@/button/toggleButton"
+
 import fbAdminPanel from "./examples/fbAdminPanel/adminPanel"
 import toast from './examples/toast/toast'
+import modal from './examples/modal/modal'
 
 export default {
     name: 'app',
     data() {
         return {
             myComponent: null,
-            examples: ["fbAdminPanel", "toast"]
+            examples: ["fbAdminPanel", "toast", "modal"]
         }
     },
     components: {
         toggleButton,
         fbAdminPanel,
-        toast
+        toast,
+        modal
     },
 };
 </script>

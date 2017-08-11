@@ -1,12 +1,12 @@
 <template>
     <div class="combobox">
-        <select name="select" v-model="model" class="select">
+        <select name="select" @input="updateValue" :value="value" class="select" ref="select">
             <option v-for="option in cOptions" :key="option" :value="option">
                 {{ option }}
             </option>
         </select>
         <div class="container">
-            <div v-if="!model" class="placeholder">{{ placeholder }}</div>
+            <div v-if="!value" class="placeholder">{{ placeholder }}</div>
             <div class="icon">
                 <i class="fa fa-caret-down"></i>
             </div>
@@ -24,20 +24,21 @@
             placeholder: {
                 type: String,
                 default: "Select..."
-            }
-        },
-        data() {
-            return {
-                model: ""
-            }
+            },
+            value: String,
         },
         computed: {
             cOptions() {
                 return this.options || [];
             }
         },
+        methods: {
+            updateValue() {
+                this.$emit('input', this.$refs.select.value);
+            }
+        },
         watch: {
-            model(v) {
+            value(v) {
                 this.$emit('value', v);
             }
         }
