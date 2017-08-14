@@ -80,15 +80,24 @@ function create({ slot, slotParent, dismissFn, animation, animationDuration, pos
     container.onDismiss(dismissFn);
     shared.modals.push(container);
 
-    animator.presetAnimation({
+    const fnNames = {
+        up: "animateToTop",
+        down: "animateToBottom",
+        center: "animateToCenter",
+        left: "animateToLeft",
+        right: "animateToRight"
+    }
+
+    const fn = lodash.get(animator, `${fnNames[position]}`)
+    if(typeof fn !== 'function')
+        return container;
+
+    fn({
         element: modal,
         elementParent: container,
-        position,
-        animation,
-        animationDuration
-    })
-
-    // animate({ container, modal, position, animation, animationDuration });
+        startingPosition: animation,
+        duration: animationDuration
+    });
 
     return container;
 }
