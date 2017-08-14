@@ -88,12 +88,20 @@ function create({ slot, slotParent, dismissFn, animation, animationDuration, pos
         right: "animateInRight"
     }
 
+    const startingPos = {
+        up: 'down',
+        left: 'right',
+        down: 'up',
+        right: 'left',
+        center: 'center'
+    }
+
     const fn = lodash.get(animator, `${fnNames[position]}`)
     if(typeof fn === 'function' && animation && animation !== 'none') {
         fn({
             element: modal,
             elementParent: container,
-            startingPosition: animation,
+            startingPosition: startingPos[animation],
             duration: animationDuration
         });
     }

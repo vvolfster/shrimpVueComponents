@@ -93,34 +93,60 @@ function presetInAnimation(element, elementParent, position, startingPosition, d
                     return new Promise((resolve, reject) => {
                         const positionAnimDict = {
                             down: {
-                                up: ["bottom", point(0, rects.el.height)],
-                                down: ["top"],
+                                down: ["bottom", point(0, rects.el.height)],
+                                up: ["top"],
                                 left: ["bottomLeft", point(-rects.el.width, 0)],
-                                right: ["bottomRight", point(rects.parent.width, 0)]
+                                right: ["bottomRight", point(rects.parent.width, 0)],
+                                upLeft: ["upLeft", point(0, -rects.el.height)],
+                                upRight: ["upRight", point(0, -rects.el.height)],
+                                downLeft: ["downLeft", point(0, rects.el.height)],
+                                downRight: ["downRight", point(0, rects.el.height)],
+                                center: ["center"]
                             },
                             left: {
-                                up: ["bottomLeft"],
-                                down: ["topLeft"],
-                                left: ["right"],
-                                right: ["left", point(-rects.el.width, 0)]
+                                down: ["bottomLeft"],
+                                up: ["topLeft"],
+                                right: ["right"],
+                                left: ["left", point(-rects.el.width, 0)],
+                                upLeft: ["upLeft"],
+                                upRight: ["upRight"],
+                                downLeft: ["downLeft"],
+                                downRight: ["downRight"],
+                                center: ["center"]
                             },
                             right: {
-                                up: ["bottomRight"],
-                                down: ["topRight"],
-                                left: ["right", point(rects.el.width, 0)],
-                                right: ["left"],
+                                down: ["bottomRight"],
+                                up: ["topRight"],
+                                right: ["right", point(rects.el.width, 0)],
+                                left: ["left"],
+
+                                upLeft: ["upLeft"],
+                                upRight: ["upRight"],
+                                downLeft: ["downLeft"],
+                                downRight: ["downRight"],
+                                center: ["center"]
                             },
                             up: {
-                                up: ["bottom"],
-                                down: ["top", point(0, -rects.el.height)],
+                                down: ["bottom"],
+                                up: ["top", point(0, -rects.el.height)],
                                 left: ["topLeft", point(-rects.el.width, 0)],
-                                right: ["topRight", point(rects.parent.width - rects.el.width, 0)]
+                                right: ["topRight", point(rects.parent.width - rects.el.width, 0)],
+
+                                upRight: ["topRight", point(rects.parent.width - rects.el.width, -rects.el.height)],
+                                upLeft: ["topLeft", point(-rects.el.width, -rects.el.height)],
+                                downLeft: ["bottomLeft", point(-rects.el.width, 0)],
+                                downRight: ["bottomRight", point(rects.parent.width - rects.el.width, 0)],
+                                center: ["center"]
                             },
                             center: {
-                                up: ["bottom"],
-                                down: ["top"],
-                                left: ["right"],
-                                right: ["left"]
+                                down: ["bottom"],
+                                up: ["top"],
+                                right: ["right"],
+                                left: ["left"],
+                                upLeft: ["topLeft"],
+                                upRight: ["topRight"],
+                                downLeft: ["bottomLeft"],
+                                downRight: ["bottomRight"]
                             }
                         }
 
@@ -153,34 +179,60 @@ function presetOutAnimation(element, elementParent, position, startingPosition, 
                     return new Promise((resolve, reject) => {
                         const positionAnimDict = {
                             down: {
-                                up: ["bottom"],
-                                down: ["top"],
-                                left: ["bottomLeft"],
-                                right: ["bottomRight"]
+                                down: ["bottom", point(0, rects.el.height)],
+                                up: ["top"],
+                                left: ["bottomLeft", point(-rects.el.width, 0)],
+                                right: ["bottomRight", point(rects.parent.width, 0)],
+                                upLeft: ["upLeft", point(0, -rects.el.height)],
+                                upRight: ["upRight", point(0, -rects.el.height)],
+                                downLeft: ["downLeft", point(0, rects.el.height)],
+                                downRight: ["downRight", point(0, rects.el.height)],
+                                center: ["center"]
                             },
                             left: {
-                                up: ["bottomLeft"],
-                                down: ["topLeft"],
-                                left: ["right"],
-                                right: ["left"]
+                                down: ["bottomLeft"],
+                                up: ["topLeft"],
+                                right: ["right"],
+                                left: ["left", point(-rects.el.width, 0)],
+                                upLeft: ["upLeft"],
+                                upRight: ["upRight"],
+                                downLeft: ["downLeft"],
+                                downRight: ["downRight"],
+                                center: ["center"]
                             },
                             right: {
-                                up: ["bottomRight"],
-                                down: ["topRight"],
-                                left: ["right"],
-                                right: ["left"],
+                                down: ["bottomRight"],
+                                up: ["topRight"],
+                                right: ["right", point(rects.el.width, 0)],
+                                left: ["left"],
+
+                                upLeft: ["upLeft"],
+                                upRight: ["upRight"],
+                                downLeft: ["downLeft"],
+                                downRight: ["downRight"],
+                                center: ["center"]
                             },
                             up: {
-                                up: ["bottom"],
-                                down: ["top"],
-                                left: ["topLeft"],
-                                right: ["topRight"]
+                                down: ["bottom"],
+                                up: ["top", point(0, -rects.el.height)],
+                                left: ["topLeft", point(-rects.el.width, 0)],
+                                right: ["topRight", point(rects.parent.width - rects.el.width, 0)],
+
+                                upRight: ["topRight", point(rects.parent.width - rects.el.width, -rects.el.height)],
+                                upLeft: ["topLeft", point(-rects.el.width, -rects.el.height)],
+                                downLeft: ["bottomLeft", point(-rects.el.width, 0)],
+                                downRight: ["bottomRight", point(rects.parent.width - rects.el.width, 0)],
+                                center: ["center"]
                             },
                             center: {
-                                up: ["bottom"],
-                                down: ["top"],
-                                left: ["right"],
-                                right: ["left"]
+                                down: ["bottom"],
+                                up: ["top"],
+                                right: ["right"],
+                                left: ["left"],
+                                upLeft: ["topLeft"],
+                                upRight: ["topRight"],
+                                downLeft: ["bottomLeft"],
+                                downRight: ["bottomRight"]
                             }
                         }
 
