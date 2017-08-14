@@ -6,103 +6,9 @@
 
 <script>
 import lodash from 'lodash'
-import Velocity from 'velocity-animate'
+import animator from "@/misc/animator"
 import shared from '../shared'
 import './modal.css'
-
-function animate({ container, modal, position, animation, animationDuration }) {
-    const rects = {
-        container: container.getBoundingClientRect(),
-        modal: modal.getBoundingClientRect()
-    }
-    const posCenter = {
-        y: (rects.container.height - rects.modal.height) / 2,
-        x: (rects.container.width - rects.modal.width) / 2
-    }
-
-    function point(x, y) {
-        const obj = { x: x || 0, y: y || 0 }
-        obj.toString = () => {
-            return `(${obj.x}, ${obj.y})`
-        }
-        return obj;
-    }
-
-    const positions = {
-        up: point(posCenter.x, 0),
-        left: point(0, posCenter.y),
-        right: point(rects.container.width - rects.modal.width, posCenter.y),
-        down: point(posCenter.x, rects.container.height - rects.modal.height),
-        center: posCenter
-    }
-
-    function setStartingPos() {
-        return new Promise((resolve) => {
-            const positionAnimDict = {
-                down: {
-                    up: point(posCenter.x, rects.container.height),
-                    down: point(posCenter.x, 0),
-                    left: point(-rects.modal.width, rects.container.height - rects.modal.height),
-                    right: point(rects.container.width - rects.modal.width, rects.container.height - rects.modal.height)
-                },
-                left: {
-                    up: point(0, rects.container.height),
-                    down: point(0, -rects.modal.height),
-                    left: point(rects.container.width, posCenter.y),
-                    right: point(-rects.modal.width, posCenter.y)
-                },
-                right: {
-                    up: point(rects.container.width - rects.modal.width, rects.container.height),
-                    down: point(rects.container.width - rects.modal.width, -rects.modal.height),
-                    left: point(rects.container.width, posCenter.y),
-                    right: point(0, posCenter.y)
-                },
-                up: {
-                    up: point(posCenter.x, rects.container.height),
-                    down: point(posCenter.x, -rects.modal.height),
-                    left: point(-rects.modal.width, 0),
-                    right: point(rects.container.width - rects.modal.width, 0)
-                },
-                center: {
-                    up: point(posCenter.x, rects.container.height),
-                    down: point(posCenter.x, 0),
-                    left: point(0, posCenter.y),
-                    right: point(rects.container.width, posCenter.y)
-                }
-            }
-
-            const pos = lodash.get(positionAnimDict, `${position}.${animation}`) || positionAnimDict.center.down;
-            modal.style.top = `${pos.y}px`;
-            modal.style.left = `${pos.x}px`;
-            resolve();
-        })
-    }
-
-    function setEndingPos() {
-        return new Promise((resolve) => {
-            const pos = positions[position] || positions.center;
-            modal.style.top = `${pos.y}px`;
-            modal.style.left = `${pos.x}px`;
-            resolve();
-        })
-    }
-
-    function doAnimation() {
-        return new Promise((resolve, reject) => {
-            // console.log(`animate ${animation} to position:${position}`)
-            const pos = positions[position] || positions.center;
-            // console.log(`from ${modal.style.left},${modal.style.top} to ${pos.x},${pos.y}`)
-            return Velocity(modal, { top: pos.y, left: pos.x }, { duration: animationDuration }).then(resolve).catch(reject)
-        })
-    }
-
-    return new Promise((resolve, reject) => {
-        if(!animation || animation === 'none')
-            return setEndingPos().then(resolve).catch(reject);
-
-        return setStartingPos().then(doAnimation).then(resolve).catch(reject);
-    })
-}
 
 function create({ slot, slotParent, dismissFn, animation, animationDuration, position }) {
     const slotEl = slot.$el || slot;
@@ -174,7 +80,15 @@ function create({ slot, slotParent, dismissFn, animation, animationDuration, pos
     container.onDismiss(dismissFn);
     shared.modals.push(container);
 
-    animate({ container, modal, position, animation, animationDuration });
+    animator.presetAnimation({
+        element: modal,
+        elementParent: container,
+        position,
+        animation,
+        animationDuration
+    })
+
+    // animate({ container, modal, position, animation, animationDuration });
 
     return container;
 }
