@@ -12,7 +12,7 @@ function point(x, y) {
 function getElAndParent(el, parent) {
     return new Promise((resolve, reject) => {
         const element = lodash.get(el, "$el") || el;
-        const elementParent = parent || lodash.get(parent, "parentNode");
+        const elementParent = parent || lodash.get(element, "parentNode");
         if(!element || !elementParent)
             return reject(`no element or parent: element ${element}, parent ${elementParent}`);
 
@@ -35,11 +35,11 @@ function getPositions(element, elementParent, offset) {
                 up: point(posCenter.x, 0),
                 right: point(r.parent.width - r.el.width, posCenter.y),
                 down: point(posCenter.x, r.parent.height - r.el.height),
-                center: posCenter,
                 upRight: point(r.parent.width - r.el.width, 0),
                 upLeft: point(0, 0),
                 downRight: point(r.parent.width - r.el.width, r.parent.height - r.el.height),
-                downLeft: point(0, r.parent.height - r.el.height)
+                downLeft: point(0, r.parent.height - r.el.height),
+                center: posCenter,
             }
 
             // apply offsets
@@ -85,55 +85,52 @@ function setPositionWithinParent({ element, elementParent, position, offset }) {
     })
 }
 
-function presetAnimationInParent(element, elementParent, position, animation, duration) {
+function presetInAnimation(element, elementParent, position, startingPosition, duration) {
     return new Promise((resolve, reject) => {
         getElAndParent(element, elementParent).then(({ el, parent }) => {
             getPositions(el, parent).then(({ positions, rects }) => {
                 function setStartingPos() {
-                    const positionAnimDict = {
-                        down: {
-                            up: ["bottom", point(0, rects.el.height)],
-                            down: ["top"],
-                            left: ["bottomLeft", point(-rects.el.width, 0)],
-                            right: ["bottomRight", point(rects.parent.width, 0)]
-                        },
-                        left: {
-                            up: ["bottomLeft"],
-                            down: ["topLeft"],
-                            left: ["right"],
-                            right: ["left", point(-rects.el.width, 0)]
-                        },
-                        right: {
-                            up: ["bottomRight"],
-                            down: ["topRight"],
-                            left: ["right", point(rects.el.width, 0)],
-                            right: ["left"],
-                        },
-                        up: {
-                            up: ["bottom"],
-                            down: ["top", point(0, -rects.el.height)],
-                            left: ["topLeft", point(-rects.el.width, 0)],
-                            right: ["topRight", point(rects.parent.width - rects.el.width, 0)]
-                        },
-                        center: {
-                            up: ["bottom"],
-                            down: ["top"],
-                            left: ["right"],
-                            right: ["left"]
+                    return new Promise((resolve, reject) => {
+                        const positionAnimDict = {
+                            down: {
+                                up: ["bottom", point(0, rects.el.height)],
+                                down: ["top"],
+                                left: ["bottomLeft", point(-rects.el.width, 0)],
+                                right: ["bottomRight", point(rects.parent.width, 0)]
+                            },
+                            left: {
+                                up: ["bottomLeft"],
+                                down: ["topLeft"],
+                                left: ["right"],
+                                right: ["left", point(-rects.el.width, 0)]
+                            },
+                            right: {
+                                up: ["bottomRight"],
+                                down: ["topRight"],
+                                left: ["right", point(rects.el.width, 0)],
+                                right: ["left"],
+                            },
+                            up: {
+                                up: ["bottom"],
+                                down: ["top", point(0, -rects.el.height)],
+                                left: ["topLeft", point(-rects.el.width, 0)],
+                                right: ["topRight", point(rects.parent.width - rects.el.width, 0)]
+                            },
+                            center: {
+                                up: ["bottom"],
+                                down: ["top"],
+                                left: ["right"],
+                                right: ["left"]
+                            }
                         }
-                    }
 
-                    const pos = lodash.get(positionAnimDict, `${position}.${animation}[0]`)
-                    const offset = lodash.get(positionAnimDict, `${position}.${animation}[1]`)
-                    return setPositionWithinParent({ offset, element, elementParent, position: pos })
-                }
+                        const pos = lodash.get(positionAnimDict, `${position}.${startingPosition}[0]`)
+                        const offset = lodash.get(positionAnimDict, `${position}.${startingPosition}[1]`)
 
-                function setEndingPos() {
-                    return new Promise((resolve) => {
-                        const pos = positions[position] || positions.center;
-                        el.style.top = `${pos.y}px`;
-                        el.style.left = `${pos.x}px`;
-                        resolve();
+                        if(!pos)
+                            return resolve();
+
+                        return setPositionWithinParent({ offset, element, elementParent, position: pos }).then(resolve).catch(reject);
                     })
                 }
 
@@ -142,8 +139,73 @@ function presetAnimationInParent(element, elementParent, position, animation, du
                     return animateToPoint({ element: el, x: pos.x, y: pos.y, duration });
                 }
 
-                if(!animation || animation === 'none')
-                    return setEndingPos().then(resolve).catch(reject);
+                return setStartingPos().then(doAnimation).then(resolve).catch(reject);
+            }).catch(reject);
+        }).catch(reject);
+    })
+}
+
+function presetOutAnimation(element, elementParent, position, startingPosition, duration) {
+    return new Promise((resolve, reject) => {
+        getElAndParent(element, elementParent).then(({ el, parent }) => {
+            getPositions(el, parent).then(({ positions, rects }) => {
+                function setStartingPos() {
+                    return new Promise((resolve, reject) => {
+                        const positionAnimDict = {
+                            down: {
+                                up: ["bottom"],
+                                down: ["top"],
+                                left: ["bottomLeft"],
+                                right: ["bottomRight"]
+                            },
+                            left: {
+                                up: ["bottomLeft"],
+                                down: ["topLeft"],
+                                left: ["right"],
+                                right: ["left"]
+                            },
+                            right: {
+                                up: ["bottomRight"],
+                                down: ["topRight"],
+                                left: ["right"],
+                                right: ["left"],
+                            },
+                            up: {
+                                up: ["bottom"],
+                                down: ["top"],
+                                left: ["topLeft"],
+                                right: ["topRight"]
+                            },
+                            center: {
+                                up: ["bottom"],
+                                down: ["top"],
+                                left: ["right"],
+                                right: ["left"]
+                            }
+                        }
+
+                        const pos = lodash.get(positionAnimDict, `${position}.${startingPosition}[0]`)
+                        const offset = lodash.get(positionAnimDict, `${position}.${startingPosition}[1]`)
+
+                        if(!pos)
+                            return resolve();
+
+                        return setPositionWithinParent({ offset, element, elementParent, position: pos }).then(resolve).catch(reject);
+                    })
+                }
+
+                function doAnimation() {
+                    const pos = positions[position] || positions.center;
+                    const offsets = {
+                        up: point(0, -rects.el.height),
+                        down: point(0, rects.el.height),
+                        left: point(-rects.el.width, 0),
+                        right: point(rects.el.width, 0)
+                    }
+
+                    const off = offsets[position] || { x: 0, y: 0 }
+                    return animateToPoint({ element: el, x: pos.x + off.x, y: pos.y + off.y, duration });
+                }
 
                 return setStartingPos().then(doAnimation).then(resolve).catch(reject);
             }).catch(reject);
@@ -154,39 +216,32 @@ function presetAnimationInParent(element, elementParent, position, animation, du
 export default {
     setPositionWithinParent,
     animateToPoint,
-    animateToCenter({ element, elementParent, startingPosition, duration }) {
-        return new Promise((resolve, reject) => {
-            getElAndParent(element, elementParent).then(({ el, parent }) => {
-                presetAnimationInParent(el, parent, "center",  startingPosition, duration).then(resolve).catch(reject);
-            }).catch(reject);
-        })
+    animateInCenter({ element, elementParent, startingPosition, duration }) {
+        return presetInAnimation(element, elementParent, "center",  startingPosition, duration)
     },
-    animateToTop({ element, elementParent, startingPosition, duration }) {
-        return new Promise((resolve, reject) => {
-            getElAndParent(element, elementParent).then(({ el, parent }) => {
-                presetAnimationInParent(el, parent, "up",  startingPosition, duration).then(resolve).catch(reject);
-            }).catch(reject);
-        })
+    animateInTop({ element, elementParent, startingPosition, duration }) {
+        return presetInAnimation(element, elementParent, "up",  startingPosition, duration)
     },
-    animateToBottom({ element, elementParent, startingPosition, duration }) {
-        return new Promise((resolve, reject) => {
-            getElAndParent(element, elementParent).then(({ el, parent }) => {
-                presetAnimationInParent(el, parent, "down",  startingPosition, duration).then(resolve).catch(reject);
-            }).catch(reject);
-        })
+    animateInBottom({ element, elementParent, startingPosition, duration }) {
+        return presetInAnimation(element, elementParent, "down",  startingPosition, duration)
     },
-    animateToLeft({ element, elementParent, startingPosition, duration }) {
-        return new Promise((resolve, reject) => {
-            getElAndParent(element, elementParent).then(({ el, parent }) => {
-                presetAnimationInParent(el, parent, "left",  startingPosition, duration).then(resolve).catch(reject);
-            }).catch(reject);
-        })
+    animateInLeft({ element, elementParent, startingPosition, duration }) {
+        return presetInAnimation(element, elementParent, "left",  startingPosition, duration)
     },
-    animateToRight({ element, elementParent, startingPosition, duration }) {
-        return new Promise((resolve, reject) => {
-            getElAndParent(element, elementParent).then(({ el, parent }) => {
-                presetAnimationInParent(el, parent, "right",  startingPosition, duration).then(resolve).catch(reject);
-            }).catch(reject);
-        })
+    animateInRight({ element, elementParent, startingPosition, duration }) {
+        return presetInAnimation(element, elementParent, "right",  startingPosition, duration)
     },
+
+    animateOutTop({ element, elementParent, startingPosition, duration }) {
+        return presetOutAnimation(element, elementParent, "up",  startingPosition, duration)
+    },
+    animateOutBottom({ element, elementParent, startingPosition, duration }) {
+        return presetOutAnimation(element, elementParent, "down",  startingPosition, duration)
+    },
+    animateOutLeft({ element, elementParent, startingPosition, duration }) {
+        return presetOutAnimation(element, elementParent, "left",  startingPosition, duration)
+    },
+    animateOutRight({ element, elementParent, startingPosition, duration }) {
+        return presetOutAnimation(element, elementParent, "right",  startingPosition, duration)
+    }
 }
