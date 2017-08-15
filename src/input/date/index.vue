@@ -1,23 +1,12 @@
 <template>
-    <div class="datetimeRoot" >
-        <div class="datetime">
-            <input class="datetime__input"
-                ref="input"
-                type="date"
-                @input="updateValue"  
-                :class="error ? 'datetime__input--error' : ''"
-                :placeholder="placeholder"
-            />
-            <div class="datetime__time">
-                <combobox class='time__box' :options="timeOptions.hrs" placeholder="hh" :uiStyle="timeboxStyle" :uiIcon="false"/>
-                <div class="time__boxDivider"><div class="time__boxDividerText">:</div></div>
-                <combobox class='time__box' :options="timeOptions.mins" placeholder="mm" :uiStyle="timeboxStyle" :uiIcon="false"/>
-                <div class="time__boxDivider"><div class="time__boxDividerText">:</div></div>
-                <combobox class='time__box' :options="timeOptions.secs" placeholder="ss" :uiStyle="timeboxStyle" :uiIcon="false"/>
-                <div class="time__boxDivider"><div class="time__boxDividerText">&nbsp</div></div>
-                <combobox class='time__box' :options="timeOptions.ap" placeholder="ap" :uiStyle="timeboxStyle"   :uiIcon="false"/>
-            </div>
-        </div>
+    <div class="datetimeRoot">
+        <input ref="flatPicker" 
+            class="datetime flatpickr flatpickr-input" 
+            :placeholder="placeholder" @click="openDatePicker" 
+            style="border-bottom-style:solid;"
+            @input="updateValue"
+            readonly='readonly'
+        />
         <div v-if="error !== null" class="datetime__error">
             {{ error }}
         </div>
@@ -25,14 +14,12 @@
 </template>
 
 <script>
+import 'flatpickr/dist/flatpickr.css';
 import lodash from 'lodash'
+import flatpickr from 'flatpickr'
 import animator from '../../misc/animator'
-import combobox from '../combobox'
 
 export default {
-    components: {
-        combobox
-    },
     props: {
         validateFn: {
             type: [Function, null],
@@ -50,7 +37,7 @@ export default {
             type: String,
             default: "date",
             validator(v) {
-                return ['date', 'datetime', 'time'].indexOf(v.toLowerCase()) !== '-1'
+                return ['date', 'datetime'].indexOf(v.toLowerCase()) !== '-1'
             }
         }
     },
@@ -58,41 +45,51 @@ export default {
         return {
             d_value: "",
             error: null,
-            timeOptions: {
-                hrs: [],
-                mins: [],
-                secs: [],
-                ap: ["AM", "PM"]
-            },
-            timeboxStyle: {
-                'border-color': 'black',
-                'border-width': '0 0 1px 0',
-                'border-radius': 0,
-                'font-size': '12px',
-                'padding-left': 0,
-                'text-align': 'center'
-            }
+            instance: null
         }
     },
-    created() {
-        lodash.times(12, (idx) => {
-            this.timeOptions.hrs.push(`${idx + 1 < 10 ? '0' : ''}${idx + 1}`)
-        })
-
-        lodash.times(60, (idx) => {
-            const v = `${idx < 10 ? '0' : ''}${idx}`
-            this.timeOptions.mins.push(v);
-            this.timeOptions.secs.push(v);
-        })
-    },
-    mounted() {
-        const date = new Date(this.value);
-        this.d_value = date;
-        this.$refs.input.value = date;
-    },
     methods: {
-        updateValue() {
-            const v = new Date(this.$refs.input.value);
+        openDatePicker() {
+            if(!this.instance) {
+                this.initFlatPickr();
+            }
+            this.instance.open();
+        },
+        getValue() {
+            return this.d_value;
+        },
+        initFlatPickr() {
+            const self = this;
+            const date = this.value ? new Date(this.value) : new Date();
+            this.destroyFlatPickr();
+            self.instance = flatpickr(self.$refs.flatPicker, {
+                defaultDate: date,
+                enableTime: self.options.toLowerCase() === 'datetime',
+                altInput: true,
+            })
+            this.d_value = date;
+            this.$emit('input', this.d_value);
+            this.$emit('value', this.d_value);
+
+            const flatPickrHtml = lodash.find(this.$el.childNodes, child => child.className === "datetime flatpickr flatpickr-input form-control input")
+            if(flatPickrHtml){
+                flatPickrHtml.style.width = `${210}px`;
+                flatPickrHtml.style.border = `solid`;
+                flatPickrHtml.style.borderWidth = '0 0 2px 0';
+                flatPickrHtml.style.paddingLeft = '5px';
+                flatPickrHtml.style.cursor = "pointer !important";
+                // flatPickrHtml.setAttribute('readonly', "none")
+            }
+        },
+        destroyFlatPickr() {
+            if(this.instance) {
+                this.instance.destroy();
+                this.instance = null;
+            }
+        },
+        updateValue(e) {
+            // console.log(`this happened`);
+            const v = new Date(e.target.value);
             if(typeof this.validateFn === 'function') {
                 const err = this.validateFn(v);
                 this.error = typeof err === 'string' ? err : null;
@@ -109,7 +106,10 @@ export default {
         error(v, ov) {
             if(v && !ov)
                 animator.shake({ element: this.$el });
-        }
+        },
+    },
+    beforeDestroy() {
+        this.destroyFlatPickr();
     }
 }
 </script>
@@ -123,46 +123,13 @@ export default {
 }
 
 .datetime {
-    display: flex;
-    align-items: center;
+    min-height: inherit;
     height: inherit;
-}
-
-.datetime__input {
-    border-color: inherit;
-    height: 100%;
-    outline: none;
-}
-
-.datetime__time {
-    display: flex;
-    align-items: center;
-    height: inherit;
-}
-
-.datetime__input--error { border-color: red; }
-.datetime__input--error:hover { border-color: red; }
-.datetime__input--error:focus { border-color: red; }
-.datetime__input--error:focus:hover { border-color: red; }
-.datetime__error {
-    color: red;
-    font-size: 12px;
-}
-
-.time__box {
-    width: 48px;
-    height: 100%;
-    display: inline-block;
-}
-
-.time__boxDivider {
-    height: 100%;
-    display: table;
-}
-
-.time__boxDividerText{
-    display: table-cell;
-    vertical-align: middle;
+    width: 210px;
+    border: solid;
+    border-width: 0 0 2px 0;
+    padding-left: 5px;
+    cursor: pointer;
 }
 
 </style>

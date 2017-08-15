@@ -9,26 +9,13 @@
         <div v-if="error !== null" class="error">
             {{ error }}
         </div>
-        <popover ref="popover" position="top">
+        <popover ref="popover" position="bottom">
             <div>
                 <div v-for="option in cOptions" :key="option" :value="option" @click="updateValue(option)" class="option" :class="d_value === option ? 'option--selected' : ''">
                     {{ option }}
                 </div>
             </div>
         </popover>
-        <!--
-            <select name="select" @input="updateValue" class="select" ref="select" :style="ui.style">
-            <option v-for="option in cOptions" :key="option" :value="option">
-                {{ option }}
-            </option>
-            </select>
-            <div class="container">
-                <div v-if="!d_value" class="placeholder">{{ placeholder }}</div>
-                <div class="icon" v-if="ui.icon">
-                    <i class="fa fa-caret-down"></i>
-                </div>
-            </div>        
-        -->
     </div>
 </template>
 

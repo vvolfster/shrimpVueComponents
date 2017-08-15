@@ -66,7 +66,7 @@ export default {
                 },
                 gender: {
                     type: "combo",
-                    options: ["Male", "Female", "Trans", "Other", "Alpha", "Beta"]
+                    options: ["Male", "Female", "Other"]
                 },
                 age: {
                     type: Number,

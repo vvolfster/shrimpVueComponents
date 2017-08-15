@@ -43,7 +43,7 @@ export default {
     },
     methods: {
         updateValue() {
-            const v = this.$refs.input.value;
+            const v = Number(this.$refs.input.value);
             if(typeof this.validateFn === 'function') {
                 const err = this.validateFn(v);
                 this.error = typeof err === 'string' ? err : null;
