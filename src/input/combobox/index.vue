@@ -1,6 +1,6 @@
 <template>
     <div class="combobox">
-        <div class="select" ref="select" @click="$refs.popover.open()" :style="ui.style">
+        <div class="select" ref="select" @click="$refs.popover.toggle()" :style="ui.style">
             <div>
                 {{ d_value ? d_value : placeholder }}
                 <i class="fa fa-caret-down" v-if="ui.icon"></i>

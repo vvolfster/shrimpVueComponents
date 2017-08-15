@@ -23,7 +23,7 @@ export default {
             default: null
         },
         value: {
-            type: String,
+            type: [String, Number],
             default: ''
         },
         placeholder: {
@@ -33,12 +33,12 @@ export default {
     },
     data() {
         return {
-            d_value: "",
+            d_value: NaN,
             error: null,
         }
     },
     mounted() {
-        this.d_value = this.value;
+        this.d_value = Number(this.value);
         this.$refs.input.value = this.value;
     },
     methods: {

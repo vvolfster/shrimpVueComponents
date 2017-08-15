@@ -1,5 +1,5 @@
 <template>
-    <div class="derpy">
+    <div class="popoverRoot">
         <div ref="slotContainer" style="display:none;">
             <slot></slot>
         </div>
@@ -152,13 +152,19 @@ export default {
         close() {
             if(this.instance)
                 this.instance.dismiss();
+        },
+        isOpen() {
+            return this.instance !== null
+        },
+        toggle() {
+            return this.isOpen() ? this.close() : this.open();
         }
     }
 }
 </script>
 
 <style scoped>
-    .derpy {
+    .popoverRoot {
         width: 100%;
         height: 100%;
         position: absolute;

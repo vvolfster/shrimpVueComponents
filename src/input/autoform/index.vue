@@ -4,15 +4,12 @@
         <div>{{ description }}</div>
         <div class="autoComponents" v-if="fields">
             <div v-for="(field, name) in fields" :key="name">
-                <div class="autoform--title">
-                    {{ getFieldName(name) }}
-                </div>
                 <div class="autoform--input">
                     <component :is="getComponent(field.type || field)" 
                         :validateFn="field && field.validateFn ? field.validateFn : null"
                         :value="d_model && d_model[name] ? d_model[name] : null"
                         :placeholder="getFieldName(name)"
-                        @value="toString(d_model) === '[object Object]' ? d_model[name] = $event : null"
+                        @value="setValue(name, $event)"
                         :options="field && field.options ? field.options : null"
                     />
                 </div>
@@ -113,6 +110,16 @@ export default {
 
                 default: return "textLine";
             }
+        },
+        setValue(name, value) {
+            if(!this.d_model)
+                return;
+
+            this.d_model[name] = value;
+            this.$emit('value', this.d_model);
+        },
+        getValue() {
+            return this.d_model;
         }
     },
     watch: {

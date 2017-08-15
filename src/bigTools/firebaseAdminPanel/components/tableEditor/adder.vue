@@ -1,38 +1,19 @@
 <template>
     <div>
         <q-modal ref="modal" @close="$emit('closeModal')">
-            
-                <tabView class="stepper" ref="tabView"
-                    @indexChanged="$event === computedSteps.length - 1 ? $emit('formCompleted') : null"
-                >
-                    <div v-for="(step, index) in computedSteps" 
-                        :key="index"
-                        slot="tab" 
-                        :name="index < computedSteps.length - 1 ? index + 1 : 'finish'" 
-                    >
-                        
-                        <div class="step" v-if="index !== computedSteps.length - 1">
-                            <div class="step__info">
-                                <h5>{{ step.title || "" }}</h5>
-                                <div>{{ step.description || "" }}</div>
-                                <br>
-                            </div>
-                            <div class="step__form">
-                                <div v-for="(field, fieldName) in step.fields" :key="fieldName">
-                                    <input type="text" 
-                                        class="form__input"
-                                        :name="fieldName" 
-                                        v-model="model[fieldName]" 
-                                        :id="fieldName"
-                                        :placeHolder="fieldName"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        
-                    </div>
-                </tabView>
-                
+            <tabView class="stepper" ref="tabView" 
+                @indexChanged="$event === computedSteps.length - 1 ? $emit('formCompleted') : null"
+            >
+                <autoform 
+                    v-for="(step, index) in computedSteps" 
+                    :key="index" slot="tab" 
+                    :name="index < computedSteps.length - 1 ? index + 1 : 'finish'" 
+                    :title="step.title"
+                    :description="step.description"
+                    :fields="step.fields"
+                    @value="handleValue"
+                />
+            </tabView>
         </q-modal>
     </div>
 </template>
@@ -40,9 +21,10 @@
 <script>
     import lodash from 'lodash'
     import tabView from '../../../../layout/tabView'
+    import autoform from '../../../../input/autoform'
 
     export default {
-        components: { tabView },
+        components: { tabView, autoform },
         props: ['steps'],
         data() {
             return {
@@ -81,6 +63,10 @@
                     return a;
                 }, {});
             },
+            handleValue(v) {
+                if(v && this.model)
+                    Object.assign(this.model, v);
+            }
         },
         computed: {
             computedSteps() {

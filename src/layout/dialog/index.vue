@@ -1,9 +1,15 @@
 <template>
     <div>
         <modal ref="modal">
-            <autoform ref="autoform">
-
-            </autoform>
+            <div>
+                TODO. This needs some re-engineering
+                <!-- <autoform ref="autoform"
+                    :title="title"
+                    :description="description"
+                    :fields="fields"
+                > -->
+                </autoform>
+            </div>
         </modal>
     </div>
 </template>
