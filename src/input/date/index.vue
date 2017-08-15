@@ -9,10 +9,13 @@
                 :placeholder="placeholder"
             />
             <div class="datetime__time">
-                <combobox class='time__box' :options="timeOptions.hrs" placeholder="h" :uiStyle="timeboxStyle" :uiIcon="false"/>
-                <combobox class='time__box' :options="timeOptions.mins" placeholder="m" :uiStyle="timeboxStyle" :uiIcon="false"/>
-                <combobox class='time__box' :options="timeOptions.secs" placeholder="s" :uiStyle="timeboxStyle" :uiIcon="false"/>
-                <combobox class='time__box' :options="timeOptions.ap" placeholder="a" :uiStyle="timeboxStyle"   :uiIcon="false"/>
+                <combobox class='time__box' :options="timeOptions.hrs" placeholder="hh" :uiStyle="timeboxStyle" :uiIcon="false"/>
+                <div class="time__boxDivider"><div class="time__boxDividerText">:</div></div>
+                <combobox class='time__box' :options="timeOptions.mins" placeholder="mm" :uiStyle="timeboxStyle" :uiIcon="false"/>
+                <div class="time__boxDivider"><div class="time__boxDividerText">:</div></div>
+                <combobox class='time__box' :options="timeOptions.secs" placeholder="ss" :uiStyle="timeboxStyle" :uiIcon="false"/>
+                <div class="time__boxDivider"><div class="time__boxDividerText">&nbsp</div></div>
+                <combobox class='time__box' :options="timeOptions.ap" placeholder="ap" :uiStyle="timeboxStyle"   :uiIcon="false"/>
             </div>
         </div>
         <div v-if="error !== null" class="datetime__error">
@@ -62,7 +65,8 @@ export default {
                 ap: ["AM", "PM"]
             },
             timeboxStyle: {
-                border: "solid 1px",
+                'border-color': 'black',
+                'border-width': '0 0 1px 0',
                 'border-radius': 0,
                 'font-size': '12px',
                 'padding-left': 0,
@@ -120,6 +124,8 @@ export default {
 
 .datetime {
     display: flex;
+    align-items: center;
+    height: inherit;
 }
 
 .datetime__input {
@@ -130,6 +136,8 @@ export default {
 
 .datetime__time {
     display: flex;
+    align-items: center;
+    height: inherit;
 }
 
 .datetime__input--error { border-color: red; }
@@ -142,8 +150,19 @@ export default {
 }
 
 .time__box {
-    width: 32px;
+    width: 48px;
     height: 100%;
+    display: inline-block;
+}
+
+.time__boxDivider {
+    height: 100%;
+    display: table;
+}
+
+.time__boxDividerText{
+    display: table-cell;
+    vertical-align: middle;
 }
 
 </style>
