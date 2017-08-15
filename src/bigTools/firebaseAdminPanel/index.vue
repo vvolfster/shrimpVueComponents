@@ -20,6 +20,7 @@
             <tableEditor 
                 :tableConfig="currentTableConfig"
                 :page="currentPage"
+                :navFn="$refs.navigation ? $refs.navigation.toTable : null"
                 class="tableEditor"
             >
                 <div :slot="currentPage ? currentPage.name : 'undefined'">

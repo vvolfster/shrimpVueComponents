@@ -32,7 +32,12 @@
                             <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></i></button>
                         </div>
                     </div>
-                    <component :is="delegateComponent" :id="id" :value="entry" :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"/>
+                    <component :is="delegateComponent" 
+                        :id="id" 
+                        :value="entry" 
+                        :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"
+                        :navFn="navFn"
+                    />
                 </div>
             </div>
         </div>
@@ -124,7 +129,7 @@
 
     export default {
         components: { imageStorage, tabView, adder, tableView },
-        props: ["page", "tableConfig"],
+        props: ["page", "tableConfig", "navFn"],
         computed: {
             actions() {
                 return this.tableConfig && this.tableConfig.actions ? this.tableConfig.actions : {}
@@ -307,7 +312,7 @@
                 this.busyMessage = `Peforming ${name}. Please wait...`
                 this.$refs.busyModal.open();
 
-                Promise.resolve(action(id, value)).then((msg) => {
+                Promise.resolve(action(id, value, this.navFn)).then((msg) => {
                     console.warn(msg);
                     this.$refs.busyModal.close();
                 }).catch((err) => {
@@ -325,6 +330,9 @@
 
                     if(!id || !field)
                         return reject("ID or Field missing on edit");
+
+                    if(field.charAt(0) === '@')
+                        return resolve();
 
                     return fbase.getTableRef(self.page.name).then((ref) => {
                         Dialog.create({
