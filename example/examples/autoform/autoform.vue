@@ -5,6 +5,7 @@
             :title="title"
             :description="description"
             :fields="fields"
+            :model="model"
         />
     </div>
 </template>
@@ -77,6 +78,10 @@ export default {
                         return true;
                     }
                 }
+            },
+            model: {
+                first: "wolf",
+                date: new Date(1988, 0, 1)
             }
         }
     },

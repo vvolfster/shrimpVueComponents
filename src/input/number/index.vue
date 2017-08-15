@@ -65,6 +65,11 @@ export default {
         },
     },
     watch: {
+        value() {
+            this.d_value = Number(this.value);
+            if(this.$refs.input)
+                this.$refs.input.value = this.value;
+        },
         error(v, ov) {
             if(v && !ov)
                 animator.shake({ element: this.$el });

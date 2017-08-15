@@ -98,6 +98,11 @@ export default {
         },
     },
     watch: {
+        value() {
+            this.d_value = this.value;
+            if(this.$refs.select)
+                this.$refs.select.value = this.value;
+        },
         error(v, ov) {
             if(v && !ov)
                 animator.shake({ element: this.$el });

@@ -41,6 +41,10 @@ export default {
             }
         }
     },
+    mounted() {
+        this.d_value = new Date(this.value);
+        this.$refs.flatPicker.value = this.d_value;
+    },
     data() {
         return {
             d_value: "",
@@ -106,6 +110,11 @@ export default {
         },
     },
     watch: {
+        value() {
+            this.d_value = new Date(this.value);
+            if(this.$refs.flatPicker)
+                this.$refs.flatPicker.value = this.d_value;
+        },
         error(v, ov) {
             if(v && !ov)
                 animator.shake({ element: this.$el });

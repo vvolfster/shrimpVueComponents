@@ -71,7 +71,8 @@ export default {
     watch: {
         value() {
             this.d_value = this.value;
-            this.$refs.input.value = this.value;
+            if(this.$refs.input)
+                this.$refs.input.value = this.value;
         },
         error(v, ov) {
             if(v && !ov)
