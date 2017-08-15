@@ -1,5 +1,5 @@
 <template>
-    <div class="derpy" style="display:none;" @keyup="keyHandler">
+    <div style="display:none;" @keyup="keyHandler">
         <slot></slot>
     </div>
 </template>
@@ -191,6 +191,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-</style>

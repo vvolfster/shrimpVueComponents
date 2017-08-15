@@ -18,6 +18,7 @@
 <script>
 import toggleButton from "@/button/toggleButton"
 
+import autoform from './examples/autoform/autoform'
 import fbAdminPanel from "./examples/fbAdminPanel/adminPanel"
 import toast from './examples/toast/toast'
 import modal from './examples/modal/modal'
@@ -28,7 +29,7 @@ export default {
     data() {
         return {
             myComponent: null,
-            examples: ["fbAdminPanel", "animator", "toast", "modal"]
+            examples: ["fbAdminPanel", "animator", "toast", "modal", "autoform"]
         }
     },
     components: {
@@ -36,7 +37,8 @@ export default {
         fbAdminPanel,
         animator,
         toast,
-        modal
+        modal,
+        autoform
     },
 };
 </script>

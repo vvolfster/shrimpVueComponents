@@ -25,6 +25,10 @@
                 type: String,
                 default: "Select..."
             },
+            validateFn: {
+                type: [Function, null],
+                default: null
+            },
             value: String,
         },
         computed: {

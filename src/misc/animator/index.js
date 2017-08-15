@@ -12,7 +12,8 @@ function point(x, y) {
 function getElAndParent(el, parent) {
     return new Promise((resolve, reject) => {
         const element = lodash.get(el, "$el") || el;
-        const elementParent = parent || lodash.get(element, "parentNode");
+        let elementParent = parent || lodash.get(element, "parentNode");
+        elementParent = lodash.get(elementParent, "$el") || elementParent;
         if(!element || !elementParent)
             return reject(`no element or parent: element ${element}, parent ${elementParent}`);
 
@@ -295,5 +296,52 @@ export default {
     },
     animateOutRight({ element, elementParent, startingPosition, duration }) {
         return presetOutAnimation(element, elementParent, "right",  startingPosition, duration)
+    },
+
+    shake({ element, magnitude, duration, vertical }) {
+        return new Promise((resolve, reject) => {
+            getElAndParent(element).then(({ el }) => {
+                const shakeVal = typeof magnitude === 'number' ? `${magnitude}px` : '5px';
+                const dur = duration || 50;
+
+                if(!el)
+                    return;
+
+                function up() {
+                    return Velocity(el, { translateY: `-${shakeVal}` }, { duration: dur })
+                }
+                function down() {
+                    return Velocity(el, { translateY: shakeVal }, { duration: dur })
+                }
+                function left() {
+                    return Velocity(el, { translateX: `-${shakeVal}` }, { duration: dur })
+                }
+                function right() {
+                    return Velocity(el, { translateX: shakeVal }, { duration: dur })
+                }
+                function end() {
+                    return Velocity(el, { translateX: '0px', translateY: '0px' }, { duration: dur })
+                }
+
+                if(vertical) {
+                    up()
+                    .then(down)
+                    .then(up)
+                    .then(down)
+                    .then(end)
+                    .then(resolve)
+                    .catch(reject)
+                }
+                else {
+                    left()
+                    .then(right)
+                    .then(left)
+                    .then(right)
+                    .then(end)
+                    .then(resolve)
+                    .catch(reject)
+                }
+            }).catch(reject);
+        })
     }
 }
