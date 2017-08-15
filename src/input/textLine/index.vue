@@ -68,6 +68,8 @@ export default {
 .line {
     min-height: 32px;
     position: relative;
+    width: inherit;
+    height: inherit;
 }
 
 .line__input {

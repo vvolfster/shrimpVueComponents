@@ -35,11 +35,47 @@ export default {
                         return true;
                     }
                 },
+                aboutMe: {
+                    type: "paragraph",
+                    validateFn(v) {
+                        if(!v || !v.length)
+                            return 'Too short'
+
+                        if(v.length < 3)
+                            return 'Too short'
+
+                        return true;
+                    }
+                },
                 last: String,
-                date: Date,
+                date: {
+                    type: Date,
+                    options: "datetime"
+                },
+                password: {
+                    type: "password",
+                    validateFn(v) {
+                        if(!v || !v.length)
+                            return 'Too short'
+
+                        if(v.length < 3)
+                            return 'Too short'
+
+                        return true;
+                    }
+                },
                 gender: {
                     type: "combo",
-                    options: ["Male", "Female"]
+                    options: ["Male", "Female", "Trans", "Other", "Alpha", "Beta"]
+                },
+                age: {
+                    type: Number,
+                    validateFn(v) {
+                        if(v <= 0)
+                            return "You cannot be that young!!"
+
+                        return true;
+                    }
                 }
             }
         }

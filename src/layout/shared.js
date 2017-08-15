@@ -1,30 +1,35 @@
 import lodash from 'lodash'
 
-const shared = {
-    modals: {
+const shared = {}
+
+function generator(key) {
+    return {
         newKey: 0,
-        stack: {
-        },
+        stack: {},
         dismissAll() {
-            lodash.each(shared.modals.stack, (modal, modalId) => {
-                modal.dismiss();
-                if(modalId in self.stack)
-                    delete shared.modals.stack[modalId]
+            lodash.each(shared[key].stack, (obj, id) => {
+                obj.dismiss();
+                if(id in self.stack)
+                    delete shared[key].stack[id]
             })
         },
-        push(modal) {
-            const self = shared.modals;
-            const modalId = self.newKey;
+        push(obj) {
+            const self = shared[key];
+            const id = self.newKey;
 
-            self.stack[modalId] = modal;
-            modal.onDismiss(() => {
-                if(modalId in self.stack)
-                    delete self.stack[modalId]
+            self.stack[id] = obj;
+            obj.onDismiss(() => {
+                if(id in self.stack)
+                    delete self.stack[id]
             })
 
             self.newKey += 1;
         },
     }
 }
+
+shared.modals = generator('modals')
+shared.dialogs = generator('dialogs')
+shared.popovers = generator('popovers')
 
 export default shared;
