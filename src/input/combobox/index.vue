@@ -133,6 +133,7 @@ export default {
 
         border: solid;
         border-width: 0 0 1px 0;
+        text-align: inherit;
 
         display: flex;
         flex-flow: column;

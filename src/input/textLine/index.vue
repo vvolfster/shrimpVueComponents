@@ -105,11 +105,16 @@ export default {
     border-width: 0 0 1px 0;
     width: 100%;
     height: 100%;
+    text-align: inherit;
     font: inherit;
     color: inherit;
     background: inherit;
     outline: none;
 }
+.line__input { border-width: 0 0 1px 0; }
+.line__input:hover { border-width: 0 0 1px 0; }
+.line__input:focus { border-width: 0 0 1px 0; }
+.line__input:focus:hover { border-width: 0 0 1px 0; }
 
 .line__input--error { border-color: red; }
 .line__input--error:hover { border-color: red; }

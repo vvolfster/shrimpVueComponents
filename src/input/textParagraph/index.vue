@@ -119,6 +119,7 @@ export default {
     resize: none;
     outline: none;
     border: none;
+    text-align: inherit;
     padding: 5px;
     min-height: inherit;
     max-height: inherit;

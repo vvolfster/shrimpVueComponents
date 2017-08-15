@@ -165,6 +165,7 @@ export default {
     min-height: inherit;
     height: inherit;
     border: solid;
+    text-align: inherit;
     border-width: 0 0 1px 0;
     padding-left: 5px;
     cursor: pointer;
