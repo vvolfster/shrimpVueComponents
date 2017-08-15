@@ -9,6 +9,7 @@
                 :pageData="pageData"
                 :actions="actionsTableRoot"
                 :hasMenu="hasDetailView"
+                :hasDelete="tableConfig ? !tableConfig.noDelete : true"
 
                 @callAction="callTableRootAction($event.name)"
                 @openDetailView="openDetailView($event.id, $event.entry, pageFbRefs[$event.id])"
@@ -29,7 +30,7 @@
                         </div>
                         <div class="componentHeader__actions">
                             <button class="btn btn--detail" @click="openDetailView(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
-                            <button class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></i></button>
+                            <button v-if="!tableConfig.noDelete" class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></i></button>
                         </div>
                     </div>
                     <component :is="delegateComponent" 

@@ -30,7 +30,7 @@
                         <button v-if="hasMenu" @click="$emit('openDetailView', { id, entry  })" class="btn btn--detail">
                             <i class='fa fa-ellipsis-h'/>
                         </button>
-                        <button class="btn btn--delete" @click="$emit('delete', { id } )">
+                        <button v-if="hasDelete" class="btn btn--delete" @click="$emit('delete', { id } )">
                             <i class='fa fa-trash'/>
                         </button>
                     </div>
@@ -62,6 +62,10 @@ export default {
             default: null
         },
         hasMenu: {
+            type: Boolean,
+            default: true
+        },
+        hasDelete: {
             type: Boolean,
             default: true
         }

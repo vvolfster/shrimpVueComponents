@@ -74,25 +74,14 @@ export default {
     computed: {
         ui() {
             const options = this.options;
-            if(!options)
-                return {
-                    style: {
-                        width: "inherit",
-                        height: "inherit"
-                    }
-                };
+            const style = options && options.style ? options.style : null;
+            const defStyleObj = { width: "inherit", height: "inherit" }
+            if(typeof style === 'string')
+                return { style }
+            if(typeof style === 'object')
+                return { style: Object.assign(defStyleObj, style) }
 
-            let maxHeight = options.maxHeight || options['max-height']
-            if(typeof maxHeight === 'number')
-                maxHeight = `${maxHeight}px`
-
-            return {
-                style: {
-                    width: "inherit",
-                    height: "inherit",
-                    'max-height': maxHeight
-                }
-            }
+            return { style: defStyleObj };
         }
     }
 }
@@ -103,7 +92,7 @@ export default {
     position: relative;
     border: solid 1px;
     width: 100%;
-    min-height: 100%;
+    min-height: inherit;
     max-height: inherit;
 }
 .paragraph--error {
@@ -118,6 +107,7 @@ export default {
     outline: none;
     border: none;
     padding: 5px;
+    min-height: inherit;
     max-height: inherit;
 }
 .paragraph__input:hover { border: none; }

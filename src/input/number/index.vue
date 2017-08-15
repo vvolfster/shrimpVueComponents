@@ -1,5 +1,5 @@
 <template>
-    <div class="line" >
+    <div class="line" :style="ui.style">
         <input class="line__input"
             ref="input"
             type="number"
@@ -30,6 +30,10 @@ export default {
             type: String,
             default: "Input..."
         },
+        options: {
+            type: [Object, null, undefined],
+            default: null
+        }
     },
     data() {
         return {
@@ -60,6 +64,19 @@ export default {
         error(v, ov) {
             if(v && !ov)
                 animator.shake({ element: this.$el });
+        }
+    },
+    computed: {
+        ui() {
+            const options = this.options;
+            const style = options && options.style ? options.style : null;
+            const defStyleObj = { width: "inherit", height: "inherit" }
+            if(typeof style === 'string')
+                return { style }
+            if(typeof style === 'object')
+                return { style: Object.assign(defStyleObj, style) }
+
+            return { style: defStyleObj };
         }
     }
 }

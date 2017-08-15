@@ -1,8 +1,10 @@
 <template>
     <div class="combobox">
-        <div class="select" ref="select" @click="$refs.popover.toggle()" :style="ui.style">
+        <div class="select" ref="select" @click="$refs.popover.toggle()"  :style="ui.style">
             <div>
-                {{ d_value ? d_value : placeholder }}
+                <div :style="!d_value ? 'color:gray;display:inline-block;' : 'display:inline-block;'">
+                    {{ d_value ? d_value : placeholder }}
+                </div>
                 <i class="fa fa-caret-down" v-if="ui.icon"></i>
             </div>
         </div>
@@ -29,7 +31,7 @@ export default {
     },
     props: {
         options: {
-            type: [Array, null],
+            type: [Array, Object, null, undefined],
             default: null
         },
         placeholder: {
@@ -41,14 +43,6 @@ export default {
             default: null
         },
         value: String,
-        uiStyle: {
-            type: [Object, String, null],
-            default: null
-        },
-        uiIcon: {
-            type: [Boolean, null, undefined],
-            default: true,
-        },
     },
     data() {
         return {
@@ -62,15 +56,28 @@ export default {
     },
     computed: {
         cOptions() {
-            return this.options || [];
+            if(toString.call(this.options) === '[object Array]')
+                return this.options;
+            if(toString.call(this.options) === '[object Object]') {
+                const opts = this.options.choices || this.options.list || this.options.options;
+                return opts || [];
+            }
+            return [];
         },
         ui() {
-            const style = this.uiStyle || {}
-            const icon = this.uiIcon
+            const options = this.options;
+            const style = options && options.style ? options.style : null;
+            const icon = options && options.icon ? options.icon : true;
+            let styleObj = { width: "inherit", height: "inherit" }
+            if(typeof style === 'string')
+                styleObj = style;
+            else if(typeof style === 'object')
+                styleObj = { style: Object.assign(styleObj, style) }
+
             return {
-                style,
+                style: styleObj,
                 icon
-            }
+            };
         }
     },
     methods: {
@@ -119,7 +126,9 @@ export default {
         align-content: center;
         text-align: left;
         padding-left: 5px;
+        padding-right: 5px;
         cursor: pointer;
+        background:white;
     }
 
     .option {

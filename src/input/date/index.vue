@@ -1,5 +1,5 @@
 <template>
-    <div class="datetimeRoot">
+    <div class="datetimeRoot" :style="ui.style">
         <input ref="flatPicker" 
             class="datetime flatpickr flatpickr-input" 
             :placeholder="placeholder" @click="openDatePicker" 
@@ -34,7 +34,7 @@ export default {
             default: "Input..."
         },
         options: {
-            type: String,
+            type: [String, Object, null, undefined],
             default: "date",
             validator(v) {
                 return ['date', 'datetime'].indexOf(v.toLowerCase()) !== '-1'
@@ -64,7 +64,7 @@ export default {
             this.destroyFlatPickr();
             self.instance = flatpickr(self.$refs.flatPicker, {
                 defaultDate: date,
-                enableTime: self.options.toLowerCase() === 'datetime',
+                enableTime: self.type === 'datetime',
                 altInput: true,
             })
             this.d_value = date;
@@ -110,6 +110,32 @@ export default {
     },
     beforeDestroy() {
         this.destroyFlatPickr();
+    },
+    computed: {
+        ui() {
+            const options = this.options;
+            const style = options && options.style ? options.style : null;
+            const defStyleObj = { width: "inherit", height: "inherit" }
+            if(typeof style === 'string')
+                return { style }
+            if(typeof style === 'object')
+                return { style: Object.assign(defStyleObj, style) }
+
+            return { style: defStyleObj };
+        },
+        type() {
+            const options = this.options;
+            if(typeof options === 'string') {
+                return options.toLowerCase() === 'datetime' ? 'datetime' : 'date'
+            }
+
+            if(typeof options === 'object') {
+                const type = options.type || 'date'
+                return type;
+            }
+
+            return 'date'
+        }
     }
 }
 </script>

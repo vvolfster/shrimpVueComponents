@@ -11,6 +11,8 @@
 <script>
 // import lodash from 'lodash'
 import fbAdminPanel from '@/bigTools/firebaseAdminPanel'
+import segmentDelegate from './delegates/segment'
+import courseDelegate from './delegates/course'
 
 export default {
     components: { fbAdminPanel },
@@ -66,11 +68,17 @@ export default {
                     //         }
                     //     }
                     // },
-                    storageKey: "storage"
+                    noDelete: true,
                 },
-                data: {
-                    storageKey: "storage"
-                }
+                courses: {
+                    storageKey: "storage",
+                    delegateComponent: courseDelegate,
+                },
+                segments: {
+                    storageKey: "storage",
+                    delegateComponent: segmentDelegate,
+                    noDelete: true,
+                },
             }
         }
     }
