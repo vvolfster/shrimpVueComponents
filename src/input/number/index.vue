@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import lodash from 'lodash'
 import animator from '../../misc/animator'
 
 export default {
@@ -46,8 +47,11 @@ export default {
         this.$refs.input.value = this.value;
     },
     methods: {
-        updateValue() {
-            const v = Number(this.$refs.input.value);
+        updateValue(val) {
+            const v = Number(lodash.get(val, "target.value")) || Number(val);
+            if(typeof v !== 'number' || isNaN(v))
+                return;
+
             if(typeof this.validateFn === 'function') {
                 const err = this.validateFn(v);
                 this.error = typeof err === 'string' ? err : null;

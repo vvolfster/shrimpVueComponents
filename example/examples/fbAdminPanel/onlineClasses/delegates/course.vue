@@ -1,6 +1,6 @@
 <template>
     <div>
-        <textLine :value="ui.title"/>
+        <textLine :value="ui.title" class="title"/>
         <textParagraph :value="ui.description" :options="{ style: { 'min-height': '69px' } }"/>
         <div class="roadmap">
             <h5>roadmap</h5>
@@ -37,4 +37,8 @@ export default {
 </script>
 
 <style scoped>
+.title {
+    width: 200px;
+    font-size: 20px;
+}
 </style>

@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import lodash from 'lodash'
 import animator from '../../misc/animator'
 
 export default {
@@ -46,8 +47,11 @@ export default {
         this.$refs.input.value = this.value;
     },
     methods: {
-        updateValue() {
-            const v = this.$refs.input.value;
+        updateValue(val) {
+            const v = lodash.get(val, "target.value") || val;
+            if(typeof v !== 'string')
+                return;
+
             if(typeof this.validateFn === 'function') {
                 const err = this.validateFn(v);
                 this.error = typeof err === 'string' ? err : null;
@@ -70,7 +74,15 @@ export default {
         ui() {
             const options = this.options;
             const style = options && options.style ? options.style : null;
-            const defStyleObj = { width: "inherit", height: "inherit" }
+            const defStyleObj = {
+                'min-width': "inherit",
+                'min-height': "inherit",
+                width: "inherit",
+                height: "inherit",
+                font: "inherit",
+                color: "inherit",
+                background: "inherit",
+            }
             if(typeof style === 'string')
                 return { style }
             if(typeof style === 'object')

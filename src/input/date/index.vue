@@ -87,9 +87,12 @@ export default {
                 this.instance = null;
             }
         },
-        updateValue(e) {
+        updateValue(val) {
             // console.log(`this happened`);
-            const v = new Date(e.target.value);
+            const v = new Date(lodash.get(val, "target.value") || val);
+            if(isNaN(v.getTime()))
+                return; // invalid date
+
             if(typeof this.validateFn === 'function') {
                 const err = this.validateFn(v);
                 this.error = typeof err === 'string' ? err : null;

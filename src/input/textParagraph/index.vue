@@ -1,6 +1,6 @@
 <template>
     <div :style="ui.style">
-        <div class="paragraph" :class="error ? 'paragraph--error' : ''">
+        <div class="paragraph" :class="error ? 'paragraph--error' : ''" :style="ui.style">
             <textarea class="paragraph__input"
                 ref="input"
                 @input="updateValue"  
@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import lodash from 'lodash'
 import animator from '../../misc/animator'
 
 export default {
@@ -47,8 +48,10 @@ export default {
         this.$refs.input.value = this.value;
     },
     methods: {
-        updateValue() {
-            const v = this.$refs.input.value;
+        updateValue(val) {
+            const v = lodash.get(val, "target.value") || val;
+            if(typeof v !== 'string')
+                return;
 
             const lines = 1 + (v.match(/\n/g) || []).length;
             this.$refs.input.rows = lines;
@@ -66,6 +69,10 @@ export default {
         },
     },
     watch: {
+        value() {
+            this.d_value = this.value;
+            this.$refs.input.value = this.value;
+        },
         error(v, ov) {
             if(v && !ov)
                 animator.shake({ element: this.$el });
@@ -75,7 +82,15 @@ export default {
         ui() {
             const options = this.options;
             const style = options && options.style ? options.style : null;
-            const defStyleObj = { width: "inherit", height: "inherit" }
+            const defStyleObj = {
+                'min-width': "inherit",
+                'min-height': "inherit",
+                width: "inherit",
+                height: "inherit",
+                font: "inherit",
+                color: "inherit",
+                background: "inherit",
+            }
             if(typeof style === 'string')
                 return { style }
             if(typeof style === 'object')
@@ -91,9 +106,6 @@ export default {
 .paragraph {
     position: relative;
     border: solid 1px;
-    width: 100%;
-    min-height: inherit;
-    max-height: inherit;
 }
 .paragraph--error {
     color: red;
