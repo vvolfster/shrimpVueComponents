@@ -2,7 +2,9 @@ import Firebase from 'firebase'
 import lodash from 'lodash'
 import axios from 'axios'
 import Chance from 'chance'
-import { Dialog, Toast } from 'quasar-framework'
+import { Dialog } from 'quasar-framework'
+import Toast from '../../vuePlugins/toasts'
+
 // import Vue from 'vue'
 // import VueTable from 'vuetable-2'
 // const fbConfig = {
@@ -107,20 +109,20 @@ const functions = {
                             function success() {
                                 localStorage.setItem("fbAdminPanelUser", username);
                                 localStorage.setItem("fbAdminPanelPW", password);
-                                Toast.create.positive(`Logged in as ${username}`);
+                                Toast.positive(`Logged in as ${username}`);
                                 resolve();
                                 state.dialog.close();
                             }
 
                             app.auth().signInWithEmailAndPassword(username, password).then(success).catch((err) => {
                                 if (err.message !== "There is no user record corresponding to this identifier. The user may have been deleted."){
-                                    Toast.create.negative(err.message);
+                                    Toast.negative(err.message);
                                     return;
                                 }
 
                                 app.auth().createUserWithEmailAndPassword(username, password)
                                 .then(success)
-                                .catch(error => Toast.create.negative(error.message));
+                                .catch(error => Toast.negative(error.message));
                             })
                         }
                     },

@@ -12,7 +12,7 @@
                 </button>
                 <navigation 
                     ref="navigation"
-                    :tables="fb.tables"
+                    :tables="computedTables"
                     :pageSize="tableConfig.pageSize || 25" @pageLoaded="currentPage = $event"
                     class="topBar__navigation"
                 />
@@ -45,7 +45,7 @@ function getURLParameter(name) {
 
 export default {
     components: { navigation, tableEditor },
-    props: ["fbConfig", "tableConfig"],
+    props: ["fbConfig", "tableConfig", "tables", "defaultTable"],
     data() {
         return {
             fb: {
@@ -86,6 +86,23 @@ export default {
 
             return this.tableConfig[this.currentPage.name];
         },
+        computedTables() {
+            const fb = this.fb;
+            const tables = this.tables;
+            if(fb && fb.tables) {
+                if(!tables)
+                    return fb.tables;
+
+                // only return the tables present in the tables property
+                const ret = [];
+                fb.tables.forEach((table) => {
+                    if(tables.indexOf(table) !== -1)
+                        ret.push(table)
+                })
+                return ret;
+            }
+            return null;
+        }
     },
     methods: {
         fbConfigChanged() {
@@ -125,10 +142,13 @@ export default {
 
             function readUrlParams() {
                 return new Promise((resolve) => {
-                    if(!self.urlParams.table || !self.$refs.navigation)
-                        return resolve();
+                    if(self.urlParams.table && self.$refs.navigation) {
+                        self.$refs.navigation.toTable(self.urlParams.table, self.urlParams.id);
+                    }
+                    else if(self.defaultTable && self.$refs.navigation) {
+                        self.$refs.navigation.toTable(self.defaultTable);
+                    }
 
-                    self.$refs.navigation.toTable(self.urlParams.table, self.urlParams.id);
                     return resolve();
                 })
             }

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <fbAdminPanel :fbConfig="fbConfig"  :tableConfig="tableConfig">
+        <fbAdminPanel :fbConfig="fbConfig"  :tableConfig="tableConfig" :tables="tables" :defaultTable="defaultTable">
             <!-- 
                 <openHousePosting slot="test"/>
             -->
@@ -28,6 +28,8 @@ export default {
                 // custom key
                 requiresAuth: true,
             },
+            tables: ['courses'],
+            defaultTable: 'courses',
             tableConfig: {
                 pageSize: 25,
                 users: {
