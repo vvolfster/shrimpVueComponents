@@ -10,7 +10,12 @@
                 <button class="topBar__user" @click="login">
                     {{ username || "Login..." }}
                 </button>
-                <navigation :tables="fb.tables" :pageSize="tableConfig.pageSize || 25" @pageLoaded="currentPage = $event" class="topBar__navigation"/>
+                <navigation 
+                    ref="navigation"
+                    :tables="fb.tables"
+                    :pageSize="tableConfig.pageSize || 25" @pageLoaded="currentPage = $event"
+                    class="topBar__navigation"
+                />
             </div>
             <tableEditor 
                 :tableConfig="currentTableConfig"
@@ -31,6 +36,12 @@ import fbase from './fbase'
 import tableEditor from "./components/tableEditor"
 import navigation from './components/navigation'
 
+function getURLParameter(name) {
+    /* eslint-disable prefer-template */
+    /* eslint-disable no-useless-concat */
+    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+}
+
 export default {
     components: { navigation, tableEditor },
     props: ["fbConfig", "tableConfig"],
@@ -44,14 +55,22 @@ export default {
                 storage: null,
                 tables: null,
             },
+            urlParams: {
+                table: null,
+                id: null
+            },
             username: null,
-            currentPage: null
+            currentPage: null,
+            isReady: false,
         }
     },
     beforeDestroy() {
         fbase.close();
     },
     mounted() {
+        this.urlParams.table = getURLParameter('table')
+        this.urlParams.id = getURLParameter('id')
+        // console.log(`params`, this.urlParams.table, this.urlParams.id);
         this.fbConfigChanged();
     },
     watch: {
@@ -74,6 +93,7 @@ export default {
             const fbConfig = this.fbConfig;
             function clearData(err) {
                 return new Promise((resolve) => {
+                    self.isReady = false;
                     if(err)
                         console.error("Error when initializing fb app", err);
 
@@ -87,12 +107,8 @@ export default {
                 })
             }
 
-            return new Promise((resolve) => {
-                if(!fbConfig)
-                    return clearData().then(resolve)
-
-                return fbase.initFb(fbConfig).then(({ app, database, auth, messaging, storage, tables }) => {
-                    // console.log(`app initialized`)
+            function initInstance({ app, database, auth, messaging, storage, tables }) {
+                return new Promise((resolve) => {
                     fb.app = app;
                     fb.database = database;
                     fb.auth = auth;
@@ -102,7 +118,25 @@ export default {
                     fb.auth.onAuthStateChanged((authe) => {
                         self.username = authe ? (authe.displayName || authe.email) : null
                     })
-                }).catch(clearData)
+                    resolve();
+                })
+            }
+
+            function readUrlParams() {
+                return new Promise((resolve) => {
+                    if(!self.urlParams.table || !self.$refs.navigation)
+                        return resolve();
+
+                    self.$refs.navigation.toTable(self.urlParams.table, self.urlParams.id);
+                    return resolve();
+                })
+            }
+
+            return new Promise((resolve) => {
+                if(!fbConfig)
+                    return clearData().then(resolve)
+
+                return fbase.initFb(fbConfig).then(initInstance).then(readUrlParams).catch(clearData)
             })
         },
         login() {

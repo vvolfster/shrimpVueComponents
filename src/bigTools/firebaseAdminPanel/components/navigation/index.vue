@@ -1,8 +1,8 @@
 <template>
     <div class="navigationBar" style="padding:5px;">
-        <combobox :options="tables" @value="input_table = $event"/>
+        <combobox ref="combobox" :options="tables" @value="input_table = $event"/>
         Firebase Admin Panel
-        <pageControls :total="totalPages" @value="input_page = $event"/>
+        <pageControls ref="pageControls" :total="totalPages" @value="input_page = $event"/>
     </div>
 </template>
 
@@ -22,7 +22,8 @@ export default {
             input_page: -1,
             ids: null,
 
-            unsubFn: null
+            unsubFn: null,
+            tableChangeCb: null
         }
     },
     beforeDestroy() {
@@ -88,7 +89,8 @@ export default {
             .then(this.clearData)
             .then(this.getIds)
             .then(this.initPages)
-            .then(this.createSubscriptions);
+            .then(this.createSubscriptions)
+            .then(this.tableChangeCb);
         },
 
         getIds() {
@@ -162,6 +164,47 @@ export default {
                     this.unsubFun = null;
                 }
                 resolve();
+            })
+        },
+
+        toTable(table, id) {
+            const self = this;
+            function setTable() {
+                if(self.$refs.combobox)
+                    self.$refs.combobox.updateValue(table);
+                else
+                    self.input_table = table;
+            }
+
+            function setPage(idx) {
+                if(self.$refs.pageControls)
+                    self.$refs.pageControls.setIndex(idx)
+                else
+                    self.input_page = idx;
+            }
+
+            return new Promise((resolve, reject) => {
+                // console.log("TABLES", JSON.stringify(self.tables), self.tables.indexOf(table), lodash.find(self.tables, t => t === table));
+                if(self.tables.indexOf(table) === -1){
+                    reject(`no such table ${table}`)
+                    return;
+                }
+
+                if(!id) {
+                    setTable(table);
+                    resolve();
+                    return;
+                }
+
+                self.tableChangeCb = () => {
+                    self.tableChangeCb = null; // unsub self
+                    const pg = lodash.findIndex(self.pages, page => page.indexOf(id) !== -1)
+                    if(pg !== null && pg !== undefined)
+                        setPage(pg);
+
+                    resolve();
+                }
+                setTable(table);
             })
         }
 

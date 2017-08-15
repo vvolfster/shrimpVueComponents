@@ -41,6 +41,10 @@
             },
             forward(allTheWay) {
                 this.idx = allTheWay === true ? Math.max(this.total - 1, 0) : Math.min(this.idx + 1, this.total - 1);
+            },
+            setIndex(v) {
+                if(v >= 0 && v < this.total)
+                    this.idx = v;
             }
         }
     }
