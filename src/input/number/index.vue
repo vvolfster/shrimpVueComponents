@@ -1,10 +1,11 @@
 <template>
-    <div class="line" :style="ui.style">
+    <div class="line">
         <input class="line__input"
             ref="input"
             type="number"
             @input="updateValue"  
             :class="error ? 'line__input--error' : ''"
+            :style="ui.style"
             :placeholder="placeholder"
         />
         <div v-if="error !== null" class="line__error">
@@ -79,7 +80,11 @@ export default {
         ui() {
             const options = this.options;
             const style = options && options.style ? options.style : null;
-            const defStyleObj = { width: "inherit", height: "inherit" }
+            const defStyleObj = {
+                font: "inherit",
+                color: "inherit",
+                background: "inherit",
+            }
             if(typeof style === 'string')
                 return { style }
             if(typeof style === 'object')
@@ -100,9 +105,13 @@ export default {
 }
 
 .line__input {
-    border-color: inherit;
+    border: solid;
+    border-width: 0 0 1px 0;
     width: 100%;
     height: 100%;
+    font: inherit;
+    color: inherit;
+    background: inherit;
     outline: none;
 }
 

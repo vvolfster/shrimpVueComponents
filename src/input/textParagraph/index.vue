@@ -1,5 +1,5 @@
 <template>
-    <div :style="ui.style">
+    <div>
         <div class="paragraph" :class="error ? 'paragraph--error' : ''" :style="ui.style">
             <textarea class="paragraph__input"
                 ref="input"

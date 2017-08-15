@@ -15,6 +15,7 @@
 
 <script>
 import 'flatpickr/dist/flatpickr.css';
+import moment from 'moment'
 import lodash from 'lodash'
 import flatpickr from 'flatpickr'
 import animator from '../../misc/animator'
@@ -43,7 +44,7 @@ export default {
     },
     mounted() {
         this.d_value = new Date(this.value);
-        this.$refs.flatPicker.value = this.d_value;
+        this.$refs.flatPicker.value = moment(this.d_value).format("MMMM D, YYYY, h:mm A")
     },
     data() {
         return {
@@ -77,9 +78,9 @@ export default {
 
             const flatPickrHtml = lodash.find(this.$el.childNodes, child => child.className === "datetime flatpickr flatpickr-input form-control input")
             if(flatPickrHtml){
-                flatPickrHtml.style.width = `${210}px`;
+                flatPickrHtml.style.width = `100%`;
                 flatPickrHtml.style.border = `solid`;
-                flatPickrHtml.style.borderWidth = '0 0 2px 0';
+                flatPickrHtml.style.borderWidth = '0 0 1px 0';
                 flatPickrHtml.style.paddingLeft = '5px';
                 flatPickrHtml.style.cursor = "pointer !important";
                 // flatPickrHtml.setAttribute('readonly', "none")
@@ -113,7 +114,7 @@ export default {
         value() {
             this.d_value = new Date(this.value);
             if(this.$refs.flatPicker)
-                this.$refs.flatPicker.value = this.d_value;
+                this.$refs.flatPicker.value = moment(this.d_value).format("MMMM D, YYYY, h:mm A")
         },
         error(v, ov) {
             if(v && !ov)
@@ -163,11 +164,11 @@ export default {
 .datetime {
     min-height: inherit;
     height: inherit;
-    width: 210px;
     border: solid;
-    border-width: 0 0 2px 0;
+    border-width: 0 0 1px 0;
     padding-left: 5px;
     cursor: pointer;
+    width: 100%;
 }
 
 </style>

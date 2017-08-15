@@ -36,18 +36,6 @@ export default {
                         return true;
                     }
                 },
-                aboutMe: {
-                    type: "paragraph",
-                    validateFn(v) {
-                        if(!v || !v.length)
-                            return 'Too short'
-
-                        if(v.length < 3)
-                            return 'Too short'
-
-                        return true;
-                    }
-                },
                 last: String,
                 date: {
                     type: Date,
@@ -77,11 +65,24 @@ export default {
 
                         return true;
                     }
-                }
+                },
+                aboutMe: {
+                    type: "paragraph",
+                    validateFn(v) {
+                        if(!v || !v.length)
+                            return 'Too short'
+
+                        if(v.length < 3)
+                            return 'Too short'
+
+                        return true;
+                    }
+                },
             },
             model: {
                 first: "wolf",
-                date: new Date(1988, 0, 1)
+                date: new Date(1988, 0, 1),
+                aboutMe: "I am the maddest wolf"
             }
         }
     },

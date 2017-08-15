@@ -1,6 +1,6 @@
 <template>
     <div class="combobox">
-        <div class="select" ref="select" @click="$refs.popover.toggle()"  :style="ui.style">
+        <div class="select" ref="select" @click="$refs.popover.toggle()" :style="ui.style">
             <div>
                 <div :style="!d_value ? 'color:gray;display:inline-block;' : 'display:inline-block;'">
                     {{ d_value ? d_value : placeholder }}
@@ -72,7 +72,7 @@ export default {
             if(typeof style === 'string')
                 styleObj = style;
             else if(typeof style === 'object')
-                styleObj = { style: Object.assign(styleObj, style) }
+                styleObj = Object.assign(styleObj, style)
 
             return {
                 style: styleObj,
@@ -116,15 +116,22 @@ export default {
         position:relative;
         width: inherit;
         height: inherit;
+        min-height: 32px;
+        min-width: 32px;
     }
 
     .select {
-        border: solid 1px;
-        min-height: 32px;
-        min-width: 32px;
-        height: inherit;
         width: inherit;
-        color: black;
+        height: inherit;
+        min-width: inherit;
+        min-height: inherit;
+        color: inherit;
+        background: inherit;
+        font: inherit;
+
+        border: solid;
+        border-width: 0 0 1px 0;
+
         display: flex;
         flex-flow: column;
         justify-content: center;
@@ -133,7 +140,6 @@ export default {
         padding-left: 5px;
         padding-right: 5px;
         cursor: pointer;
-        background:white;
     }
 
     .option {

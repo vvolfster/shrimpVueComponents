@@ -38,7 +38,7 @@ export default {
 
 <style scoped>
 .title {
-    width: 200px;
+    width: 120px;
     font-size: 20px;
 }
 </style>
