@@ -118,6 +118,8 @@ export default {
         height: inherit;
         min-height: 32px;
         min-width: 32px;
+        background: white;
+        color: black;
     }
 
     .select {
