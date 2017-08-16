@@ -11,9 +11,11 @@
             {{ error }}
         </div>
         <popover ref='popover'>
-            <div>
-                Results...
-                <button v-for="(result, key) in results" :key="key">
+            <div class="results">
+                <div>
+                    Results...
+                </div>
+                <button v-for="(result, key) in results" :key="key" @click="chooseResult(result, key)">
                     <!-- show the search things -->
                     {{ showResult(result, key) }}
                 </button>
@@ -71,6 +73,7 @@ export default {
             d_search: "",
             results: {},
             error: null,
+            popoverAutoOpen: true,
         }
     },
     methods: {
@@ -94,8 +97,15 @@ export default {
             this.$emit('value', this.d_value);
         },
         updateResults() {
+            // console.log(`update results`)
             const searchTerm = this.d_search.toLowerCase()
             const searchArr = lodash.isArray(this.matchOn) ? this.matchOn : [this.matchOn]
+            if(!searchTerm) {
+                // console.log(`finish results`);
+                this.results = {};
+                return;
+            }
+
             this.results = lodash.reduce(this.dictionary, (a, v, k) => {
                 lodash.some(searchArr, (searchKey) => {
                     const val = lodash.get(v, searchKey);
@@ -112,6 +122,7 @@ export default {
 
                 return a;
             }, {})
+            // console.log(`finish results`);
             // console.log(lodash.keys(this.results).length, this.results);
         },
         showResult(v, k) {
@@ -137,11 +148,29 @@ export default {
                     str += `${val} `
             })
             return str || k;
+        },
+        chooseResult(v, k) {
+            this.popoverAutoOpen = false;
+            this.d_search = this.showResult(v, k);
+            if(this.$refs.input)
+                this.$refs.input.value = this.d_search;
+
+            this.d_value = { key: k, data: v }
+            this.$emit('value', this.d_value);
+            if(this.$refs.popover){
+                this.$refs.popover.close();
+            }
+
+            // weak sauce
+            const self = this;
+            this.$nextTick(() => {
+                self.popoverAutoOpen = true;
+            })
         }
     },
     watch: {
         value() {
-            this.d_value = this.value;
+            this.d_search = this.value;
             if(this.$refs.input)
                 this.$refs.input.value = this.value;
         },
@@ -155,10 +184,12 @@ export default {
         dictionary() {
             this.updateResults();
         },
-        results() {
+        results(v) {
             // when results change. we should just show the popover
-            if(this.$refs.popover && !this.$refs.popover.isOpen())
+            if(this.$refs.popover && !this.$refs.popover.isOpen() && lodash.keys(v).length && this.popoverAutoOpen){
+                console.log(`opened`)
                 this.$refs.popover.open();
+            }
         }
     },
     computed: {
@@ -210,6 +241,16 @@ export default {
 .line__error {
     color: red;
     font-size: 12px;
+}
+
+.results {
+    display: flex;
+    flex-flow: column;
+}
+
+button:hover {
+    color: white;
+    background: green;
 }
 
 </style>

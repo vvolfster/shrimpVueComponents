@@ -6,7 +6,7 @@
                 <textLine :value="ui.title" />
                 <combobox :options="['lesson', 'assignment']" placeholder="type" :value="ui.type"/>
             </div>
-            <textParagraph :value="ui.description" class='segment__description' :options="{ 'min-height': 69 }"/>
+            <textParagraph :value="ui.description" class='segment__description' :options="{ style: { 'min-height': '81px' } }"/>
         </div>
     </div>
 </template>
@@ -21,7 +21,7 @@ export default {
     components: {
         combobox, textParagraph, textLine
     },
-    props: ['id', 'value', 'fbRef', 'navFn'],
+    props: ['id', 'value'],
     data(){
         return{
         }

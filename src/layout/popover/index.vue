@@ -64,7 +64,9 @@ function create({ slot, slotParent, root, dismissFn, position }) {
             container.parentNode.removeChild(container);
         }
 
-        container.addEventListener('click', () => {
+        // container.style.cursor = 'none';
+        container.addEventListener('click', (e) => {
+            e.preventDefault();
             if(!container.isDismissed)
                 container.dismiss();
         })

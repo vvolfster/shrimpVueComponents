@@ -2,17 +2,33 @@
 EVENTS: opened, closed
 -->
 <template>
-    <div  @click="toggle()" >
-        <transition
-            @enter="enter"
-            @leave="leave"
-            :css="false"
-        >
-            <slot name="content" v-if="isOpen"></slot>
-        </transition>
+    <div>
+        <div v-if="direction === 'up'">
+            <transition
+                @enter="enter"
+                @leave="leave"
+                :css="false"
+                ref="content"
+            >
+                <slot name="content" v-if="isOpen"></slot>
+            </transition>
 
-        <div class="collapsibleHeader">
-            <slot name="heading"></slot>
+            <div class="collapsibleHeader" ref="header"  @click="toggle()">
+                <slot name="heading"></slot>
+            </div>
+        </div>
+        <div v-else>
+            <div class="collapsibleHeader" ref="header"  @click="toggle()">
+                <slot name="heading"></slot>
+            </div>
+            <transition
+                @enter="enter"
+                @leave="leave"
+                :css="false"
+                ref="content"
+            >
+                <slot name="content" v-if="isOpen"></slot>
+            </transition>
         </div>
     </div>
 </template>
@@ -33,6 +49,10 @@ EVENTS: opened, closed
             animated: {
                 type: Boolean,
                 default: true,
+            },
+            direction: {
+                type: String,
+                default: 'down'
             }
         },
         data() {
@@ -46,7 +66,7 @@ EVENTS: opened, closed
         watch: {
             open(v) {
                 this.isOpen = v;
-            }
+            },
         },
         methods: {
             toggle() {
@@ -65,8 +85,7 @@ EVENTS: opened, closed
                     self.$emit(`opened`);
                 }
                 if(this.animated)
-//                    Velocity(el, 'slideDown');
-                    finish();
+                    Velocity(el, 'slideDown');
                 else
                     finish();
             },
@@ -90,7 +109,7 @@ EVENTS: opened, closed
                 // },
                 // { complete: done })
             },
-        }
+        },
     }
 </script>
 

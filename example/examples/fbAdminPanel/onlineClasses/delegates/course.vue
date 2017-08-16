@@ -10,6 +10,22 @@
                     New
                 </button>
             </div>
+
+            <!-- this is the list of all existing roadmap sections -->
+            <collapsible v-for="(roadmap, idx) in ui.roadmap" :key="idx" class="roadmap__section">
+                <div slot="heading" class='roadmap__sectionHeader'>
+                    <div>
+                        #{{ idx }} {{ roadmap.title || 'Untitled' }}
+                    </div>
+                    <i class="fa fa-caret-down"></i>
+                </div>
+                <div slot="content" class="roadmap__sectionList">
+                    <div v-for="segment in roadmap.segments" :key="segment">
+                        <segment  :id="segment" :value="segments ? segments[segment] : null"/>
+                    </div>
+                </div>
+            </collapsible>
+            
         </div>
         <button class="savebtn" @click="save">
             <div v-if="!saving">
@@ -20,8 +36,9 @@
         </button>
 
         <modal ref="roadmapEntryModal" containerStyle="width:50vw;">
-            <roadmapEntry>
-            </roadmapEntry>
+            <roadmapEntry
+                :allSegments="segments"
+            />
         </modal>
 
     </div>
@@ -30,26 +47,39 @@
 <script>
 import lodash from 'lodash'
 import textLine from '@/input/textLine'
+import collapsible from '@/misc/collapsible'
 import textParagraph from '@/input/textParagraph'
 import modal from '@/layout/modal'
 import roadmapEntry from './components/roadmapEntry'
-// import fbase from '@/bigTools/firebaseAdminPanel/fbase'
+import segmentListener from './segmentListener'
+import segment from './segment'
 
 export default {
     props: ['id', 'value', 'fbRef', 'navFn'],
     components: {
-        textParagraph, textLine, modal, roadmapEntry
+        textParagraph, textLine, modal, roadmapEntry, segment, collapsible
     },
     data(){
         return{
             d_value: null,
             saving: false,
+            segments: null, // we need all segment data in order to add!
         }
     },
+    beforeDestroy() {
+        segmentListener.unsubscribe(this.updateSegments);
+    },
     mounted() {
-        this.valueChg();
+        const self = this;
+        self.valueChg();
+
+        segmentListener.subscribe(this.updateSegments);
     },
     methods: {
+        updateSegments(val) {
+            console.log(`update segments`, val);
+            this.segments = val;
+        },
         valueChg() {
             if(this.value)
                 this.d_value = lodash.cloneDeep(this.value);
@@ -95,7 +125,8 @@ export default {
                 title: meta ? meta.title : '',
                 description: meta ? meta.description : '',
                 img: value ? value.media : '',
-                type: value ? value.type : ''
+                type: value ? value.type : '',
+                roadmap: value && value.roadmap ? value.roadmap : null
             }
         }
     },
@@ -130,6 +161,7 @@ export default {
     background-color: seagreen;
     min-height: 44px;
     padding: 5px;
+    margin-bottom: 10px;
 }
 
 .roadmap__title {
@@ -170,6 +202,28 @@ export default {
 
 .inline {
     display: inline-block;
+}
+
+.roadmap__section {
+    border-width: 0 0 1px 0;
+    padding: 5px;
+}
+
+.roadmap__sectionHeader {
+    display: flex;
+    background: seagreen;
+    color: white;
+    padding: 5px;
+    border: solid 1px black;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.roadmap__sectionList{
+    padding: 5px;
+    padding-bottom: 20px;
+    border: solid 1px black;
+    border-top: none;
 }
 
 

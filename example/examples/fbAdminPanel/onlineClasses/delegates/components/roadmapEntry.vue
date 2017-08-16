@@ -1,25 +1,43 @@
 <template>
     <div>
-        <h4>Roadmap Entry</h4>
         <textLine @value="d_title = $event" placeholder="title" class="textLine"/>
-        <textLineAutoComplete 
-            :dictionary="allSegments"
-            display="meta.title"
-            :matchOn= "['meta.title','meta.description']"
-            class="textLine"
-            placeholder="add segment"
-        />
+        <div class='currentSegments'>
+            <div v-for="(segment, key, idx) in d_segments" :key="key" class='segment'>
+                <div>
+                    #{{ idx }} {{ segment.meta.title }}
+                </div>
+                <button class='btn--delete'>
+                    <i class='fa fa-trash'></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="segInputArea">
+            <div>
+                <i class="fa fa-search"></i>
+                <textLineAutoComplete 
+                    :dictionary="allSegments"
+                    display="meta.title"
+                    :matchOn= "['meta.title','meta.description']"
+                    placeholder="add existing..."
+                    @value="addSegment"
+                    class="textLine"
+                    style="display:inline-block;"
+                />
+            </div>
+            <button class='btn--create'>
+                Create New Segment
+            </button>
+        </div>
+        
     </div>
 </template>
 
 <script>
-    import lodash from 'lodash'
-    import fbase from '@/bigTools/firebaseAdminPanel/fbase'
     import textLine from '@/input/textLine'
     import textLineAutoComplete from '@/input/textLineAutoComplete'
-    import textParagraph from '@/input/textParagraph'
-    import popover from "@/layout/popover"
-
+    import Vue from 'vue'
+    
     export default {
         props: {
             title: {
@@ -31,6 +49,12 @@
                 default() {
                     return {}
                 }
+            },
+            allSegments: {
+                type: Object,
+                default() {
+                    return {}
+                }
             }
         },
         data() {
@@ -38,28 +62,19 @@
                 d_title: "",
                 d_search: "",
                 d_segments: {},
-                results: {},
-                allSegments: {}
             }
         },
         mounted() {
-            const self = this;
             this.d_title = this.title;
             this.d_segments = this.segments;
-
-            const db = lodash.get(fbase.getState(), "appVars.database");
-            if(!db)
-                return;
-
-            // create a hashing algorithm on the firebase side for this.
-            // firebase is pretty !!#$#% stupid for not even having start at queries.
-            db.ref('segments').once('value')
-            .then((snap) => {
-                self.allSegments = snap.val();
-            })
+        },
+        methods: {
+            addSegment(segObj) {
+                Vue.set(this.d_segments, segObj.key, segObj.data);
+            }
         },
         components: {
-            textLine, textParagraph, popover, textLineAutoComplete
+            textLine, textLineAutoComplete
         },
         watch: {
             title() {
@@ -75,22 +90,38 @@
 <style scoped>
     .textLine {
         font-size: 20px;
+        text-align: center;
     }
 
-    button {
-        display: block;
+    .currentSegments {
+        display: flex;
+        flex-flow: row;
+    }
+
+    .segment {
         font-size: 20px;
+        display: flex;
+        justify-content: space-between;
+        border: solid 1px;
+        width: 100%;
+        align-items: center;
     }
 
-    button:hover {
-        background: blue;
+    .segInputArea {
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .btn--create {
+        background: green;
         color: white;
     }
 
-    .searchResults {
-        display: flex;
-        flex-flow: column;
-        border: solid 1px black;
-        width: 100%;
+    .btn--delete {
+        background: red;
+        color: white;
     }
+
 </style>

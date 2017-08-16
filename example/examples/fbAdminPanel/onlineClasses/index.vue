@@ -11,7 +11,6 @@
 <script>
 // import lodash from 'lodash'
 import fbAdminPanel from '@/bigTools/firebaseAdminPanel'
-import segmentDelegate from './delegates/segment'
 import courseDelegate from './delegates/course'
 
 export default {
@@ -32,54 +31,9 @@ export default {
             defaultTable: 'courses',
             tableConfig: {
                 pageSize: 25,
-                users: {
-                    columnOrder: ["first", "last", "age", "address"],
-                    add: [
-                        {
-                            description: "First and Last",
-                            fields: {
-                                first: "String",
-                                last: "String"
-                            }
-                        },
-                        {
-                            title: "Age and Gender",
-                            fields: {
-                                age: "Number",
-                                gender: {
-                                    type: "combo",
-                                    options: ["Male", "Female", "Other"]
-                                }
-                            }
-                        },
-                        {
-                            title: "Address",
-                            fields: {
-                                address: "String",
-                                city: "String",
-                                state: "String",
-                                zip: "Number"
-                            }
-                        }
-                    ],
-                    // fields: {
-                    //     siblings: {
-                    //         linksTo: 'data',
-                    //         render(v) {
-                    //             return v.name;
-                    //         }
-                    //     }
-                    // },
-                    noDelete: true,
-                },
                 courses: {
                     storageKey: "storage",
                     delegateComponent: courseDelegate,
-                },
-                segments: {
-                    storageKey: "storage",
-                    delegateComponent: segmentDelegate,
-                    noDelete: true,
                 },
             }
         }
