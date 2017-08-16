@@ -82,7 +82,7 @@ export default {
                 flatPickrHtml.style.border = `solid`;
                 flatPickrHtml.style.borderWidth = '0 0 1px 0';
                 flatPickrHtml.style.paddingLeft = '5px';
-                flatPickrHtml.style.cursor = "pointer !important";
+                flatPickrHtml.style.setProperty("cursor", "pointer", "important");
                 // flatPickrHtml.setAttribute('readonly', "none")
             }
         },
@@ -168,7 +168,7 @@ export default {
     text-align: inherit;
     border-width: 0 0 1px 0;
     padding-left: 5px;
-    cursor: pointer;
+    cursor: pointer !important;
     width: 100%;
 }
 
