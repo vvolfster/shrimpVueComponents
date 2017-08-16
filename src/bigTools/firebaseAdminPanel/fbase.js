@@ -194,6 +194,9 @@ export default {
             return !state.app ? cleanup() : state.app.delete().then(cleanup).catch(reject);
         })
     },
+    getState() {
+        return state;
+    },
     getTableKeys(name) {
         return new Promise((resolve, reject) => {
             const url = `${functions.dbUrl()}${name}`

@@ -3,7 +3,13 @@
         <textLine :value="ui.title" class="title" placeholder="title" @value="d_value.meta.title = $event"/>
         <textParagraph :value="ui.description" class="description" placeholder="description" @value="d_value.meta.description = $event"/>
         <div class="roadmap">
-            <div class="roadmap__title">Roadmap</div>
+            <div class="roadmap__header" style="position:relative;">
+                <div class="roadmap__title">Roadmap</div>
+                <button @click="$refs.roadmapEntryModal.open()" class="roadmap__btn" style="margin-left:20px;">
+                    <i class="fa fa-plus"></i>
+                    New
+                </button>
+            </div>
         </div>
         <button class="savebtn" @click="save">
             <div v-if="!saving">
@@ -12,6 +18,12 @@
             </div>
             <i v-else class="savebtn--busy fa fa-circle-o-notch"></i>
         </button>
+
+        <modal ref="roadmapEntryModal" containerStyle="width:50vw;">
+            <roadmapEntry>
+            </roadmapEntry>
+        </modal>
+
     </div>
 </template>
 
@@ -19,12 +31,14 @@
 import lodash from 'lodash'
 import textLine from '@/input/textLine'
 import textParagraph from '@/input/textParagraph'
+import modal from '@/layout/modal'
+import roadmapEntry from './components/roadmapEntry'
 // import fbase from '@/bigTools/firebaseAdminPanel/fbase'
 
 export default {
     props: ['id', 'value', 'fbRef', 'navFn'],
     components: {
-        textParagraph, textLine
+        textParagraph, textLine, modal, roadmapEntry
     },
     data(){
         return{
@@ -109,11 +123,30 @@ export default {
     margin-top: 10px;
 }
 
+.roadmap__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: seagreen;
+    min-height: 44px;
+    padding: 5px;
+}
+
 .roadmap__title {
-    color: gray;
-    font-size: 14px;
+    color: white;
+    font-size: 20px;
     text-align: center;
 }
+
+.roadmap__btn {
+    color: white;
+    font-size: 14px;
+    border-width: 0 0 0 1px;
+    border-style: solid;
+    border-color: white;
+}
+
+
 
 .savebtn {
     position: absolute;
@@ -134,5 +167,11 @@ export default {
     font-size: 20px;
     min-width: 50px;
 }
+
+.inline {
+    display: inline-block;
+}
+
+
 
 </style>

@@ -10,7 +10,7 @@ import animator from "@/misc/animator"
 import shared from '../shared'
 import './modal.css'
 
-function create({ slot, slotParent, dismissFn, animation, animationDuration, position }) {
+function create({ slot, slotParent, dismissFn, animation, animationDuration, position, style }) {
     const slotEl = slot.$el || slot;
     // console.log(`animate ${animation}`)
 
@@ -34,6 +34,13 @@ function create({ slot, slotParent, dismissFn, animation, animationDuration, pos
         // newNode.style[`pointer-events`] = `none`;
         const relativePosNode = document.createElement('div');
         relativePosNode.className = "modalObjectWrapper"
+
+        if(typeof style === 'string') {
+            newNode.style = style;
+        }
+        else if(toString.call(style) === '[object Object]'){
+            lodash.assign(newNode.style, style);
+        }
 
         // put it in the DOM. don't forget to add the slot element
         newNode.appendChild(slotEl);
@@ -175,6 +182,7 @@ export default {
                 animation,
                 animationDuration,
                 position,
+                style: self.containerStyle
             })
 
             return this.instance;
