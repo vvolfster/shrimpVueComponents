@@ -3,30 +3,47 @@
         <img :src="ui.img" class="segment__img">
         <div class='segment__text'>
             <div class='segment__row'>
-                <textLine :value="ui.title" />
+                <div class="segment__title" @click="edit('title', ui.title)">
+                    {{ ui.title }}
+                </div>
                 <combobox :options="['lesson', 'assignment']" placeholder="type" :value="ui.type"/>
             </div>
-            <textParagraph :value="ui.description" class='segment__description' :options="{ style: { 'min-height': '81px' } }"/>
+            <div class='segment__description' @click="edit('description', ui.description)">
+                {{ ui.description }}
+            </div>
+            <!-- <textParagraph :value="ui.description"  :options="{ style: { 'min-height': '81px' } }"/> -->
         </div>
     </div>
 </template>
 
 <script>
+import { Dialog } from 'quasar-framework'
 import textLine from '@/input/textLine'
 import textParagraph from '@/input/textParagraph'
 import combobox from "@/input/combobox"
+import segmentsListener from './segmentListener'
 
 
 export default {
     components: {
         combobox, textParagraph, textLine
     },
-    props: ['id', 'value'],
+    props: ['id'],
     data(){
         return{
+            allSegments: null
         }
     },
+    mounted() {
+        segmentsListener.subscribe(this.updateSegments);
+    },
+    beforeDestroy() {
+        segmentsListener.unsubscribe(this.updateSegments);
+    },
     computed: {
+        value() {
+            return this.allSegments ? this.allSegments[this.id] : null;
+        },
         ui() {
             const self = this;
             const value = self.value ? self.value : null;
@@ -37,9 +54,38 @@ export default {
                 img: value ? value.media : '',
                 type: value ? value.type : ''
             }
-        }
+        },
     },
     methods: {
+        updateSegments(val) {
+            this.allSegments = val;
+        },
+        edit(property, currentValue) {
+            const formDict = {
+                title: 'textbox',
+                description: 'textarea'
+            }
+
+
+            Dialog.create({
+                title: property,
+                description: currentValue,
+                form: {
+                    [property]: {
+                        model: currentValue,
+                        type: formDict[property]
+                    },
+                    classes: 'wide',
+                },
+                buttons: [{
+                    label: 'Submit',
+                    handler(data) {
+                        const input = data[property];
+                        console.log(input);
+                    }
+                }]
+            })
+        }
     }
 }
 </script>
@@ -72,6 +118,10 @@ export default {
 
 .segment__description {
  
+}
+
+.wide {
+    width: 50vw;
 }
 
 </style>

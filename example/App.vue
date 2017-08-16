@@ -23,6 +23,7 @@ import fbAdminPanel from "./examples/fbAdminPanel/adminPanel"
 import onlineClasses from './examples/fbAdminPanel/onlineClasses'
 import toast from './examples/toast/toast'
 import modal from './examples/modal/modal'
+import dialogExample from './examples/dialog/dialogExample'
 import animator from './examples/animator/animator'
 
 export default {
@@ -30,7 +31,7 @@ export default {
     data() {
         return {
             myComponent: null,
-            examples: ["fbAdminPanel", "onlineClasses", "animator", "toast", "modal", "autoform"]
+            examples: ["fbAdminPanel", "onlineClasses", "animator", "toast", "modal", "autoform", "dialogExample"]
         }
     },
     components: {
@@ -40,6 +41,7 @@ export default {
         animator,
         toast,
         modal,
+        dialogExample,
         autoform
     },
 };
