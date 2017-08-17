@@ -47,7 +47,7 @@
         </div>
         
         
-        <q-modal ref="magicModal" position="bottom">
+        <modal ref="magicModal" position="down">
             <div class="magicModal">
                 <!-- actions -->
                 <div class="magicModal__actions" v-if="typeof actions === 'object' && Object.keys(actions).length">
@@ -65,21 +65,20 @@
                     </div>
                 </tabView>
             </div>
-        </q-modal>
+        </modal>
 
-        <q-modal ref="busyModal">
+        <modal ref="busyModal">
             <div class="busyModal">
                 <i class="fa fa-circle-o-notch busyModal__icon"></i>
                 {{ busyMessage }}
             </div>
-        </q-modal>
+        </modal>
 
         <adder ref="adder" :steps="addSteps"/>
     </div>
 </template>
 
 <script>
-    import { Dialog } from 'quasar-framework'
     // import moment from 'moment'
     import lodash from 'lodash'
     import fbase from '../../fbase'
@@ -87,6 +86,10 @@
     import tabView from '../../../../layout/tabView'
     import tableView from './tableView'
     import adder from './adder'
+    import modal from '../../../../layout/modal'
+    import Dialog from '../../../../layout/dialog'
+    import collapsible from '../../../../misc/collapsible'
+    
 
     const functions = {
         getColumns(data, storageKey) {
@@ -129,7 +132,7 @@
     }
 
     export default {
-        components: { imageStorage, tabView, adder, tableView },
+        components: { imageStorage, tabView, adder, tableView, modal, collapsible },
         props: ["page", "tableConfig", "navFn"],
         computed: {
             actions() {
@@ -341,22 +344,20 @@
                             form: {
                                 value: {
                                     model: currentValue,
-                                    type: 'textbox',
+                                    type: String,
                                     label: field
                                 }
                             },
-                            buttons: [
-                                {
-                                    label: "Submit",
-                                    handler({ value }) {
-                                        ref.child(id).child(field).set(value)
-                                        .then(() => {
-                                            resolve();
-                                        })
-                                        .catch(reject);
-                                    }
+                            buttons: {
+                                Submit({ value }) {
+                                    ref.child(id).child(field).set(value)
+                                    .then(() => {
+                                        resolve();
+                                    })
+                                    .catch(reject);
                                 }
-                            ]
+                            },
+                            style: "min-width: 50vw;"
                         })
                     }).catch(reject);
                 })
