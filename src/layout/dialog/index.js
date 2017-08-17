@@ -1,6 +1,7 @@
 /* eslint-disable import/no-webpack-loader-syntax */
 // import lodash from 'lodash'
 import Vue from 'vue'
+import lodash from 'lodash'
 import shared from '../shared'
 import instance from './instance'
 import '../modal/modal.css'
@@ -13,11 +14,10 @@ function createContainer() {
 
     containerNode.id = containerId;
     containerNode.className = "modalContainer";
-    containerNode.innerHTML = `<instance id="${instanceId}" :params="params"/>`
+    containerNode.innerHTML = `<instance id="${instanceId}" :params="params" @close="dismiss"/>`
     containerNode.style.display = "flex";
     containerNode.style.alignItems = "center";
     containerNode.style.justifyContent = "center";
-
     frag.appendChild(containerNode);
     document.body.appendChild(frag);
     return {
@@ -30,43 +30,45 @@ function createContainer() {
 function create(params) {
     const retObj = createContainer();
     const container = retObj.container;
+    container.style.cursor = params.noDismiss ? 'not-allowed' : 'pointer';
+
     const instanceId = retObj.instanceId;
     const dialog = new Vue({
         el: `#${instanceId}`,
         methods: {
-            open() {
-                if(this.$refs.instance)
-                    this.$refs.instance.open();
+            dismiss() {
+                this.isDismissed = true;
+                lodash.each(this.dismissFns, (fn) => {
+                    if(typeof fn === 'function')
+                        fn();
+                })
+                this.$destroy();
             },
-            close() {
-                if(this.$refs.instance)
-                    this.$refs.instance.close();
+            onDismiss(fn) {
+                if(typeof fn === 'function')
+                    this.dismissFns.push(fn);
             }
         },
         destroyed() {
-            console.log('aaah i die')
             container.parentNode.removeChild(container);
         },
         data() {
             return {
-                params
+                params,
+                isDismissed: false,
+                dismissFns: [],
             }
-        },
-        mounted() {
-            this.open();
         },
         components: { instance }
     })
 
-    container.addEventListener('click', () => {
-        console.log(dialog.methods);
-        dialog.$destroy();
-    })
+    shared.dialogs.push(dialog);
 
-    // console.log(dialog);
-    // dialog.open();
+    if(!params.noDismiss)
+        container.addEventListener('click', dialog.dismiss);
 }
 
 export default {
-    create
+    create,
+    dismissAll: shared.dialogs.dismissAll
 };

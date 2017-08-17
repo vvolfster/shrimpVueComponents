@@ -78,7 +78,7 @@ export default {
     },
     methods: {
         updateSearchTerm(val) {
-            const v = lodash.get(val, "target.value") || val;
+            const v = val && val.target ? val.target.value : val;
             if(typeof v !== 'string')
                 return;
 
@@ -166,7 +166,16 @@ export default {
             this.$nextTick(() => {
                 self.popoverAutoOpen = true;
             })
-        }
+        },
+        getValue() {
+            return this.d_value;
+        },
+        isInError() {
+            return !!this.error
+        },
+        isEmpty() {
+            return !this.d_value;
+        },
     },
     watch: {
         value() {

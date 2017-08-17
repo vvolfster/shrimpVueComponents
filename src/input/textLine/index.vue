@@ -2,7 +2,7 @@
     <div class="line">
         <input class="line__input"
             ref="input"
-            @input="updateValue"  
+            @input="updateValue"
             :class="error ? 'line__input--error' : ''"
             :style="ui.style"
             :placeholder="placeholder"
@@ -14,7 +14,6 @@
 </template>
 
 <script>
-import lodash from 'lodash'
 import animator from '../../misc/animator'
 
 export default {
@@ -48,7 +47,7 @@ export default {
     },
     methods: {
         updateValue(val) {
-            const v = lodash.get(val, "target.value") || val;
+            const v = val && val.target ? val.target.value : val;
             if(typeof v !== 'string')
                 return;
 
@@ -62,6 +61,16 @@ export default {
             this.d_value = this.error === null ? v : '';
             this.$emit('input', this.d_value);
             this.$emit('value', this.d_value);
+        },
+        getValue() {
+            return this.d_value;
+        },
+        isInError() {
+            // console.log(`am i in error`, !!this.error);
+            return !!this.error
+        },
+        isEmpty() {
+            return !this.d_value;
         },
     },
     watch: {

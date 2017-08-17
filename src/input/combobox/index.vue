@@ -96,6 +96,15 @@ export default {
             if(this.$refs.popover)
                 this.$refs.popover.close();
         },
+        getValue() {
+            return this.d_value;
+        },
+        isInError() {
+            return !!this.error
+        },
+        isEmpty() {
+            return !this.d_value;
+        },
     },
     watch: {
         value() {

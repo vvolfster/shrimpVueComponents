@@ -3,7 +3,7 @@
         <div>{{ title }}</div>
         <div>{{ description }}</div>
         <div class="autoComponents" v-if="fields">
-            <div v-for="(field, name) in fields" :key="name">
+            <div v-for="(field, name) in fields" :key="name" style="position:relative;">
                 <div class="autoform--input">
                     <component :is="getComponent(field.type || field)" 
                         :validateFn="field && field.validateFn ? field.validateFn : null"
@@ -11,7 +11,11 @@
                         :placeholder="getFieldName(name)"
                         @value="setValue(name, $event)"
                         :options="field && field.options ? field.options : null"
+                        :ref="`formField_${name}`"
                     />
+                    <div class='requireOverlay' v-if="fieldIsMissing(name, field)">
+                            <i class='fa fa-asterisk'></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -19,7 +23,7 @@
 </template>
 
 <script>
-// import lodash from 'lodash'
+import lodash from 'lodash'
 import combobox from '../combobox'
 import date from '../date'
 import file from '../file'
@@ -120,6 +124,47 @@ export default {
         },
         getValue() {
             return this.d_model;
+        },
+        isValid() {
+            const self = this;
+            return lodash.every(this.fields, (type, name) => {
+                // console.log(lodash.keys(self.$refs), `formField__${name}`)
+                const component = lodash.get(self.$refs, `formField_${name}[0]`)
+                const required = lodash.get(type, 'required', false);
+                if(!component)
+                    return true;
+
+                if(component.isInError()){
+                    console.log(`${name} is in error`)
+                    return false;
+                }
+
+                if(required) {
+                    if(typeof component.isEmpty === 'function' && component.isEmpty()){
+                        console.log(`${name} is empty`)
+                        return false;
+                    }
+                    return component.getValue();
+                }
+
+                return true;
+            })
+        },
+        fieldIsMissing(name, type) {
+            if(!type || !type.required)
+                return false;
+
+            let cmp = this.$refs[`formField_${name}`];
+            if(!cmp)
+                return false;
+
+            cmp = cmp[0];
+            if(!cmp)
+                return false;
+
+            window[name] = cmp;
+
+            return typeof cmp.isEmpty === 'function' ? cmp.isEmpty() : cmp.getValue();
         }
     },
     watch: {
@@ -145,5 +190,15 @@ export default {
 .autoform--input {
     margin-bottom: 20px;
 }
+
+.requireOverlay {
+    position: absolute;
+    pointer-events: none;
+    top: 5px;
+    right: 0px;
+    font-size: 8px;
+    color: red;
+}
+
 
 </style>

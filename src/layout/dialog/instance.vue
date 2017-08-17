@@ -1,8 +1,13 @@
 <template>
-    <div class='modalObject column instanceRoot' :style="ui.style">
-        <h5>{{ ui.title }}</h5>
-        {{ ui.description }}
-
+    <div class='modalObject column instanceRoot' :style="ui.style" @click.stop.prevent="doNothing">
+        <div class="dialog__title">{{ ui.title }}</div>
+        <div class="dialog__description">{{ ui.description }}</div>
+        <autoform v-if="ui.form"
+            ref="form"
+            :fields="ui.formFields"
+            :model="ui.formModel"
+            @value="formVal = $event"
+        />
         <div class='buttonRow'>
             <button v-for="(button, name) in buttons" :key="name" @click="pressButton(name)">
                 {{ name }}
@@ -14,6 +19,7 @@
 <script>
 import '../modal/modal.css'
 import autoform from '../../input/autoform'
+import animator from '../../misc/animator'
 
 export default {
     components: { autoform },
@@ -29,10 +35,16 @@ export default {
             const title = params && params.title ? params.title : ''
             const description = params && params.description ? params.description : ''
             const style = params && params.style ? params.style : ''
+            const form = params && params.form ? params.form : null
+            const formFields = form ? (form.fields || form) : null;
+            const formModel = form && form.fields && form.model ? form.model : null;
             return {
                 title,
                 description,
-                style
+                style,
+                form,
+                formFields,
+                formModel
             }
         },
         buttons() {
@@ -42,31 +54,59 @@ export default {
     },
     methods: {
         close(){
-            this.$emit('closeMe')
+            this.$emit('close')
         },
         pressButton(name) {
             const buttons = this.buttons;
             const fn = buttons[name];
-            const formVal = null;
-
-            Promise.resolve(typeof fn === 'function' ? fn(formVal) : true).then(this.close);
-        }
+            const form = this.$refs.form;
+            const formVal = form ? form.getValue() : null;
+            const formIsValid = form ? form.isValid() : true;
+            if(typeof fn === 'function'){
+                if(formIsValid)
+                    Promise.resolve(fn(formVal)).then(this.close);
+                else
+                    animator.shake({ element: this.$el });
+            }
+            else {
+                this.close();
+            }
+        },
+        doNothing(){ /* this is just so we absorb the click */ }
     }
 }
 </script>
 
 <style scoped>
+.dialog__title {
+    font-size: 24px;
+}
+
+.dialog__description {
+    margin-top: 20px;
+}
+
 .instanceRoot {
     position: relative;
+    cursor: auto;
 }
 
 .column {
     display: flex;
     flex-flow: column;
     align-items: center;
+    justify-content: space-between;
     max-width: 80vw;
     max-height: 80vh;
     min-width: 25vw;
+}
+
+.buttonRow {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    width: 100%;
+    height: 50px;
 }
 
 button:hover {

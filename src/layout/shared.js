@@ -9,7 +9,7 @@ function generator(key) {
         dismissAll() {
             lodash.each(shared[key].stack, (obj, id) => {
                 obj.dismiss();
-                if(id in self.stack)
+                if(id in shared[key].stack)
                     delete shared[key].stack[id]
             })
         },

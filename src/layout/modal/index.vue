@@ -52,14 +52,14 @@ function create({ slot, slotParent, dismissFn, animation, animationDuration, pos
 
     function createModalLogic(container, modal) {
         container.isDismissed = false;
-        container.dissmissFns = []
+        container.dismissFns = []
         container.onDismiss = (fn) => {
             if(typeof fn === 'function')
-                container.dissmissFns.push(fn);
+                container.dismissFns.push(fn);
         }
         container.dismiss = () => {
             container.isDismissed = true;
-            lodash.each(container.dissmissFns, (fn) => {
+            lodash.each(container.dismissFns, (fn) => {
                 if(typeof fn === 'function')
                     fn();
             })

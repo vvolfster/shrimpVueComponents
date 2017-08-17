@@ -63,6 +63,12 @@ export default {
         getValue() {
             return this.d_value;
         },
+        isInError() {
+            return !!this.error
+        },
+        isEmpty() {
+            return !this.d_value;
+        },
         initFlatPickr() {
             const self = this;
             const date = this.value ? new Date(this.value) : new Date();
@@ -94,7 +100,7 @@ export default {
         },
         updateValue(val) {
             // console.log(`this happened`);
-            const v = new Date(lodash.get(val, "target.value") || val);
+            const v = val && val.target ? new Date(val.target.value) : val;
             if(isNaN(v.getTime()))
                 return; // invalid date
 

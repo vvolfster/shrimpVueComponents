@@ -26,6 +26,7 @@ export default {
             fields: {
                 first: {
                     type: String,
+                    required: true,
                     validateFn(v) {
                         if(!v || !v.length)
                             return 'Too short'
@@ -39,6 +40,7 @@ export default {
                 last: String,
                 date: {
                     type: Date,
+                    required: true,
                     options: "datetime"
                 },
                 password: {

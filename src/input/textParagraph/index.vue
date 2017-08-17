@@ -15,7 +15,6 @@
 </template>
 
 <script>
-import lodash from 'lodash'
 import animator from '../../misc/animator'
 
 export default {
@@ -49,7 +48,7 @@ export default {
     },
     methods: {
         updateValue(val) {
-            const v = lodash.get(val, "target.value") || val;
+            const v = val && val.target ? val.target.value : val;
             if(typeof v !== 'string')
                 return;
 
@@ -67,6 +66,15 @@ export default {
             this.$emit('input', this.d_value);
             this.$emit('value', this.d_value);
         },
+        isEmpty() {
+            return !this.d_value;
+        },
+        getValue() {
+            return this.d_value;
+        },
+        isInError() {
+            return !!this.error
+        }
     },
     watch: {
         value() {
