@@ -17,16 +17,15 @@
 </template>
 
 <script>
-import { Dialog } from 'quasar-framework'
-import textLine from '@/input/textLine'
-import textParagraph from '@/input/textParagraph'
+import lodash from 'lodash'
+import Dialog from '@/layout/dialog'
+import fbase from '@/bigTools/firebaseAdminPanel/fbase'
 import combobox from "@/input/combobox"
 import segmentsListener from './segmentListener'
 
-
 export default {
     components: {
-        combobox, textParagraph, textLine
+        combobox
     },
     props: ['id'],
     data(){
@@ -61,29 +60,48 @@ export default {
             this.allSegments = val;
         },
         edit(property, currentValue) {
-            const formDict = {
-                title: 'textbox',
-                description: 'textarea'
+            const dict = {
+                title: {
+                    type: String,
+                    firebaseLocation: 'meta/title'
+                },
+                description: {
+                    type: 'paragraph',
+                    firebaseLocation: 'meta/description',
+                    style: 'min-width: 90vw;',
+                    options: {
+                        style: 'min-height: 10vh; max-height: 50vh;'
+                    }
+                }
             }
 
-
+            const self = this;
             Dialog.create({
                 title: property,
-                description: currentValue,
                 form: {
                     [property]: {
                         model: currentValue,
-                        type: formDict[property]
+                        type: lodash.get(dict, `${property}.type`, String),
+                        options: lodash.get(dict, `${property}.options`, null),
                     },
-                    classes: 'wide',
                 },
-                buttons: [{
-                    label: 'Submit',
-                    handler(data) {
-                        const input = data[property];
-                        console.log(input);
+                buttons: {
+                    Submit(data) {
+                        const id = self.id;
+                        return new Promise((resolve, reject) => {
+                            fbase.getTableRef('segments').then((ref) => {
+                                const path = lodash.get(dict, `${property}.firebaseLocation`, String)
+                                if(!path)
+                                    return reject('no such path');
+
+                                return ref.child(id).child(path).set(data[property])
+                                       .then(resolve)
+                                       .catch(reject);
+                            })
+                        })
                     }
-                }]
+                },
+                style: lodash.get(dict, `${property}.style`, String)
             })
         }
     }
@@ -118,10 +136,6 @@ export default {
 
 .segment__description {
  
-}
-
-.wide {
-    width: 50vw;
 }
 
 </style>

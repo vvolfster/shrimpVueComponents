@@ -13,7 +13,12 @@ function startListening() {
     fbase.getTableRef('segments').then((ref) => {
         ref.on('value', (snap) => {
             segments = snap.val();
-            lodash.each(subscribedFns, fn => fn(segments));
+            lodash.each(subscribedFns, (fn, k) => {
+                if(typeof fn === 'function')
+                    fn(segments)
+                else
+                    console.warn(`segmentListener::${k} is not a function`)
+            });
         })
     })
 }

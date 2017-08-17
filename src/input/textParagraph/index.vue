@@ -45,6 +45,11 @@ export default {
     mounted() {
         this.d_value = this.value;
         this.$refs.input.value = this.value;
+        if(this.value) {
+            const lines = 1 + (this.value.match(/\n/g) || []).length;
+            this.$refs.input.rows = lines;
+            // console.log(`rows ${lines}`)
+        }
     },
     methods: {
         updateValue(val) {
@@ -102,6 +107,7 @@ export default {
             }
             if(typeof style === 'string')
                 return { style }
+
             if(typeof style === 'object')
                 return { style: Object.assign(defStyleObj, style) }
 

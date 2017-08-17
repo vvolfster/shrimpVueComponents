@@ -77,7 +77,6 @@ export default {
     },
     methods: {
         updateSegments(val) {
-            console.log(`update segments`, val);
             this.segments = val;
         },
         valueChg() {

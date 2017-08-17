@@ -4,6 +4,7 @@
         <button @click="open('simple')">Open Simple</button>
         <button @click="open('simpleNonClosing')">Open No Dismiss</button>
         <button @click="open('form')">Open Form</button>
+        <button @click="open('formWithModel')">Open Form With Model</button>
     </div>
 </template>
 
@@ -46,6 +47,43 @@ export default {
                     },
                     age: {
                         type: Number,
+                        required: true,
+                        validator(s) {
+                            if(s < 0)
+                                return "No benji buttons allowed"
+                            return true;
+                        }
+                    }
+                },
+                buttons: {
+                    cancel: true,
+                    submit(formVal) {
+                        Toast.positive(`${formVal.first} ${formVal.last} ${formVal.age}`)
+                    }
+                }
+            },
+            formWithModel: {
+                title: 'Form',
+                description: "This dialog contains a form",
+                form: {
+                    first: {
+                        type: String,
+                        required: true,
+                        model: "Shahan",
+                        validateFn(s) {
+                            if(s.length < 3)
+                                return "too short"
+                            return true;
+                        }
+                    },
+                    last: {
+                        model: "Kazi",
+                        type: String,
+                        required: true,
+                    },
+                    age: {
+                        type: Number,
+                        model: 29,
                         required: true,
                         validator(s) {
                             if(s < 0)
