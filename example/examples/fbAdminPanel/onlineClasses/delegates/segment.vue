@@ -68,7 +68,6 @@ export default {
             return {
                 title: meta ? meta.title : '',
                 description: meta ? meta.description : '',
-                img: value ? value.media : '',
                 type: value ? value.type : ''
             }
         },
