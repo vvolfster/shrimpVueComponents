@@ -71,7 +71,8 @@ export default {
             return !!this.error
         },
         isEmpty() {
-            return isNaN(this.d_value);
+            const ref = this.$refs.input;
+            return isNaN(this.d_value) || this.d_value === '' || (ref && ref.value === '');
         },
     },
     watch: {

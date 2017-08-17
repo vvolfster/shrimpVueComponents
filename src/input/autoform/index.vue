@@ -6,7 +6,7 @@
             <div v-for="(field, name) in fields" :key="name" style="position:relative;">
                 <div class="autoform--input">
                     <component :is="getComponent(field.type || field)" 
-                        :validateFn="field && field.validateFn ? field.validateFn : null"
+                        :validateFn="field && field.validateFn ? field.validateFn : field.validator ? field.validator : null"
                         :value="d_model && d_model[name] ? d_model[name] : null"
                         :placeholder="getFieldName(name)"
                         @value="setValue(name, $event)"
