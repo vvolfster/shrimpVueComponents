@@ -19,8 +19,8 @@
                     </div>
                     <i class="fa fa-caret-down"></i>
                 </div>
-                <div slot="content" class="roadmap__sectionList">
-                    <div v-for="segment in roadmap.segments" :key="segment">
+                <div slot="content" class="roadmap__segmentList">
+                    <div v-for="segment in roadmap.segments" :key="segment" class="roadmap__segment">
                         <segment  :id="segment" :value="segments ? segments[segment] : null"/>
                     </div>
                 </div>
@@ -218,11 +218,19 @@ export default {
     align-items: center;
 }
 
-.roadmap__sectionList{
+.roadmap__segmentList{
     padding: 5px;
     padding-bottom: 20px;
     border: solid 1px black;
     border-top: none;
+}
+
+.roadmap__segment {
+    border-width: 0 0 1px 0;
+    border-color: gray;
+    border-style: solid;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 

@@ -1,14 +1,18 @@
 <template>
     <div class="segmentRoot">
-        <img :src="ui.img" class="segment__img">
+        <div class="segment__img">
+            <img :src="ui.img" style="width:100%;height:100%;" class="hoverable" @click="edit('media', ui.img)">
+        </div>
         <div class='segment__text'>
-            <div class='segment__row'>
-                <div class="segment__title" @click="edit('title', ui.title)">
+            <div class='segment__header'>
+                <div class="hoverable" @click="edit('title', ui.title)">
                     {{ ui.title }}
                 </div>
-                <combobox :options="['lesson', 'assignment']" placeholder="type" :value="ui.type"/>
+                <div class="hoverable" @click="edit('type', ui.type)">
+                    {{ ui.type }}
+                </div>
             </div>
-            <div class='segment__description' @click="edit('description', ui.description)">
+            <div class='segment__description hoverable' @click="edit('description', ui.description)">
                 {{ ui.description }}
             </div>
             <!-- <textParagraph :value="ui.description"  :options="{ style: { 'min-height': '81px' } }"/> -->
@@ -20,13 +24,9 @@
 import lodash from 'lodash'
 import Dialog from '@/layout/dialog'
 import fbase from '@/bigTools/firebaseAdminPanel/fbase'
-import combobox from "@/input/combobox"
 import segmentsListener from './segmentListener'
 
 export default {
-    components: {
-        combobox
-    },
     props: ['id'],
     data(){
         return{
@@ -72,6 +72,16 @@ export default {
                     options: {
                         style: 'min-height: 10vh; max-height: 50vh;'
                     }
+                },
+                type: {
+                    type: 'combo',
+                    firebaseLocation: 'type',
+                    options: ['assignment', 'lesson']
+                },
+                media: {
+                    type: 'text',
+                    style: 'min-width: 90vw;',
+                    firebaseLocation: 'media'
                 }
             }
 
@@ -90,7 +100,7 @@ export default {
                         const id = self.id;
                         return new Promise((resolve, reject) => {
                             fbase.getTableRef('segments').then((ref) => {
-                                const path = lodash.get(dict, `${property}.firebaseLocation`, String)
+                                const path = lodash.get(dict, `${property}.firebaseLocation`)
                                 if(!path)
                                     return reject('no such path');
 
@@ -115,8 +125,13 @@ export default {
 }
 
 .segment__img {
-    width: 128px;
+    flex: 0 0 128px;
     height: 128px;
+    justify-content: center;
+    border-style: solid;
+    border-width: 0 1px 0 0;
+    border-color: black;
+    padding-right: 10px;
 }
 
 .segment__text {
@@ -128,14 +143,20 @@ export default {
     margin-right: 5px;
 }
 
-.segment__row {
+.segment__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-style: solid;
+    border-width: 0 0 1px 0;
+    margin-bottom: 10px;
+    font-size: 24px;
 }
 
-.segment__description {
- 
+.hoverable:hover {
+    cursor: pointer;
+    background: seagreen;
+    color: white;
 }
 
 </style>

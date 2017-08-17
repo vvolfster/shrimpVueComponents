@@ -25,13 +25,14 @@ import toast from './examples/toast/toast'
 import modal from './examples/modal/modal'
 import dialogExample from './examples/dialog/dialogExample'
 import animator from './examples/animator/animator'
+import fileExample from './examples/file/file'
 
 export default {
     name: 'app',
     data() {
         return {
             myComponent: null,
-            examples: ["fbAdminPanel", "onlineClasses", "animator", "toast", "modal", "autoform", "dialogExample"]
+            examples: ["fbAdminPanel", "onlineClasses", "animator", "toast", "modal", "autoform", "dialogExample", "fileExample"]
         }
     },
     components: {
@@ -42,7 +43,8 @@ export default {
         toast,
         modal,
         dialogExample,
-        autoform
+        autoform,
+        fileExample
     },
 };
 </script>

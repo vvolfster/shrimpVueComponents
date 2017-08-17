@@ -28,7 +28,6 @@ import lodash from 'lodash'
 import combobox from '../combobox'
 import date from '../date'
 import file from '../file'
-import fileMulti from '../fileMulti'
 import number from '../number'
 import textLine from '../textLine'
 import textParagraph from '../textParagraph'
@@ -75,7 +74,7 @@ export default {
             d_model: null,
         }
     },
-    components: { combobox, date, file, fileMulti, number, textLine, textParagraph, textPassword },
+    components: { combobox, date, file, number, textLine, textParagraph, textPassword },
     methods: {
         getFieldName(name) {
             const field = this.fields[name]
@@ -97,7 +96,6 @@ export default {
                 case "combo": return "combobox";
                 case "date": return "date";
                 case "file": return "file";
-                case "fileMutli" : return "fileMutli";
                 case "number": return "number";
                 case "string": return "textLine";
                 case "paragraph": return "textParagraph";
