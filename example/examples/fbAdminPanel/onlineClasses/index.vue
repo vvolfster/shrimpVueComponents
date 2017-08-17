@@ -34,6 +34,12 @@ export default {
                 courses: {
                     storageKey: "storage",
                     delegateComponent: courseDelegate,
+                    header: {
+                        fn(v) {
+                            return v && v.meta && v.meta.title ? v.meta.title : 'untitled'
+                        },
+                        open: false,
+                    }
                 },
             }
         }

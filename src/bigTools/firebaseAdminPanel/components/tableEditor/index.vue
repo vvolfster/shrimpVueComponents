@@ -24,21 +24,28 @@
                     </button>
                 </div>
                 <div style="position:relative;margin-bottom:10px;" v-for="(entry, id, index) in pageData" :key="id">
-                    <div class="componentHeader">
-                        <div class="componentHeader__index">
-                            #{{ (page.idx * page.pageSize) + index + 1  }}
+                    <collapsible :open="header.openMode">
+                        <div class="componentHeader" slot="heading">
+                            <div class="componentHeader__index">
+                                #{{ (page.idx * page.pageSize) + index + 1  }}
+                            </div>
+                            <div v-if="typeof header.displayFn === 'function'">
+                                {{ header.displayFn(entry) }}
+                            </div>
+                            <div class="componentHeader__actions">
+                                <button class="btn btn--detail" @click="openDetailView(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
+                                <button v-if="!tableConfig.noDelete" class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></i></button>
+                            </div>
                         </div>
-                        <div class="componentHeader__actions">
-                            <button class="btn btn--detail" @click="openDetailView(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
-                            <button v-if="!tableConfig.noDelete" class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></i></button>
-                        </div>
-                    </div>
-                    <component :is="delegateComponent" 
-                        :id="id" 
-                        :value="entry" 
-                        :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"
-                        :navFn="navFn"
-                    />
+                        <component 
+                            :is="delegateComponent" 
+                            :id="id" 
+                            :value="entry" 
+                            :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"
+                            :navFn="navFn"
+                            slot="content"
+                        />
+                    </collapsible>
                 </div>
             </div>
         </div>
@@ -171,6 +178,47 @@
 
                 return self.tableConfig.delegateComponent || self.tableConfig.component || self.tableConfig.delegate || false;
             },
+            header() {
+                const tableConfig = this.tableConfig;
+                let displayFn = null;
+                let openMode = true;
+                if(!tableConfig || !tableConfig.header)
+                    return { displayFn, openMode }
+
+                const header = tableConfig.header;
+                if(typeof header === 'function'){
+                    displayFn = tableConfig.header;
+                    return { displayFn, openMode }
+                }
+
+                if(toString.call(header) === '[object Object]') {
+                    const fn = header.fn || header.displayFn || header.handler || header.display
+                    if(typeof fn === 'function')
+                        displayFn = fn;
+                    else if(typeof fn === 'string')
+                        displayFn = v => v[fn] || 'N/A'
+
+                    if(header.open !== undefined || header.openMode !== undefined || header.defaultOpen !== undefined)
+                        openMode = header.open || header.defaultOpen || header.openMode
+
+                    return { displayFn, openMode }
+                }
+
+                if(toString.call(header) === '[object Array]'){
+                    const fn = header[0];
+                    if(typeof fn === 'function')
+                        displayFn = fn;
+                    else if(typeof fn === 'string')
+                        displayFn = v => v[fn] || 'N/A'
+
+                    if(header[1] !== undefined)
+                        openMode = header[1]
+
+                    return { displayFn, openMode }
+                }
+
+                return { displayFn, openMode }
+            }
         },
         data() {
             return {
