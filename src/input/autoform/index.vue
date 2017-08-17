@@ -135,13 +135,13 @@ export default {
                     return true;
 
                 if(component.isInError()){
-                    console.log(`${name} is in error`)
+                    // console.log(`${name} is in error`)
                     return false;
                 }
 
                 if(required) {
                     if(typeof component.isEmpty === 'function' && component.isEmpty()){
-                        console.log(`${name} is empty`)
+                        // console.log(`${name} is empty`)
                         return false;
                     }
                     return component.getValue();

@@ -192,7 +192,7 @@ export default {
                 this.instance.dismiss();
         },
         keyHandler(e) {
-            console.log(`escape mofo`)
+            // console.log(`escape`)
             if(e.keyCode === 27)
                 this.close();
         }

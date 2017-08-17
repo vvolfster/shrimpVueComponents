@@ -196,7 +196,7 @@ export default {
         results(v) {
             // when results change. we should just show the popover
             if(this.$refs.popover && !this.$refs.popover.isOpen() && lodash.keys(v).length && this.popoverAutoOpen){
-                console.log(`opened`)
+                // console.log(`opened`)
                 this.$refs.popover.open();
             }
         }
