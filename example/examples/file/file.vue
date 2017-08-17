@@ -19,6 +19,11 @@
             Only 3 Jpg or Png. Duplicates allowed.
             <file :options="only3imgWithDupes"/>
         </div>
+
+        <div>
+            File in dialog
+            <button @click="open">Open</button>
+        </div>
         
 
     </div>
@@ -26,6 +31,7 @@
 
 <script>
 import file from '@/input/file'
+import Dialog from '@/layout/dialog'
 
 export default {
     data(){
@@ -44,9 +50,20 @@ export default {
             }
         }
     },
-    components: {
-        file
-    }
+    methods: {
+        open() {
+            Dialog.create({
+                title: "File in dialog",
+                form: {
+                    file: File
+                },
+                buttons: {
+                    Yes: true
+                }
+            })
+        }
+    },
+    components: { file }
 }
 </script>
 

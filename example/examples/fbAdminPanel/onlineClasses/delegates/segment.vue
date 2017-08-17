@@ -1,7 +1,7 @@
 <template>
     <div class="segmentRoot">
         <div class="segment__img">
-            <img :src="ui.img" style="width:100%;height:100%;" class="hoverable" @click="edit('media', ui.img)">
+            <img :src="url" style="width:100%;height:100%;" class="hoverable" @click="edit('media', ui.img)">
         </div>
         <div class='segment__text'>
             <div class='segment__header'>
@@ -26,15 +26,33 @@ import Dialog from '@/layout/dialog'
 import fbase from '@/bigTools/firebaseAdminPanel/fbase'
 import segmentsListener from './segmentListener'
 
+function getMediaUrl(media) {
+    return new Promise((resolve) => {
+        if(!media)
+            return resolve('');
+
+        if(media.startsWith('http://') || media.startsWith('https://'))
+            return resolve(media);
+
+        return fbase.getStorageUrl(media).then((url) => {
+            resolve(url);
+        }).catch(() => resolve(''))
+    })
+}
+
 export default {
     props: ['id'],
     data(){
         return{
-            allSegments: null
+            allSegments: null,
+            url: ''
         }
     },
     mounted() {
+        const self = this;
         segmentsListener.subscribe(this.updateSegments);
+        if(self.value && self.value.media)
+            getMediaUrl(self.value.media).then((url) => { self.url = url })
     },
     beforeDestroy() {
         segmentsListener.unsubscribe(this.updateSegments);
@@ -60,6 +78,8 @@ export default {
             this.allSegments = val;
         },
         edit(property, currentValue) {
+            const self = this;
+            const id = self.id;
             const dict = {
                 title: {
                     type: String,
@@ -84,35 +104,114 @@ export default {
                     firebaseLocation: 'media'
                 }
             }
+            function Submit(data) {
+                return new Promise((resolve, reject) => {
+                    // console.log(`submit heretic`, data[property], property);
+                    fbase.getTableRef('segments').then((ref) => {
+                        const path = lodash.get(dict, `${property}.firebaseLocation`)
+                        if(!path)
+                            return reject('no such path');
 
-            const self = this;
-            Dialog.create({
-                title: property,
-                form: {
-                    [property]: {
-                        model: currentValue,
-                        type: lodash.get(dict, `${property}.type`, String),
-                        options: lodash.get(dict, `${property}.options`, null),
+                        return ref.child(id).child(path).set(data[property])
+                            .then(resolve)
+                            .catch(reject);
+                    })
+                })
+            }
+
+            if(property !== 'media') {
+                Dialog.create({
+                    title: property,
+                    form: {
+                        [property]: {
+                            model: currentValue,
+                            type: lodash.get(dict, `${property}.type`, String),
+                            options: lodash.get(dict, `${property}.options`, null),
+                        },
                     },
-                },
-                buttons: {
-                    Submit(data) {
-                        const id = self.id;
-                        return new Promise((resolve, reject) => {
-                            fbase.getTableRef('segments').then((ref) => {
-                                const path = lodash.get(dict, `${property}.firebaseLocation`)
-                                if(!path)
-                                    return reject('no such path');
-
-                                return ref.child(id).child(path).set(data[property])
-                                       .then(resolve)
-                                       .catch(reject);
+                    buttons: { Submit },
+                    style: lodash.get(dict, `${property}.style`, String)
+                })
+            }
+            else {
+                Dialog.create({
+                    title: property,
+                    buttons: {
+                        url(){
+                            Dialog.create({
+                                title: property,
+                                form: {
+                                    media: {
+                                        type: String,
+                                        validator(v) {
+                                            if(!v.startsWith('http://') && !v.startsWith('https://'))
+                                                return "Not a valid url";
+                                            return true;
+                                        }
+                                    },
+                                },
+                                buttons: { Submit }
                             })
-                        })
+                        },
+                        fromDisk() {
+                            Dialog.create({
+                                title: property,
+                                form: {
+                                    files: {
+                                        type: File,
+                                        options: {
+                                            limit: 1,
+                                            filter: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/tga']
+                                        }
+                                    },
+                                },
+                                buttons: {
+                                    Submit({ files }) {
+                                        return new Promise((resolve, reject) => {
+                                            const file = files[0];
+                                            if(!file)
+                                                return reject('no file')
+
+                                            // console.log(file);
+                                            // return resolve(file);
+                                            const storagePath = `segments/${id}`
+                                            function uploadToStorage(){
+                                                return new Promise((resolve, reject) => {
+                                                    fbase.getStorageRef(storagePath).then((storageRef) => {
+                                                        storageRef.put(file).then(resolve).catch(reject);
+                                                    }).catch(reject);
+                                                })
+                                            }
+
+                                            function setInDb() {
+                                                return new Promise((resolve, reject) => {
+                                                    fbase.getTableRef(`segments`).then((ref) => {
+                                                        ref.child(id).child('media').set(storagePath)
+                                                        .then(resolve)
+                                                        .catch(reject);
+                                                    }).catch(reject);
+                                                })
+                                            }
+
+                                            return uploadToStorage().then(setInDb).then(resolve).catch(reject);
+                                        })
+                                    }
+                                }
+                            })
+                        }
                     }
-                },
-                style: lodash.get(dict, `${property}.style`, String)
-            })
+                })
+            }
+        }
+    },
+    watch: {
+        value: {
+            deep: true,
+            handler(v) {
+                const self = this;
+                if(v)
+                    getMediaUrl(v.media).then((url) => { self.url = url })
+            }
         }
     }
 }

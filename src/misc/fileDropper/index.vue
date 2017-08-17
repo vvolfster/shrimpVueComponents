@@ -7,8 +7,8 @@
             @submit="handleSubmit"
         >
             <div class="box__input">
-                <input ref="input" class="box__file" type="file" name="files[]" :id="generatedId" multiple :accept="extensions"/>
-                <label :for="generatedId" class="box__fileLabel">
+                <input ref="input" class="box__file" type="file" name="files[]" multiple :accept="extensions"/>
+                <label class="box__fileLabel" ref='label'>
                     <div class="box__inputContainer">
                         <i class="fa fa-plus box__inputIcon" v-show="!busy"></i>
                         <i class="fa fa-circle-o-notch box__inputIcon box__inputIcon--spinning" v-show="busy" @click.stop.prevent="doNothing"></i>
@@ -48,9 +48,6 @@ export default {
             type: String,
             default: "image/*"
         }
-    },
-    created() {
-        this.generatedId = idGen.getId();
     },
     data() {
         const dataObj = {
@@ -97,6 +94,10 @@ export default {
         const events = self.events;
         const listeners = self.eventListeners;
         const input = self.$refs.input;
+
+        this.generatedId = idGen.getId();
+        this.$refs.input.id = this.generatedId;
+        this.$refs.label.htmlFor = this.generatedId;
 
 
         events.all.forEach(eName => form.addEventListener(eName, listeners.preventDefault))

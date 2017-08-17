@@ -1,5 +1,5 @@
 <template>
-    <div class='modalObject column instanceRoot' :style="ui.style" @click.stop.prevent="doNothing">
+    <div class='modalObject column instanceRoot' :style="ui.style" @click.stop="doNothing">
         <div class="dialog__title">{{ ui.title }}</div>
         <div class="dialog__description">{{ ui.description }}</div>
         <autoform v-if="form.fields"

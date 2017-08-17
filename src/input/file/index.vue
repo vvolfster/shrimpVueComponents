@@ -11,7 +11,7 @@
         <div class="fileList">
             <div v-for="(file, idx ) in d_value" :key="idx" class="file">
                 <div class="fileName">
-                    {{ limit ? `${idx + 1}.` : `` }} {{ file.name }}
+                    {{ limit > 1 ? `${idx + 1}.` : `` }} {{ file.name }}
                 </div>
                 <button @click="removeFile(idx)"><i class='fa fa-trash'></i></button>
             </div>
@@ -181,7 +181,7 @@ export default {
         limit(){
             return this.options && typeof this.options.limit === 'number' && this.options.limit > 0 ? this.options.limit : null;
         }
-    }
+    },
 }
 </script>
 
