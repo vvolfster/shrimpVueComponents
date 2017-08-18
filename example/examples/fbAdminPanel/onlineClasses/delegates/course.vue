@@ -9,7 +9,7 @@
         <div class="roadmap">
             <div class="roadmap__header" style="position:relative;">
                 <div class="roadmap__title">Roadmap</div>
-                <button @click="$refs.roadmapEntryModal.open()" class="roadmap__btn" style="margin-left:20px;">
+                <button @click="addNew('roadmapEntry')" class="roadmap__btn" style="margin-left:20px;">
                     <i class="fa fa-plus"></i>
                     New
                 </button>
@@ -40,7 +40,6 @@ import collapsible from '@/misc/collapsible'
 import segmentListener from './segmentListener'
 import segment from './segment'
 
-
 export default {
     props: ['id', 'value', 'fbRef', 'navFn'],
     components: {
@@ -64,6 +63,54 @@ export default {
         updateSegments(val) {
             this.segments = val;
         },
+        edit(property, currentValue){
+            const ref = this.fbRef;
+            const dict = {
+                tite: {
+                    form: {
+                        type: String,
+                        validator(v) {
+                            if(v.length < 5)
+                                return "too short"
+                            return true;
+                        },
+                        model: currentValue        
+                    },
+                    firebaseLocation: 'title'
+                },
+                description: {
+                    form: {
+                        type: 'Paragraph',
+                        options: {
+                            style: 'min-width: 50vw;'
+                        },
+                        model: currentValue
+                    },
+                    firebaseLocation: 'description',
+                    style: 'min-width: 60vw;'
+                }
+            }
+
+            function Submit(data) {
+                return new Promise((resolve, reject) => {
+                    const val = data[property];
+                    const fbLocation = lodash.get(dict, `${property}.firebaseLocation`)
+                    if(!ref || !fbLocation)
+                        return reject('no firebase ref provided or no location')
+                    
+                    ref.child(fbLocation).set(val).then(resolve).catch(reject);
+                })
+            }
+
+            Dialog.create({
+                title: property,
+                form: lodash.get(dict, `${property}.form`),
+                buttons: { Submit }
+            })
+        },
+        addNew(type) {
+
+        }
     },
     computed: {
         ui() {
