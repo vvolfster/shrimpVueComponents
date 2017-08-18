@@ -21,7 +21,10 @@
                     <div>
                         #{{ idx }} {{ roadmap.title || 'Untitled' }}
                     </div>
-                    <i class="fa fa-caret-down"></i>
+                    <div>
+                        <button @click="addNew(`segment`, idx)"><i class="fa fa-plus"></i>New Section</button>
+                        <i class="fa fa-caret-down"></i>
+                    </div>
                 </div>
                 <div slot="content" class="roadmap__segmentList">
                     <div v-for="segment in roadmap.segments" :key="segment" class="roadmap__segment">
@@ -39,6 +42,92 @@ import Dialog from '@/layout/dialog'
 import collapsible from '@/misc/collapsible'
 import segmentListener from './segmentListener'
 import segment from './segment'
+
+function addNewSegment(roadmapIdx){
+    const self = this;
+    const selfRef = this.fbRef;
+    const rmapEntry = this.value.roadmap[roadmapIdx]
+    return new Promise((resolve, reject) => {
+        if(!rmapEntry)
+            return reject('invalid roadmap idx provided')
+
+        return Dialog.create({
+            onDismiss: reject,
+            title: "New segment",
+            form: {
+                title: {
+                    type: String,
+                    required: true,
+                },
+                description: "Paragraph",
+                media: File,
+                type: {
+                    type: "combo",
+                    required: true,
+                    options: ['assignment', 'lesson']
+                }
+            },
+            buttons: {
+                Submit(val) {
+                    return new Promise((resolve, reject) => {
+                        fbase.getTableRef('segments').then((ref) => {
+
+                            function getUniqueKey(){
+                                return ref.push(); // this is a promise in iself
+                            }
+
+                            function addMedia({ key }) {
+                                return new Promise((resolve, reject) => {
+                                    if(!val.media)
+                                        return resolve({ key });
+
+                                    fbase.getStorageRef(`segments/${key}`).then((storageRef) => {
+                                        storageRef.put(val.media).then(() => {
+                                            resolve({ key, media: `segments/${key}`})
+                                        }).catch(reject);
+                                    }).catch(reject);
+                                })
+                            }
+
+                            function addToSegmentsTable({ key, media }) {
+                                return new Promise((resolve, reject) => {
+                                    ref.child(key).set({
+                                        media,
+                                        type: val.type,
+                                        meta: {
+                                            title: val.title,
+                                            description: val.description
+                                        }
+                                    }).then(() => resolve(key)).catch(reject);
+                                })
+                            }
+
+                            function addSegmentToCourseRoadmap({ key }) {
+                                return new Promise((resolve, reject) => {
+                                    const newSegIdx = lodash.last(lodash.keys(rmapEntry.segments).sort()) + 1;
+                                    selfRef.child(`roadmap/${roadmapIdx}/segments/${newSegIdx}`).set(key).then(resolve).catch(reject);
+                                })
+                            }
+
+                            // do it all now
+                            getUniqueKey()
+                            .then(addMedia)
+                            .then(addToSegmentsTable)
+                            .then(addSegmentToCourseRoadmap)
+                            .then(resolve)
+                            .catch(reject);
+                        })
+                    })
+                }
+            }
+        })
+    })
+}
+
+function addExistingSegment(roadmapIdx){
+
+}
+
 
 export default {
     props: ['id', 'value', 'fbRef', 'navFn'],
@@ -108,8 +197,52 @@ export default {
                 buttons: { Submit }
             })
         },
-        addNew(type) {
+        addNew(type, idx) {
+            const self = this;
+            if(type === 'roadmapEntry'){
+                Dialog.create({
+                    title: type,
+                    form: {
+                        roadmapEntry: String
+                    },
+                    buttons: {
+                        Submit({ roadmapEntry}){
+                            // get current roadmap
+                            const keys = lodash.keys(ui.roadmap).sort();
+                            
+                            // find the max of all the keys, add 1 to it
+                            const newKey = lodash.last(keys) + 1;
+                            return new Promise((resolve, reject) => {
+                                const val = {
+                                    title: roadmapEntry,
+                                    segments: {}
+                                }
+                                if(!self.fbRef || isNan(newKey))
+                                    return reject('no ref or key is invalid')
 
+                                fbRef.child('roadmap').child(newKey).set(val).then(resolve).catch(reject);
+                            })
+                        }
+                    }
+                })
+            }
+            else if(type === 'segment'){
+
+                function newSegment() {
+                    return addNewSegment.apply(self, [idx])
+                }
+                function existingSegment() {
+                    return addExistingSegment.apply(self, [idx]);
+                }
+
+                Dialog.create({
+                    title: "Add segment",
+                    buttons: {
+                        Existing: existingSegment,
+                        New: newSegment
+                    }
+                })
+            }
         }
     },
     computed: {
