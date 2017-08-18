@@ -11,6 +11,7 @@
 <script>
 // import lodash from 'lodash'
 import fbAdminPanel from '@/bigTools/firebaseAdminPanel'
+import Dialog from '@/layout/dialog'
 import courseDelegate from './delegates/course'
 
 export default {
@@ -32,14 +33,51 @@ export default {
             tableConfig: {
                 pageSize: 25,
                 courses: {
-                    storageKey: "storage",
                     delegateComponent: courseDelegate,
                     header: {
                         fn(v) {
                             return v && v.meta && v.meta.title ? v.meta.title : 'untitled'
                         },
                         open: false,
-                    }
+                    },
+                    actions: {
+                        CreateClassroom(courseId, courseValue) {
+                            console.log(courseId, courseValue);
+                            Dialog.create({
+                                title: `Create a classroom for ${courseValue.meta.title}`,
+                                form: {
+                                    startDate: { type: Date, required: true },
+                                    endDate: { type: Date, required: true },
+                                    moderator: { type: String, required: true },
+                                },
+                                buttons: {
+                                    Submit({ startDate, endDate, moderator }) {
+                                        console.log(startDate, endDate, moderator);
+                                        // find moderator in users. if not, create a bad toast.
+
+                                        // create a master classroom object
+                                    }
+                                }
+                            })
+                        }
+                    },
+                    add: [
+                        {
+                            description: "Create new Course",
+                            fields: {
+                                'meta.title': {
+                                    label: "Title",
+                                    type: String,
+                                    required: true,
+                                },
+                                'meta.description': {
+                                    label: "Description",
+                                    type: "paragraph",
+                                    required: true,
+                                }
+                            }
+                        },
+                    ],
                 },
             }
         }

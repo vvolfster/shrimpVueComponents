@@ -2,12 +2,10 @@
     <div class='modalObject column instanceRoot' :style="ui.style" @click.stop="doNothing">
         <div class="dialog__title">{{ ui.title }}</div>
         <div class="dialog__description">{{ ui.description }}</div>
-        <autoform v-if="form.fields"
+        <autoform v-if="ui.form"
             ref="form"
-            :fields="form.fields"
-            :model="form.model"
+            :fields="ui.form"
             @value="formVal = $event"
-            class='form'
         />
         <div class='buttonRow'>
             <button v-for="(button, name) in buttons" :key="name" @click="pressButton(name)">
@@ -37,42 +35,13 @@ export default {
             const title = params && params.title ? params.title : ''
             const description = params && params.description ? params.description : ''
             const style = params && params.style ? params.style : ''
+            const form = params && params.form ? params.form : null
             return {
                 title,
                 description,
                 style,
+                form
             }
-        },
-        form() {
-            const params = this.params;
-            let fields = null;
-            let model = null;
-            if(!params || !params.form)
-                return { model, fields }
-
-            if(toString.call(params.form) === '[object Array]'){
-                fields = params.form[0] || null;
-                model = params.form[1] || null;
-                return { model, fields }
-            }
-
-            // the model might be embedded in the fields. so we better
-            // go thru it.
-            if(toString.call(params.form) === '[object Object]'){
-                fields = params.form;
-                Object.keys(fields).forEach((key) => {
-                    const f = fields[key];
-                    if(toString.call(f) === '[object Object]' && 'model' in f) {
-                        const modelValue =  f.model;
-                        if(!model)
-                            model = { [key]: modelValue }
-                        else
-                            model[key] = modelValue;
-                    }
-                })
-            }
-
-            return { fields, model }
         },
         buttons() {
             const params = this.params;
@@ -147,9 +116,7 @@ button:hover {
     color: white;
 }
 
-.form {
-    width: 95%;
-}
+
 
 
 </style>

@@ -65,9 +65,9 @@
                 </div>
 
                 <!-- tabView -->
-                <tabView headerScroll="scroll" headerPosition="left" class="magicModal__tabView">
-                    <imageStorage ref="imageStorage" slot="tab" name="Storage"/>
-                    <div ref="slotContainer" class="magicModal__slot" slot="tab" name="Custom">
+                <tabView headerScroll="scroll" headerPosition="left" class="magicModal__tabView" v-if="hasStorage || hasCustomSlot">
+                    <imageStorage ref="imageStorage" slot="tab" name="Storage" v-if="hasStorage"/>
+                    <div ref="slotContainer" class="magicModal__slot" slot="tab" name="Custom" v-if="hasCustomSlot">
                         <slot :name="page && page.name ? page.name : 'undefined'"/>
                     </div>
                 </tabView>
@@ -170,6 +170,12 @@
                 const hasSlot = self.$slots && self.$slots.length > 0;
                 const hasStorage = self.tableConfig && typeof self.tableConfig.storageKey === 'string' && self.tableConfig.storageKey !== ""
                 return hasActions || hasSlot || hasStorage || false;
+            },
+            hasStorage() {
+                return this.tableConfig && this.tableConfig.storageKey;
+            },
+            hasCustomSlot() {
+                return this.$slots && this.$slots.length;
             },
             delegateComponent() {
                 const self = this;
@@ -637,11 +643,11 @@
 }
 
 .magicModal__actions {
-    border-top: solid 1px lightgray;
+    border: none;
     display: flex;
     flex-flow: column;
     align-items: left;
-    flex: 0 0 10vw;
+    flex: 0 1 auto;
     padding-left: 10px;
     margin-right: 10px;
     overflow-y: auto;
@@ -662,8 +668,8 @@
 }
 
 .magicModal__button {
-    width: 8vw;
-    text-align: left;
+    min-width: 8vw;
+    padding: 10px;
 }
 
 .magicModal__tabView {

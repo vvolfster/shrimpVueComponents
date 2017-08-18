@@ -8,7 +8,7 @@
                     <component :is="getComponent(field.type || field)" 
                         :validateFn="field && typeof field.validateFn === 'function' ? field.validateFn : 
                                                                                        typeof field.validator === 'function' ? field.validator : null"
-                        :value="d_model && d_model[name] ? d_model[name] : null"
+                        :value="getFieldValue(name)"
                         :placeholder="getFieldName(name)"
                         @value="setValue(name, $event)"
                         :options="field && field.options ? field.options : null"
@@ -34,23 +34,14 @@ import textLineAutoComplete from '../textLineAutoComplete'
 import textParagraph from '../textParagraph'
 import textPassword from '../textPassword'
 
-function getDataModel(m, f){
+function getDataModel(f){
     const obj = {};
-    const seenKeys = {}
+    if(!f || toString.call(f) !== '[object Object]')
+        return obj;
 
-    // get the combined keys
-    const fKeys = f ? Object.keys(f) : [];
-    const mKeys = m ? Object.keys(m) : [];
-    const allKeys = fKeys.concat(mKeys);
-    allKeys.forEach((key) => {
-        if(seenKeys[key])
-            return;
-
-        seenKeys[key] = true;
-        const val = m && m[key] ? m[key] : "";
-        obj[key] = val;
+    lodash.each(f, (v, k) => {
+        lodash.set(obj, k, lodash.get(v, 'model', ''))
     })
-
     return obj;
 }
 
@@ -62,13 +53,9 @@ export default {
             type: [Object, null, undefined],
             default: null
         },
-        model: {
-            type: [Object, null, undefined],
-            default: null
-        }
     },
     mounted() {
-        this.d_model = getDataModel(this.model, this.fields);
+        this.d_model = getDataModel(this.fields);
     },
     data() {
         return {
@@ -89,6 +76,9 @@ export default {
                 return field.title;
 
             return name;
+        },
+        getFieldValue(name) {
+            return lodash.get(this.d_model, name, '');
         },
         getComponent(fieldType) {
             const f = typeof fieldType === 'string' ? fieldType.toLowerCase() : fieldType;
@@ -122,7 +112,7 @@ export default {
             if(!this.d_model)
                 return;
 
-            this.d_model[name] = value;
+            lodash.set(this.d_model, name, value);
             this.$emit('value', this.d_model);
         },
         getValue() {
@@ -172,10 +162,10 @@ export default {
     },
     watch: {
         model() {
-            this.d_model = getDataModel(this.model, this.fields);
+            this.d_model = getDataModel(this.fields);
         },
         fields() {
-            this.d_model = getDataModel(this.model, this.fields);
+            this.d_model = getDataModel(this.fields);
         }
     }
 }

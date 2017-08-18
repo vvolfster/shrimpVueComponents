@@ -27,8 +27,8 @@ export default {
             default: null
         },
         value: {
-            type: [Date, String],
-            default: ''
+            type: [Date, String, null],
+            default: null
         },
         placeholder: {
             type: String,
@@ -43,8 +43,11 @@ export default {
         }
     },
     mounted() {
-        this.d_value = new Date(this.value);
-        this.$refs.flatPicker.value = moment(this.d_value).format("MMMM D, YYYY, h:mm A")
+        const v = new Date(this.value);
+        if(!isNaN(v.getTime())){
+            this.d_value = v;
+            this.$refs.flatPicker.value = moment(v).format("MMMM D, YYYY, h:mm A")
+        }
     },
     data() {
         return {
@@ -72,10 +75,11 @@ export default {
         initFlatPickr() {
             const self = this;
             const date = this.value ? new Date(this.value) : new Date();
+            const type = this.options ? this.options.type : null;
             this.destroyFlatPickr();
             self.instance = flatpickr(self.$refs.flatPicker, {
                 defaultDate: date,
-                enableTime: self.type === 'datetime',
+                enableTime: type,
                 altInput: true,
             })
             this.d_value = date;
@@ -118,9 +122,12 @@ export default {
     },
     watch: {
         value() {
-            this.d_value = new Date(this.value);
-            if(this.$refs.flatPicker)
-                this.$refs.flatPicker.value = moment(this.d_value).format("MMMM D, YYYY, h:mm A")
+            const v = new Date(this.value);
+            if(!isNaN(v.getTime())){
+                this.d_value = v;
+                if(this.$refs.flatPicker)
+                    this.$refs.flatPicker.value = moment(v).format("MMMM D, YYYY, h:mm A")
+            }
         },
         error(v, ov) {
             if(v && !ov)

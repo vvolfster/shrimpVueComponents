@@ -10,7 +10,7 @@
                     :name="index < computedSteps.length - 1 ? index + 1 : 'finish'" 
                     :title="step.title"
                     :description="step.description"
-                    :fields="step.fields"
+                    :fields="step.fields || step.form"
                     @value="handleValue"
                 />
             </tabView>
@@ -56,17 +56,19 @@
                 })
             },
             createModel() {
-                this.model = lodash.reduce(this.steps, (a, { fields }) => {
+                this.model = lodash.reduce(this.steps, (a, val) => {
+                    const fields = val.fields || val.form;
                     lodash.each(fields, (field, fieldName) => {
-                        a[fieldName] = lodash.get(field, "default", "");
+                        lodash.set(a, fieldName, lodash.get(field, "model", ""))
                     })
                     return a;
                 }, {});
             },
             handleValue(v) {
-                if(v && this.model)
-                    Object.assign(this.model, v);
-            }
+                lodash.each(v, (value, key) => {
+                    lodash.set(this.model, key, value);
+                })
+            },
         },
         computed: {
             computedSteps() {

@@ -16,31 +16,33 @@
             </div>
 
             <!-- this is the list of all existing roadmap sections -->
-            <collapsible v-for="(roadmap, idx) in ui.roadmap" :key="idx" class="roadmap__section">
-                <div slot="heading" class='roadmap__sectionHeader'>
-                    <div>
-                        #{{ idx }} {{ roadmap.title || 'Untitled' }}
+            <div class="roadmap__sectionList">
+                <collapsible v-for="(roadmap, idx) in ui.roadmap" :key="idx" class="roadmap__section">
+                    <div slot="heading" class='roadmap__sectionHeader'>
+                        <div>
+                            #{{ idx }} {{ roadmap.title || 'Untitled' }}
+                        </div>
+                        <div class="leftDivider">
+                            <button @click.stop="remove(`roadmapEntry`, idx)" class="roadmap__sectionBtn roadmap__sectionBtn--delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="leftDivider">
-                        <button @click.stop="remove(`roadmapEntry`, idx)" class="roadmap__sectionBtn roadmap__sectionBtn--delete">
-                            <i class="fa fa-trash"></i>
+                    <div slot="content" class="roadmap__segmentList">
+                        <button @click.stop="addNew(`segment`, idx)" class="roadmap__sectionBtn">
+                            <i class="fa fa-plus"></i>
+                            Add Segment
                         </button>
+                        <div v-for="(segment, segIdx) in roadmap.segments" :key="segment" class="roadmap__segment">
+                            <segment  
+                                :id="segment" 
+                                :value="segments ? segments[segment] : null"
+                                @removeSegment="remove('segment', { roadmapIdx: idx, segmentIdx: segIdx })"
+                            />
+                        </div>
                     </div>
-                </div>
-                <div slot="content" class="roadmap__segmentList">
-                    <button @click.stop="addNew(`segment`, idx)" class="roadmap__sectionBtn">
-                        <i class="fa fa-plus"></i>
-                        Add Segment
-                    </button>
-                    <div v-for="(segment, segIdx) in roadmap.segments" :key="segment" class="roadmap__segment">
-                        <segment  
-                            :id="segment" 
-                            :value="segments ? segments[segment] : null"
-                            @removeSegment="remove('segment', { roadmapIdx: idx, segmentIdx: segIdx })"
-                        />
-                    </div>
-                </div>
-            </collapsible>
+                </collapsible>
+            </div>
         </div>
     </div>
 </template>
@@ -241,27 +243,30 @@ export default {
         edit(property, currentValue){
             const ref = this.fbRef;
             const dict = {
-                tite: {
+                title: {
                     form: {
-                        type: String,
-                        validator(v) {
-                            if(v.length < 5)
-                                return "too short"
-                            return true;
-                        },
-                        model: currentValue
+                        title: {
+                            type: String,
+                            validator(v) {
+                                if(v.length < 5)
+                                    return "too short"
+                                return true;
+                            },
+                            options: { style: 'min-width: 50vw;' },
+                            model: currentValue
+                        }
                     },
-                    firebaseLocation: 'title'
+                    firebaseLocation: 'meta/title'
                 },
                 description: {
                     form: {
-                        type: 'Paragraph',
-                        options: {
-                            style: 'min-width: 50vw;'
-                        },
-                        model: currentValue
+                        description: {
+                            type: 'Paragraph',
+                            options: { style: 'min-width: 50vw; min-height: 20vh;' },
+                            model: currentValue
+                        }
                     },
-                    firebaseLocation: 'description',
+                    firebaseLocation: 'meta/description',
                     style: 'min-width: 60vw;'
                 }
             }
@@ -277,6 +282,7 @@ export default {
                 })
             }
 
+            console.log(lodash.get(dict, `${property}.form`));
             Dialog.create({
                 title: property,
                 form: lodash.get(dict, `${property}.form`),
@@ -347,7 +353,7 @@ export default {
 
                 fbRef.child(`roadmap/${roadmapIdx}/segments/${segmentIdx}`).remove();
             }
-        }
+        },
     },
     computed: {
         ui() {
@@ -380,6 +386,7 @@ export default {
 
 .description {
     min-height: 69px;
+    white-space: pre-line;
 }
 
 .roadmap {
@@ -393,7 +400,7 @@ export default {
     background-color: seagreen;
     min-height: 44px;
     padding: 5px;
-    margin-bottom: 10px;
+    border: solid 1px black;
 }
 
 .roadmap__title {
@@ -411,34 +418,8 @@ export default {
 }
 
 
-
-.savebtn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    font-size: 14px;
-    border: solid 1px;
-    color: black;
-    background: lightblue;
-    min-width: 50px;
-}
-
-.savebtn--busy {
-    -webkit-animation:spin 1s linear infinite;
-    -moz-animation:spin 1s linear infinite;
-    animation:spin 1s linear infinite;
-    color: white;
-    font-size: 20px;
-    min-width: 50px;
-}
-
 .inline {
     display: inline-block;
-}
-
-.roadmap__section {
-    border-width: 0 0 1px 0;
-    padding: 5px;
 }
 
 .roadmap__sectionHeader {
@@ -450,6 +431,18 @@ export default {
     justify-content: space-between;
     align-items: center;
 }
+
+.roadmap__sectionList {
+    border-width: 0 1px 1px 1px;
+    border-color: black;
+    border-style: solid;
+}
+
+.roadmap__section {
+    border-width: 0 0 1px 0;
+    padding: 5px;
+}
+
 
 .roadmap__segmentList{
     padding: 5px;
@@ -479,6 +472,12 @@ export default {
     color: white;
     border-style: solid;
     padding-left: 10px;
+}
+
+.hoverable:hover {
+    background: seagreen;
+    color: white;
+    cursor: pointer;
 }
 
 </style>

@@ -1,12 +1,17 @@
 <template>
     <div>
-        <button @click="randomize()">RAND</button>
         <autoform
             :title="title"
             :description="description"
             :fields="fields"
-            :model="model"
+            @value="updateJSON"
         />
+        <br>
+        ---- JSON form value ----
+        <br>
+        <pre>
+            {{ json }}
+        </pre>
     </div>
 </template>
 
@@ -27,6 +32,7 @@ export default {
                 first: {
                     type: String,
                     required: true,
+                    model: "Wolf",
                     validateFn(v) {
                         if(!v || !v.length)
                             return 'Too short'
@@ -41,6 +47,7 @@ export default {
                 date: {
                     type: Date,
                     required: true,
+                    model: new Date(),
                     options: "datetime"
                 },
                 password: {
@@ -70,6 +77,7 @@ export default {
                 },
                 aboutMe: {
                     type: "paragraph",
+                    model: "I am the maddest wolf",
                     validateFn(v) {
                         if(!v || !v.length)
                             return 'Too short'
@@ -80,18 +88,17 @@ export default {
                         return true;
                     }
                 },
+                "embedded.field": {
+                    type: String,
+                    model: "This is an embedded field"
+                }
             },
-            model: {
-                first: "wolf",
-                date: new Date(1988, 0, 1),
-                aboutMe: "I am the maddest wolf"
-            }
+            json: ''
         }
     },
     methods: {
-        randomize() {
-            this.title = chance.first();
-            this.description = chance.paragraph();
+        updateJSON(v) {
+            this.json = JSON.stringify(v, null, 2);
         }
     }
 }

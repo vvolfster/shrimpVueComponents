@@ -1,7 +1,7 @@
 <template>
     <div class="segmentRoot">
-        <div class="segment__img">
-            <img :src="url" style="width:100%;height:100%;" class="hoverable" @click="edit('media', ui.img)">
+        <div class="segment__imgContainer">
+            <img :src="url" class="segment__img hoverable" @click="edit('media', ui.img)">
         </div>
         <div class='segment__text'>
             <div class='segment__header'>
@@ -223,16 +223,26 @@ export default {
 .segmentRoot {
     display: flex;
     margin-top: 10px;
+    align-items: stretch;
 }
 
-.segment__img {
+.segment__imgContainer {
     flex: 0 0 128px;
-    height: 128px;
-    justify-content: center;
     border-style: solid;
     border-width: 0 1px 0 0;
     border-color: black;
     padding-right: 10px;
+}
+
+.segment__img {
+    width:100%;
+    height:100%;
+    object-fit: cover;
+}
+
+.segment__description {
+    min-height: 69px;
+    white-space: pre-line;
 }
 
 .segment__text {
