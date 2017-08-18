@@ -120,6 +120,9 @@ export default {
             else
                 this.error = null;
 
+            if(this.error)
+                return;
+
             this.d_search = this.error === null ? v : '';
         },
         updateValue(val) {

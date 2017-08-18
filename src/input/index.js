@@ -1,4 +1,5 @@
 import autoform from './autoform'
+import boolean from './boolean'
 import combobox from './combobox'
 import date from './date'
 import file from './file'
@@ -11,6 +12,7 @@ import textPassword from './textPassword'
 
 export default {
     autoform,
+    boolean,
     combobox,
     date,
     file,

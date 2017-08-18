@@ -88,6 +88,9 @@ export default {
                         return true;
                     }
                 },
+                married: {
+                    type: Boolean
+                },
                 "embedded.field": {
                     type: String,
                     model: "This is an embedded field"

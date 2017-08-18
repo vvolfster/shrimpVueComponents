@@ -86,6 +86,9 @@ export default {
                     self.error = null;
                 }
 
+                if(self.error)
+                    return;
+
                 if(options.limit && self.d_value.length + v.length > options.limit) {
                     const pickAmt = options.limit - self.d_value.length;
                     const ignoredFiles = []

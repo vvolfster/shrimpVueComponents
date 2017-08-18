@@ -1,19 +1,17 @@
 <template>
-    <div class="line">
-        <input class="line__input"
-            ref="input"
-            @input="updateValue"
-            :class="error ? 'line__input--error' : ''"
-            :style="ui.style"
-            :placeholder="placeholder"
-        />
-        <div v-if="error !== null" class="line__error">
+    <div class="boolean">
+        <div class="boolean__input">
+            <div>{{ placeholder }}</div>
+            <i class="fa boolean__icon" :class="d_value ? 'fa-toggle-on' : 'fa-toggle-off'" @click="updateValue(d_value ? false : true)"/>
+        </div>
+        <div v-if="error !== null" class="boolean__error">
             {{ error }}
         </div>
     </div>
 </template>
 
 <script>
+/* eslint-disable no-unneeded-ternary */
 import animator from '../../misc/animator'
 
 export default {
@@ -23,7 +21,7 @@ export default {
             default: null
         },
         value: {
-            type: String,
+            type: [String, Boolean],
             default: ''
         },
         placeholder: {
@@ -42,15 +40,11 @@ export default {
         }
     },
     mounted() {
-        this.d_value = this.value;
-        this.$refs.input.value = this.value;
+        this.d_value = this.value ? true : false;
     },
     methods: {
         updateValue(val) {
-            const v = val && val.target ? val.target.value : val;
-            if(typeof v !== 'string')
-                return;
-
+            const v = val ? true : false;
             if(typeof this.validateFn === 'function') {
                 const err = this.validateFn(v);
                 this.error = typeof err === 'string' ? err : null;
@@ -73,14 +67,12 @@ export default {
             return !!this.error
         },
         isEmpty() {
-            return !this.d_value;
+            return false;
         },
     },
     watch: {
         value() {
-            this.d_value = this.value;
-            if(this.$refs.input)
-                this.$refs.input.value = this.value;
+            this.d_value = this.value ? true : false;
         },
         error(v, ov) {
             if(v && !ov)
@@ -108,34 +100,24 @@ export default {
 </script>
 
 <style scoped>
-.line {
+.boolean {
     position: relative;
 }
 
-.line__input {
-    border: solid;
-    border-width: 0 0 1px 0;
-    width: 100%;
-    height: 100%;
-    text-align: inherit;
-    font: inherit;
-    color: inherit;
-    background: inherit;
-    outline: none;
+.boolean__input {
+    display: flex;
+    align-items: center;
 }
-.line__input { border-width: 0 0 1px 0; }
-.line__input:hover { border-width: 0 0 1px 0; }
-.line__input:focus { border-width: 0 0 1px 0; }
-.line__input:focus:hover { border-width: 0 0 1px 0; }
 
-.line__input--error { border-color: red; }
-.line__input--error:hover { border-color: red; }
-.line__input--error:focus { border-color: red; }
-.line__input--error:focus:hover { border-color: red; }
-
-.line__error {
+.boolean__error {
     color: red;
     font-size: 12px;
+}
+
+.boolean__icon {
+    margin-left: 10px;
+    font-size: 20px;
+    cursor: pointer;
 }
 
 </style>

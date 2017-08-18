@@ -115,7 +115,10 @@ export default {
             else
                 this.error = null;
 
-            this.d_value = this.error === null ? v : '';
+            if(this.error)
+                return;
+
+            this.d_value = v;
             this.$emit('input', this.d_value);
             this.$emit('value', this.d_value);
         },

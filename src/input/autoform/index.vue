@@ -25,6 +25,7 @@
 
 <script>
 import lodash from 'lodash'
+import boolean from '../boolean'
 import combobox from '../combobox'
 import date from '../date'
 import file from '../file'
@@ -62,7 +63,7 @@ export default {
             d_model: null,
         }
     },
-    components: { combobox, date, file, number, textLine, textLineAutoComplete, textParagraph, textPassword },
+    components: { boolean, combobox, date, file, number, textLine, textLineAutoComplete, textParagraph, textPassword },
     methods: {
         getFieldName(name) {
             const field = this.fields[name]
@@ -83,6 +84,7 @@ export default {
         getComponent(fieldType) {
             const f = typeof fieldType === 'string' ? fieldType.toLowerCase() : fieldType;
             switch(f) {
+                case "boolean": return "boolean";
                 case "combobox": return "combobox";
                 case "combo": return "combobox";
                 case "date": return "date";
@@ -100,6 +102,7 @@ export default {
                 case "textparagraph": return "textParagraph";
                 case "textpassword": return "textPassword";
 
+                case Boolean: return "boolean";
                 case String: return "textLine";
                 case Number: return "number";
                 case Date: return "date";
