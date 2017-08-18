@@ -48,20 +48,7 @@ export default {
     components: {
         fileDropper
     },
-    props: {
-        value: {
-            type: [Array, File, null, undefined],
-            default: null,
-        },
-        validateFn: {
-            type: [Function, null],
-            default: null
-        },
-        options: {
-            type: [Object, null, undefined],
-            default: null
-        }
-    },
+    props: ['placeholder', 'value', 'validateFn', 'options'],
     data() {
         return {
             d_value: [],
