@@ -17,7 +17,7 @@
                 </div>
                 <button v-for="(result, key) in results" :key="key" @click="chooseResult(result, key)">
                     <!-- show the search things -->
-                    {{ showResult(result, key) }}
+                    {{ getDisplayValue(result, key) }}
                 </button>
             </div>
         </popover>
@@ -29,6 +29,38 @@ import lodash from 'lodash'
 import animator from '../../misc/animator'
 import popover from '../../layout/popover'
 
+// dictionary: {
+//     type: [Object, Array, null, undefined],
+//     default: null
+// },
+// matchOn: {
+//     type: [String, Array],
+//     default() {
+//         return []
+//     }
+// },
+// display: {
+//     type: [Function, Array, String, null, undefined],
+//     default: null
+// }
+function assureString(v) {
+    if(typeof v === 'string')
+        return v;
+    if(typeof v.toString === 'function'){
+        const vStr = v.toString();
+        if(typeof vStr === 'string')
+            return vStr;
+    }
+
+    try {
+        const stringified = JSON.stringify(v);
+        return stringified;
+    } catch(e) {
+        return 'Invalid String'
+    }
+}
+
+
 export default {
     components: {
         popover
@@ -39,8 +71,24 @@ export default {
             default: null
         },
         value: {
-            type: String,
-            default: ''
+            type: [String, Object],
+            default: '',
+            validator(v) {
+                if(typeof v === 'object'){
+                    if(toString.call(v) !== '[object Object]'){
+                        console.error('textLineAutoComplete.vue :: validation failed', v);
+                        return false;
+                    }
+
+                    const hasKey = 'key' in v;
+                    const hasData = 'data' in v;
+                    if(!hasKey || !hasData){
+                        console.error('textLineAutoComplete.vue :: validation failed', v);
+                        return false;
+                    }
+                }
+                return true;
+            }
         },
         placeholder: {
             type: String,
@@ -50,26 +98,9 @@ export default {
             type: [Object, null, undefined],
             default: null,
         },
-        dictionary: {
-            type: [Object, Array, null, undefined],
-            default() {
-                return {}
-            }
-        },
-        matchOn: {
-            type: [String, Array],
-            default() {
-                return {}
-            }
-        },
-        display: {
-            type: [Function, Array, String, null, undefined],
-            default: null
-        }
     },
     data() {
         return {
-            d_value: "",
             d_search: "",
             results: {},
             error: null,
@@ -92,21 +123,28 @@ export default {
             this.d_search = this.error === null ? v : '';
         },
         updateValue(val) {
-            this.d_value = val;
-            this.$emit('input', this.d_value);
-            this.$emit('value', this.d_value);
+            this.$emit('input', val);
+            this.$emit('value', val);
         },
         updateResults() {
             // console.log(`update results`)
             const searchTerm = this.d_search.toLowerCase()
-            const searchArr = lodash.isArray(this.matchOn) ? this.matchOn : [this.matchOn]
-            if(!searchTerm) {
+            const options = this.options;
+            const matchOn = lodash.get(options, "matchOn");
+            if(!matchOn) {
+                this.results = {};
+                return;
+            }
+
+            const searchArr = lodash.isArray(matchOn) ? matchOn : [matchOn];
+            const dictionary = lodash.get(options, "dictionary");
+            if(!searchTerm || !dictionary) {
                 // console.log(`finish results`);
                 this.results = {};
                 return;
             }
 
-            this.results = lodash.reduce(this.dictionary, (a, v, k) => {
+            this.results = lodash.reduce(dictionary, (a, v, k) => {
                 lodash.some(searchArr, (searchKey) => {
                     const val = lodash.get(v, searchKey);
                     if(typeof val === 'string' && val.toLowerCase().startsWith(searchTerm)) {
@@ -125,20 +163,26 @@ export default {
             // console.log(`finish results`);
             // console.log(lodash.keys(this.results).length, this.results);
         },
-        showResult(v, k) {
-            if(typeof this.display === 'function'){
-                return this.display(v, k) || k;
+        getDisplayValue(v, k) {
+            const display = lodash.get(this, 'options.display');
+
+            if(typeof display === 'function'){
+                return assureString(display(v, k)) || k;
             }
-            if(typeof this.display === 'string'){
-                const val = lodash.get(v, this.display);
-                return val || k;
+            if(typeof display === 'string'){
+                const val = lodash.get(v, display);
+                return assureString(val) || k;
             }
             let searchTerms = null;
-            if(lodash.isArray(this.display)) {
-                searchTerms = this.display;
+            if(lodash.isArray(display)) {
+                searchTerms = display;
             }
             else {
-                searchTerms = lodash.isArray(this.matchOn) ? this.matchOn : [this.matchOn];
+                const matchOn = lodash.get(this, 'options.matchOn');
+                if(!matchOn)
+                    return k;
+
+                searchTerms = lodash.isArray(matchOn) ? matchOn : [matchOn];
             }
 
             let str = '';
@@ -150,38 +194,41 @@ export default {
             return str || k;
         },
         chooseResult(v, k) {
-            this.popoverAutoOpen = false;
-            this.d_search = this.showResult(v, k);
-            if(this.$refs.input)
-                this.$refs.input.value = this.d_search;
-
-            this.d_value = { key: k, data: v }
-            this.$emit('value', this.d_value);
-            if(this.$refs.popover){
-                this.$refs.popover.close();
+            const self = this;
+            self.popoverAutoOpen = false;
+            self.$emit('value', { key: k, data: v });
+            if(self.$refs.popover){
+                self.$refs.popover.close();
             }
 
             // weak sauce
-            const self = this;
-            this.$nextTick(() => {
+            self.$nextTick(() => {
                 self.popoverAutoOpen = true;
             })
         },
         getValue() {
-            return this.d_value;
+            return this.value;
         },
         isInError() {
             return !!this.error
         },
         isEmpty() {
-            return !this.d_value;
+            return !this.value;
         },
     },
+    mounted() {
+        const v = this.value;
+        const d  = toString.call(v) === '[object Object]' ? this.getDisplayValue(v.data, v.key) : v;
+        this.d_search = d || '';
+        if(this.$refs.input)
+            this.$refs.input.value = this.d_search;
+    },
     watch: {
-        value() {
-            this.d_search = this.value;
+        value(v) {
+            const d = toString.call(v) === '[object Object]' ? this.getDisplayValue(v.data, v.key) : v;
+            this.d_search = d || '';
             if(this.$refs.input)
-                this.$refs.input.value = this.value;
+                this.$refs.input.value = this.d_search;
         },
         error(v, ov) {
             if(v && !ov)
@@ -190,8 +237,12 @@ export default {
         d_search() {
             this.updateResults();
         },
-        dictionary() {
-            this.updateResults();
+        options: {
+            deep: true,
+            handler(v, ov) {
+                if(v.dictionary !== ov.dictionary)
+                    this.updateResults();
+            }
         },
         results(v) {
             // when results change. we should just show the popover

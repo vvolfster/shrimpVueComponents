@@ -6,14 +6,17 @@
         <div class='segment__text'>
             <div class='segment__header'>
                 <div class="hoverable" @click="edit('title', ui.title)">
-                    {{ ui.title }}
+                    {{ ui.title || "No title..." }}
                 </div>
                 <div class="hoverable" @click="edit('type', ui.type)">
                     {{ ui.type }}
                 </div>
+                <button class="deleteBtn" @click="$emit('removeSegment')">
+                    <i class="fa fa-trash"></i>
+                </button>
             </div>
             <div class='segment__description hoverable' @click="edit('description', ui.description)">
-                {{ ui.description }}
+                {{ ui.description || 'No description...' }}
             </div>
             <!-- <textParagraph :value="ui.description"  :options="{ style: { 'min-height': '81px' } }"/> -->
         </div>
@@ -255,6 +258,12 @@ export default {
     cursor: pointer;
     background: seagreen;
     color: white;
+}
+
+.deleteBtn {
+    background: red;
+    color: white;
+    border: solid 1px black;
 }
 
 </style>

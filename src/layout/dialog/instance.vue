@@ -62,7 +62,7 @@ export default {
                 fields = params.form;
                 Object.keys(fields).forEach((key) => {
                     const f = fields[key];
-                    if('model' in f) {
+                    if(toString.call(f) === '[object Object]' && 'model' in f) {
                         const modelValue =  f.model;
                         if(!model)
                             model = { [key]: modelValue }
@@ -90,11 +90,14 @@ export default {
             const formVal = form ? form.getValue() : null;
             const formIsValid = form ? form.isValid() : true;
             if(typeof fn === 'function'){
-                if(formIsValid)
-                    Promise.resolve(fn(formVal)).then(this.close).catch((err) => {
+                if(formIsValid){
+                    Promise.resolve(fn(formVal))
+                    .then(this.close)
+                    .catch((err) => {
                         if(typeof err === 'string' || typeof err === 'number')
                             Toast.negative(err);
                     })
+                }
                 else
                     animator.shake({ element: this.$el });
             }

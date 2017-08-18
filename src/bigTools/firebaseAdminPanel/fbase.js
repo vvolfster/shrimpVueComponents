@@ -2,7 +2,7 @@ import Firebase from 'firebase'
 import lodash from 'lodash'
 import axios from 'axios'
 import Chance from 'chance'
-import { Dialog } from 'quasar-framework'
+import Dialog from '../../layout/dialog'
 import Toast from '../../vuePlugins/toasts'
 
 // import Vue from 'vue'
@@ -84,54 +84,42 @@ const functions = {
         })
     },
     doAuth(app) {
-        if(state.dialog) {
-            state.dialog.close();
-        }
-
-        return new Promise((resolve, reject) => {
-            state.dialog = Dialog.create({
+        Dialog.dismissAll();
+        return new Promise((resolve) => {
+            Dialog.create({
                 title: "Sign In",
+                noDismiss: true,
                 form: {
                     username: {
                         model: localStorage ? localStorage.getItem("fbAdminPanelUser") : "",
-                        type: "textbox"
+                        type: String
                     },
                     password: {
                         model: localStorage ? localStorage.getItem("fbAdminPanelPW") : "",
                         type: "password"
                     }
                 },
-                buttons: [
-                    {
-                        label: "Submit",
-                        preventClose: true,
-                        handler({ username, password }){
-                            function success() {
-                                localStorage.setItem("fbAdminPanelUser", username);
-                                localStorage.setItem("fbAdminPanelPW", password);
-                                Toast.positive(`Logged in as ${username}`);
-                                resolve();
-                                state.dialog.close();
+                buttons: {
+                    Submit({ username, password }){
+                        function success() {
+                            localStorage.setItem("fbAdminPanelUser", username);
+                            localStorage.setItem("fbAdminPanelPW", password);
+                            Toast.positive(`Logged in as ${username}`);
+                            resolve();
+                        }
+
+                        app.auth().signInWithEmailAndPassword(username, password).then(success).catch((err) => {
+                            if (err.message !== "There is no user record corresponding to this identifier. The user may have been deleted."){
+                                Toast.negative(err.message);
+                                return;
                             }
 
-                            app.auth().signInWithEmailAndPassword(username, password).then(success).catch((err) => {
-                                if (err.message !== "There is no user record corresponding to this identifier. The user may have been deleted."){
-                                    Toast.negative(err.message);
-                                    return;
-                                }
-
-                                app.auth().createUserWithEmailAndPassword(username, password)
-                                .then(success)
-                                .catch(error => Toast.negative(error.message));
-                            })
-                        }
+                            app.auth().createUserWithEmailAndPassword(username, password)
+                            .then(success)
+                            .catch(error => Toast.negative(error.message));
+                        })
                     },
-                    "Cancel",
-                ],
-                onDimiss() {
-                    reject()
-                    state.dialog = null;
-                }
+                },
             })
         })
     }
