@@ -1,7 +1,11 @@
 <template>
     <div class="course">
-        <textLine :value="ui.title" class="title" placeholder="title" @value="d_value.meta.title = $event"/>
-        <textParagraph :value="ui.description" class="description" placeholder="description" @value="d_value.meta.description = $event"/>
+        <div class="title hoverable" placeholder="title" @click="edit('title', ui.title)">
+            {{ ui.title }}
+        </div>
+        <div class="description hoverable" placeholder="description" @click="edit('description', ui.description)">
+            {{ ui.description }}
+        </div>
         <div class="roadmap">
             <div class="roadmap__header" style="position:relative;">
                 <div class="roadmap__title">Roadmap</div>
@@ -25,39 +29,22 @@
                     </div>
                 </div>
             </collapsible>
-            
         </div>
-        <button class="savebtn" @click="save">
-            <div v-if="!saving">
-                <i class="fa fa-save"></i>
-                Save
-            </div>
-            <i v-else class="savebtn--busy fa fa-circle-o-notch"></i>
-        </button>
-
-        <modal ref="roadmapEntryModal" containerStyle="width:50vw;">
-            <roadmapEntry
-                :allSegments="segments"
-            />
-        </modal>
-
     </div>
 </template>
 
 <script>
 import lodash from 'lodash'
-import textLine from '@/input/textLine'
+import Dialog from '@/layout/dialog'
 import collapsible from '@/misc/collapsible'
-import textParagraph from '@/input/textParagraph'
-import modal from '@/layout/modal'
-import roadmapEntry from './components/roadmapEntry'
 import segmentListener from './segmentListener'
 import segment from './segment'
+
 
 export default {
     props: ['id', 'value', 'fbRef', 'navFn'],
     components: {
-        textParagraph, textLine, modal, roadmapEntry, segment, collapsible
+        segment, collapsible
     },
     data(){
         return{
@@ -71,49 +58,12 @@ export default {
     },
     mounted() {
         const self = this;
-        self.valueChg();
-
         segmentListener.subscribe(this.updateSegments);
     },
     methods: {
         updateSegments(val) {
             this.segments = val;
         },
-        valueChg() {
-            if(this.value)
-                this.d_value = lodash.cloneDeep(this.value);
-            else
-                this.d_value = null;
-        },
-        save() {
-            this.saving = true;
-            const self = this;
-            const ref = this.fbRef;
-
-            function unbusy() {
-                self.saving = false;
-            }
-
-            function doSave() {
-                return new Promise((resolve, reject) => {
-                    if(!ref)
-                        return reject();
-
-                    const promises = lodash.reduce(self.d_value, (acc, v, k) => {
-                        acc.push(ref.child(k).set(v));
-                    }, [])
-
-                    return Promise.all(promises).then(resolve).catch(reject);
-                })
-            }
-
-            doSave().then(unbusy).catch(unbusy);
-        }
-    },
-    watch: {
-        value() {
-            this.valueChg();
-        }
     },
     computed: {
         ui() {
