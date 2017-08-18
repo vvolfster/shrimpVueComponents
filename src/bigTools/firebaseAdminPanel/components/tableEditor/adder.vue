@@ -1,6 +1,6 @@
 <template>
     <div>
-        <q-modal ref="modal" @close="$emit('closeModal')">
+        <modal ref="modal" @close="$emit('closeModal')">
             <tabView class="stepper" ref="tabView" 
                 @indexChanged="$event === computedSteps.length - 1 ? $emit('formCompleted') : null"
             >
@@ -14,7 +14,7 @@
                     @value="handleValue"
                 />
             </tabView>
-        </q-modal>
+        </modal>
     </div>
 </template>
 
@@ -22,9 +22,10 @@
     import lodash from 'lodash'
     import tabView from '../../../../layout/tabView'
     import autoform from '../../../../input/autoform'
+    import modal from '../../../../layout/modal'
 
     export default {
-        components: { tabView, autoform },
+        components: { tabView, autoform, modal },
         props: ['steps'],
         data() {
             return {
@@ -92,7 +93,7 @@
 <style>
     .stepper {
         width: 40vw;
-        height: 70vh;
+        height: 50vh;
     }
 
     .step {
