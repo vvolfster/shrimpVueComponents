@@ -13,6 +13,7 @@ export const image = _image;
 export const input = _input;
 export const layout = _layout;
 export const misc = _misc;
+export const vuePlugins = _vuePlugins;
 
 // this will let us do stuff like 'import svt from shrimp-vue-tools' & then use svt.button.toggleButton for instance.
 export default {
@@ -22,6 +23,7 @@ export default {
     input,
     layout,
     misc,
+    vuePlugins,
     install(vue, config) {
         // console.log(`shrimp-vue-components . starting install`)
         _vuePlugins.install(vue, config);

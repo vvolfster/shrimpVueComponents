@@ -6,7 +6,7 @@
 
 <script>
 import lodash from 'lodash'
-import animator from "@/misc/animator"
+import animator from "../../misc/animator"
 import shared from '../shared'
 import './modal.css'
 
