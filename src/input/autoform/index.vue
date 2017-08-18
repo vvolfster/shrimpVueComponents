@@ -121,9 +121,12 @@ export default {
         isValid() {
             const self = this;
             return lodash.every(this.fields, (type, name) => {
-                // console.log(lodash.keys(self.$refs), `formField__${name}`)
-                const component = lodash.get(self.$refs, `formField_${name}[0]`)
+                let component = lodash.get(self.$refs, `formField_${name}`)
+                if(lodash.isArray(component))
+                    component = component[0];
+
                 const required = lodash.get(type, 'required', false);
+                // console.log('hello', name, component, required);
                 if(!component)
                     return true;
 
@@ -132,9 +135,13 @@ export default {
                     return false;
                 }
 
+                // console.log(name, 'is required:', required);
                 if(required) {
+                    // console.log(name, required, component.isEmpty());
+                    // console.log(name, typeof component.isEmpty === 'function', component.isEmpty());
                     if(typeof component.isEmpty === 'function' && component.isEmpty()){
                         // console.log(`${name} is empty`)
+                        // console.log(name, required, component.isEmpty(), "RETURNING FALSE");
                         return false;
                     }
                     return component.getValue();

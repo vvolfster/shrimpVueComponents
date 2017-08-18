@@ -84,13 +84,15 @@
                     }
 
                     if(!autoForm.isValid()){
-                        animator.shake({ el: self.$el })
+                        if(modal)
+                            animator.shake({ element: tabViewInstance })
                         if(tabViewInstance)
                             tabViewInstance.goTo(index);
+                        return false;
                     }
 
-                    const autoFormVal = autoform.getValue();
-                    lodash.each(fields, (k) => {
+                    const autoFormVal = autoForm.getValue();
+                    lodash.each(fields, (v, k) => {
                         const value = lodash.get(autoFormVal, k);
                         lodash.set(formVal, k, value);
                     })
