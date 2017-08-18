@@ -125,7 +125,35 @@ function addNewSegment(roadmapIdx){
 }
 
 function addExistingSegment(roadmapIdx){
-
+    const self = this;
+    const selfRef = this.fbRef;
+    const rmapEntry = this.value.roadmap[roadmapIdx];
+    const allSegments = this.allSegments;
+    return new Promise((resolve, reject) => {
+        Dialog.create({
+            onDismiss: reject,
+            title: 'Existing Segment',
+            form: {
+                segment: {
+                    type: "textLineAutoComplete",
+                    options: {
+                        dictionary: allSegments,
+                        matchOn: ['meta.title'],
+                        show: ['meta.title'],
+                    }
+                }
+            },
+            buttons: {
+                Submit(val) {
+                    const id = val.id;
+                    return new Promise((resolve, reject) => {
+                        const newSegIdx = lodash.last(lodash.keys(rmapEntry.segments).sort()) + 1;
+                        selfRef.child(`roadmap/${roadmapIdx}/segments/${newSegIdx}`).set(id).then(resolve).catch(reject);
+                    })
+                }
+            }
+        })
+    })
 }
 
 

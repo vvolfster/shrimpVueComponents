@@ -29,6 +29,7 @@ function createContainer() {
 
 function create(params) {
     const retObj = createContainer();
+    const onDismiss = params.onDismiss;
     const container = retObj.container;
     container.style.cursor = params.noDismiss ? 'not-allowed' : 'pointer';
 
@@ -42,6 +43,10 @@ function create(params) {
                     if(typeof fn === 'function')
                         fn();
                 })
+
+                if(typeof onDismiss === 'function')
+                    onDismiss();
+
                 this.$destroy();
             },
             onDismiss(fn) {
