@@ -7,10 +7,14 @@
             :fields="ui.form"
             @value="formVal = $event"
         />
-        <div class='buttonRow'>
+        <div class='buttonRow' v-if="!busy">
             <button v-for="(button, name) in buttons" :key="name" @click="pressButton(name)">
                 {{ name }}
             </button>
+        </div>
+        <div class="busyContainer" v-else>
+            <i class='fa fa-circle-o-notch busy'></i>
+            <div class="progress" :style="`width:${progress * 100}%`"/>
         </div>
     </div>
 </template>
@@ -23,6 +27,12 @@ import Toast from '../../vuePlugins/toasts'
 
 export default {
     components: { autoform },
+    data() {
+        return {
+            busy: false,
+            progress: 0,
+        }
+    },
     props: {
         params: {
             type: [Object, null, undefined],
@@ -52,7 +62,11 @@ export default {
         close(){
             this.$emit('close')
         },
+        isBusy() {
+            return this.busy
+        },
         pressButton(name) {
+            const self = this;
             const buttons = this.buttons;
             const fn = buttons[name];
             const form = this.$refs.form;
@@ -60,9 +74,16 @@ export default {
             const formIsValid = form ? form.isValid() : true;
             if(typeof fn === 'function'){
                 if(formIsValid){
-                    Promise.resolve(fn(formVal))
-                    .then(this.close)
+                    self.busy = true;
+                    Promise.resolve(fn(formVal, (progress) => {
+                        self.progress = progress;
+                    }))
+                    .then(() => {
+                        self.busy = false;
+                        self.close();
+                    })
                     .catch((err) => {
+                        self.busy = false;
                         if(typeof err === 'string' || typeof err === 'number')
                             Toast.negative(err);
                     })
@@ -116,7 +137,35 @@ button:hover {
     color: white;
 }
 
+.busyContainer {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    position: relative;
+    width: 100%;
+}
 
+.busy {
+    -webkit-animation:spin 1s linear infinite;
+    -moz-animation:spin 1s linear infinite;
+    animation:spin 1s linear infinite;
+    font-size: 20px;
+    line-height: normal;
+}
 
+.progress {
+    overflow: hidden;
+    height: 2px;
+    background: green;
+    position: absolute;
+    bottom: 1px;
+    left: 0;
+}
+
+@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
 </style>

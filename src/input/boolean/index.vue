@@ -107,6 +107,7 @@ export default {
 .boolean__input {
     display: flex;
     align-items: center;
+    justify-content: space-between;
 }
 
 .boolean__error {

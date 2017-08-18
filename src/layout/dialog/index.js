@@ -14,7 +14,7 @@ function createContainer() {
 
     containerNode.id = containerId;
     containerNode.className = "modalContainer";
-    containerNode.innerHTML = `<instance id="${instanceId}" :params="params" @close="dismiss"/>`
+    containerNode.innerHTML = `<instance id="${instanceId}" :params="params" @close="dismiss" ref="instance"/>`
     containerNode.style.display = "flex";
     containerNode.style.alignItems = "center";
     containerNode.style.justifyContent = "center";
@@ -31,6 +31,7 @@ function create(params) {
     const retObj = createContainer();
     const onDismiss = params.onDismiss;
     const container = retObj.container;
+    const busyCanBeDismissed = params.dismissBusy;
     container.style.cursor = params.noDismiss ? 'not-allowed' : 'pointer';
 
     const instanceId = retObj.instanceId;
@@ -38,6 +39,9 @@ function create(params) {
         el: `#${instanceId}`,
         methods: {
             dismiss() {
+                if(this.isBusy() && !busyCanBeDismissed)
+                    return;
+
                 this.isDismissed = true;
                 lodash.each(this.dismissFns, (fn) => {
                     if(typeof fn === 'function')
@@ -48,6 +52,11 @@ function create(params) {
                     onDismiss();
 
                 this.$destroy();
+            },
+            isBusy() {
+                if(this.$refs && this.$refs.instance)
+                    return this.$refs.instance.isBusy();
+                return false;
             },
             onDismiss(fn) {
                 if(typeof fn === 'function')

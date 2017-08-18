@@ -5,6 +5,8 @@
         <button @click="open('simpleNonClosing')">Open No Dismiss</button>
         <button @click="open('form')">Open Form</button>
         <button @click="open('formWithModel')">Open Form With Model</button>
+        <button @click="open('form3s')">Form that takes 3 seconds to resolve</button>
+        <button @click="open('formDeterminate')">Form Determinate</button>
     </div>
 </template>
 
@@ -98,8 +100,88 @@ export default {
                         Toast.positive(`${formVal.first} ${formVal.last} ${formVal.age}`)
                     }
                 }
+            },
+            form3s: {
+                title: 'form3s',
+                description: 'wait 3s after submit',
+                form: {
+                    first: {
+                        type: String,
+                        required: true,
+                        model: "Shahan",
+                        validateFn(s) {
+                            if(s.length < 3)
+                                return "too short"
+                            return true;
+                        }
+                    },
+                    last: {
+                        model: "Kazi",
+                        type: String,
+                        required: true,
+                    },
+                    age: {
+                        type: Number,
+                        model: 29,
+                        required: true,
+                        validator(s) {
+                            if(s < 0)
+                                return "No benji buttons allowed"
+                            return true;
+                        }
+                    },
+                    married: Boolean
+                },
+                buttons: {
+                    Submit() {
+                        return new Promise((resolve) => {
+                            setTimeout(resolve, 3000);
+                        })
+                    }
+                }
+            },
+            formDeterminate: {
+                title: 'form3s',
+                description: 'wait 3s after submit',
+                form: {
+                    first: {
+                        type: String,
+                        required: true,
+                        model: "Shahan",
+                        validateFn(s) {
+                            if(s.length < 3)
+                                return "too short"
+                            return true;
+                        }
+                    },
+                    last: {
+                        model: "Kazi",
+                        type: String,
+                        required: true,
+                    },
+                    age: {
+                        type: Number,
+                        model: 29,
+                        required: true,
+                        validator(s) {
+                            if(s < 0)
+                                return "No benji buttons allowed"
+                            return true;
+                        }
+                    },
+                    married: Boolean
+                },
+                buttons: {
+                    Submit(val, prog) {
+                        return new Promise((resolve) => {
+                            prog(0.3);
+                            setTimeout(() => prog(0.6), 1000);
+                            setTimeout(() => prog(0.9), 2000);
+                            setTimeout(resolve, 3000);
+                        })
+                    }
+                }
             }
-
         }
     },
     methods: {
