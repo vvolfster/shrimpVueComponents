@@ -50,6 +50,8 @@ const functions = {
         newNode.style.position = "fixed";
         newNode.style.width = "100%";
         newNode.style.height = "100%";
+        newNode.style.left = 0;
+        newNode.style.top = 0;
         newNode.style[`pointer-events`] = `none`;
 
         frag.appendChild(newNode);
@@ -88,6 +90,9 @@ const functions = {
         }
     },
     startToast(stackItem) {
+        if(!state.container)
+            state.container = functions.createToastContainer();
+
         // extract params
         const style = stackItem.style;
         const duration = stackItem.duration;
