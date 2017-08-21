@@ -37,8 +37,17 @@ export default {
         options: {
             type: [String, Object, null, undefined],
             default: "date",
-            validator(v) {
-                return ['date', 'datetime'].indexOf(v.toLowerCase()) !== '-1'
+            validator(opt) {
+                const validTypes = ['date', 'datetime']
+                if(typeof opt === 'string')
+                    return validTypes.indexOf(opt) !== '-1'
+
+                if(typeof opt === 'object') {
+                    const v = opt.type || 'date'
+                    return validTypes.indexOf(v) !== '-1'
+                }
+
+                return true;
             }
         }
     },
