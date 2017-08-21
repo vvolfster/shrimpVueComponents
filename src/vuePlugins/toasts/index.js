@@ -53,6 +53,7 @@ const functions = {
         newNode.style.left = 0;
         newNode.style.top = 0;
         newNode.style[`pointer-events`] = `none`;
+        newNode.style.zIndex = 9999;
 
         frag.appendChild(newNode);
         document.body.appendChild(newNode);
