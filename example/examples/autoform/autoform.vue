@@ -48,7 +48,7 @@ export default {
                     type: Date,
                     required: true,
                     model: new Date(),
-                    options: "datetime"
+                    options: 'datetime'
                 },
                 password: {
                     type: "password",

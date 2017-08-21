@@ -57,12 +57,14 @@ export default {
             this.d_value = v;
             this.$refs.flatPicker.value = moment(v).format("MMMM D, YYYY, h:mm A")
         }
+        this.hasMounted = true;
     },
     data() {
         return {
             d_value: "",
             error: null,
-            instance: null
+            instance: null,
+            hasMounted: false,
         }
     },
     methods: {
@@ -84,11 +86,13 @@ export default {
         initFlatPickr() {
             const self = this;
             const date = this.value ? new Date(this.value) : new Date();
-            const type = this.options ? this.options.type : null;
+            const type = lodash.get(this, 'options.type') || lodash.get(this, 'options') || 'date';
+            const enableTime = type.toLowerCase() === 'datetime'
             this.destroyFlatPickr();
+            // console.log('init flatpickr with', date, enableTime);
             self.instance = flatpickr(self.$refs.flatPicker, {
                 defaultDate: date,
-                enableTime: type,
+                enableTime,
                 altInput: true,
             })
             this.d_value = date;
@@ -145,6 +149,10 @@ export default {
             if(v && !ov)
                 animator.shake({ element: this.$el });
         },
+        type() {
+            if(this.hasMounted && this.instance)
+                this.initFlatPickr();
+        }
     },
     beforeDestroy() {
         this.destroyFlatPickr();
