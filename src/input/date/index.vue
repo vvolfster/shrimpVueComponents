@@ -171,6 +171,9 @@ export default {
         },
         type() {
             const options = this.options;
+            if(!options)
+                return "date";
+
             if(typeof options === 'string') {
                 return options.toLowerCase() === 'datetime' ? 'datetime' : 'date'
             }
