@@ -86,7 +86,7 @@ export default {
         initFlatPickr() {
             const self = this;
             const date = this.value ? new Date(this.value) : new Date();
-            const type = lodash.get(this, 'options.type') || lodash.get(this, 'options') || 'date';
+            const type = this.getType(this.options)
             const enableTime = type.toLowerCase() === 'datetime'
             this.destroyFlatPickr();
             // console.log('init flatpickr with', date, enableTime);
@@ -135,6 +135,21 @@ export default {
             this.$emit('input', this.d_value);
             this.$emit('value', this.d_value);
         },
+        getType(options) {
+            if(!options)
+                return "date";
+
+            if(typeof options === 'string') {
+                return options.toLowerCase() === 'datetime' ? 'datetime' : 'date'
+            }
+
+            if(typeof options === 'object') {
+                const type = options.type || 'date'
+                return type;
+            }
+
+            return 'date'
+        }
     },
     watch: {
         value() {
@@ -170,20 +185,7 @@ export default {
             return { style: defStyleObj };
         },
         type() {
-            const options = this.options;
-            if(!options)
-                return "date";
-
-            if(typeof options === 'string') {
-                return options.toLowerCase() === 'datetime' ? 'datetime' : 'date'
-            }
-
-            if(typeof options === 'object') {
-                const type = options.type || 'date'
-                return type;
-            }
-
-            return 'date'
+            return this.getType(this.options);
         }
     }
 }
@@ -206,6 +208,11 @@ export default {
     padding-left: 5px;
     cursor: pointer !important;
     width: 100%;
+}
+
+.datetime__error {
+    color: red;
+    font-size: 12px;
 }
 
 </style>
