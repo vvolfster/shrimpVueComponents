@@ -118,21 +118,19 @@ export default {
         ui() {
             const options = this.options;
             const style = options && options.style ? options.style : null;
-            const allowInfinity = false;
+            const allowInfinity = options && options.allowInfinity ? options.allowInfinity : false;
             const defStyleObj = {
                 font: "inherit",
                 color: "inherit",
                 background: "inherit",
             }
+
             if(typeof style === 'string')
                 return { style, allowInfinity }
-            if(typeof style === 'object')
+            if(typeof style === 'object' && style !== null)
                 return { style: Object.assign(defStyleObj, style), allowInfinity }
 
-            return {
-                style: defStyleObj,
-                allowInfinity: options && options.allowInfinity
-            };
+            return { style: defStyleObj, allowInfinity };
         }
     }
 }

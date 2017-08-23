@@ -75,6 +75,18 @@ export default {
                         return true;
                     }
                 },
+                powerLevel: {
+                    type: Number,
+                    options: {
+                        allowInfinity: true,
+                    },
+                    validateFn(v) {
+                        if(v <= 0)
+                            return "You cannot be that young!!"
+
+                        return true;
+                    }
+                },
                 aboutMe: {
                     type: "paragraph",
                     model: "I am the maddest wolf",
