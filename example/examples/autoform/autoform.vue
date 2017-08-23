@@ -77,6 +77,7 @@ export default {
                 },
                 powerLevel: {
                     type: Number,
+                    required: true,
                     options: {
                         allowInfinity: true,
                     },

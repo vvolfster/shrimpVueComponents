@@ -84,6 +84,9 @@ export default {
         },
         isEmpty() {
             const ref = this.$refs.input;
+            if(this.d_value === Infinity)
+                return false;
+
             return isNaN(this.d_value) || this.d_value === '' || (ref && ref.value === '');
         },
         increment(v){
@@ -183,7 +186,7 @@ export default {
 }
 
 .btn {
-    border: solid 1px;
+    border: solid 1px black;
     padding-left: 5px;
     padding-right: 5px;
     cursor: pointer;
@@ -192,14 +195,14 @@ export default {
 }
 
 .btn--infinity {
-    -webkit-animation:infinity 2s linear infinite;
-    -moz-animation:infinity 2s linear infinite;
-    animation:infinity 2s linear infinite;
+    -webkit-animation:infinity 2s linear infinite alternate;
+    -moz-animation:infinity 2s linear infinite alternate;
+    animation:infinity 2s linear infinite alternate;
 }
 
 @keyframes infinity {
-    from {background-color: white;}
-    to {background-color: lightBlue;}
+    from {color: black;}
+    to {color: lightBlue;}
 }
 
 
