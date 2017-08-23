@@ -80,6 +80,8 @@ function create(params) {
 
     if(!params.noDismiss)
         container.addEventListener('click', dialog.dismiss);
+
+    return dialog;
 }
 
 export default {
