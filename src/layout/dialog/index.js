@@ -84,7 +84,15 @@ function create(params) {
     return dialog;
 }
 
-export default {
+const Dialog = {
     create,
-    dismissAll: shared.dialogs.dismissAll
+    dismissAll() {
+        shared.dialogs.dismissAll();
+        // also delete remove any dangling diaogs that may be left from last reload
+        const remainingDialogs = document.querySelectorAll('*[id^="dialogContainer_"]');
+        lodash.each(remainingDialogs, dialog => dialog.parentNode.removeChild(dialog))
+    }
 };
+
+Dialog.dismissAll();
+export default Dialog;
