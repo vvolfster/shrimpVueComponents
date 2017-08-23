@@ -6,8 +6,15 @@
             @input="updateValue"  
             :class="error ? 'line__input--error' : ''"
             :style="ui.style"
-            :placeholder="placeholder"
+            :placeholder="d_value === Infinity ? 'Infinity' : placeholder"
         />
+        <div class="buttons">
+            <div v-if="ui.allowInfinity" class="btn" :class="d_value === Infinity ? 'btn--infinity' : ''" @click.stop="updateValue(Infinity)">∞</div>
+            <div class="buttons__updown">
+                <div class="fa fa-caret-up btn" @click.stop="increment"></div>
+                <div class="fa fa-caret-down btn" @click.stop="decrement"></div>
+            </div>
+        </div>
         <div v-if="error !== null" class="line__error">
             {{ error }}
         </div>
@@ -15,6 +22,7 @@
 </template>
 
 <script>
+import lodash from 'lodash'
 import animator from '../../misc/animator'
 
 export default {
@@ -24,7 +32,7 @@ export default {
             default: null
         },
         value: {
-            type: [String, Number],
+            type: [String, Number, Infinity],
             default: ''
         },
         placeholder: {
@@ -48,6 +56,7 @@ export default {
     },
     methods: {
         updateValue(val) {
+            // console.log("VALUE", val);
             const vStr = val && val.target ? val.target.value : val;
             const v = Number(vStr);
             if(typeof v !== 'number' || isNaN(v))
@@ -77,6 +86,22 @@ export default {
             const ref = this.$refs.input;
             return isNaN(this.d_value) || this.d_value === '' || (ref && ref.value === '');
         },
+        increment(v){
+            const val = typeof v === 'number' ?  v : lodash.get(this.options, "stepSize", 1);
+            const currentVal = this.getValue();
+            if(isNaN(currentVal))
+                this.updateValue(0);
+            else
+                this.updateValue(currentVal + val);
+        },
+        decrement(v) {
+            const val = typeof v === 'number' ?  v : lodash.get(this.options, "stepSize", 1);
+            const currentVal = this.getValue();
+            if(isNaN(currentVal))
+                this.updateValue(0);
+            else
+                this.updateValue(currentVal - val);
+        }
     },
     watch: {
         value() {
@@ -93,17 +118,21 @@ export default {
         ui() {
             const options = this.options;
             const style = options && options.style ? options.style : null;
+            const allowInfinity = false;
             const defStyleObj = {
                 font: "inherit",
                 color: "inherit",
                 background: "inherit",
             }
             if(typeof style === 'string')
-                return { style }
+                return { style, allowInfinity }
             if(typeof style === 'object')
-                return { style: Object.assign(defStyleObj, style) }
+                return { style: Object.assign(defStyleObj, style), allowInfinity }
 
-            return { style: defStyleObj };
+            return {
+                style: defStyleObj,
+                allowInfinity: options && options.allowInfinity
+            };
         }
     }
 }
@@ -142,5 +171,38 @@ export default {
     color: red;
     font-size: 12px;
 }
+
+.buttons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+}
+
+.buttons__updown {
+    display: flex;
+    flex-flow: column;
+}
+
+.btn {
+    border: solid 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.btn--infinity {
+    -webkit-animation:infinity 2s linear infinite;
+    -moz-animation:infinity 2s linear infinite;
+    animation:infinity 2s linear infinite;
+}
+
+@keyframes infinity {
+    from {background-color: white;}
+    to {background-color: lightBlue;}
+}
+
 
 </style>
