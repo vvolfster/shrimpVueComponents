@@ -68,40 +68,74 @@
             finish() {
                 const self = this;
                 const steps = this.steps;
-                const tabViewInstance = lodash.get(self, `$refs.tabView`)
+                const tabViewInstance = lodash.get(self, `$refs.tabView`);
+                const modalInstance = lodash.get(self, `$refs.modal`);
 
-                // combine all the form values
-                const formVal = {}
-                const canComplete = lodash.every(steps, (step, index) => {
-                    const fields = step.fields || step.form;
-                    let autoForm = lodash.get(self, `$refs.autoform_${index}`);
-                    if(lodash.isArray(autoForm))
-                        autoForm = autoForm[0];
-
-                    if(!autoForm) {
-                        console.error(`no autoform for step ${index}`)
-                        return false;
-                    }
-
-                    if(!autoForm.isValid()){
-                        if(modal)
-                            animator.shake({ element: tabViewInstance })
-                        if(tabViewInstance)
-                            tabViewInstance.goTo(index);
-                        return false;
-                    }
-
-                    const autoFormVal = autoForm.getValue();
-                    lodash.each(fields, (v, k) => {
-                        const value = lodash.get(autoFormVal, k);
-                        lodash.set(formVal, k, value);
+                const formVal = {};
+                function amalgamateValueIntoFormVal(step, val) {
+                    return new Promise((resolve) => {
+                        const fields = step.fields || step.form;
+                        lodash.each(fields, (v, k) => {
+                            const value = lodash.get(val, k);
+                            lodash.set(formVal, k, value);
+                        })
+                        resolve();
                     })
+                }
 
-                    return true;
-                })
+                function generateGetValueFn(step, index) {
+                    return () => {
+                        return new Promise((resolve, reject) => {
+                            let autoForm = lodash.get(self, `$refs.autoform_${index}`);
+                            if(lodash.isArray(autoForm))
+                                autoForm = autoForm[0];
 
-                if(canComplete)
-                    this.$emit('formCompleted', formVal)
+                            if(!autoForm) {
+                                console.error(`no autoform for step ${index}`)
+                                return reject(`no autoform for step ${index}`);
+                            }
+
+                            if(!autoForm.isValid()){
+                                if(tabViewInstance) {
+                                    if(modalInstance)
+                                        animator.shake({ element: tabViewInstance })
+                                    tabViewInstance.goTo(index);
+                                }
+                                return reject('Invalid form');
+                            }
+
+                            const val = autoForm.getValue();
+                            return amalgamateValueIntoFormVal(step, val).then(() => {
+                                if(lodash.isFunction(step.after)){
+                                    return Promise.resolve(step.after(formVal)).then(resolve).catch(reject);
+                                }
+                                return resolve();
+                            }).catch(reject);
+                        })
+                    }
+                }
+
+                // we need to execute in order!
+                function getAllStepValues() {
+                    return new Promise((resolve) => {
+                        const pChain = lodash.reduce(steps, (acc, step, index) => {
+                            acc.push(generateGetValueFn(step, index));
+                            return acc;
+                        }, []);
+
+                        // now reduce the pChain
+                        lodash.reduce(pChain, (acc, fn, idx) => {
+                            const nextFn = pChain[idx + 1] || resolve;
+                            // console.log(idx, "next fn is resolve", resolve === nextFn, nextFn);
+                            if(idx === 0)
+                                return fn().then(nextFn);
+
+                            return acc.then(nextFn);
+                        }, null);
+                    })
+                }
+
+                getAllStepValues().then(() => self.$emit('formCompleted', formVal))
             }
         },
         computed: {

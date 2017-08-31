@@ -75,6 +75,11 @@ export default {
                                 city: "String",
                                 state: "String",
                                 zip: "Number"
+                            },
+                            after(v) {
+                                v.first = v.first.charAt(0).toUpperCase() + v.first.slice(1);
+                                v.last = v.last.charAt(0).toUpperCase() + v.last.slice(1);
+                                return true;
                             }
                         }
                     ],
