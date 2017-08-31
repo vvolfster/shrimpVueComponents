@@ -117,7 +117,7 @@
 
                 // we need to execute in order!
                 function getAllStepValues() {
-                    return new Promise((resolve) => {
+                    return new Promise((resolve, reject) => {
                         const pChain = lodash.reduce(steps, (acc, step, index) => {
                             acc.push(generateGetValueFn(step, index));
                             return acc;
@@ -129,6 +129,9 @@
                             // console.log(idx, "next fn is resolve", resolve === nextFn, nextFn);
                             if(idx === 0)
                                 return fn().then(nextFn);
+
+                            if(idx === pChain.length - 1)
+                                return acc.then(nextFn).catch(reject);
 
                             return acc.then(nextFn);
                         }, null);
