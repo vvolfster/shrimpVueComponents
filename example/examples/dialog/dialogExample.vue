@@ -1,6 +1,16 @@
 <template>
     <div class="dialogExample">
         Press Esc to Dismiss
+
+        <div>
+            Position
+            <combobox :options="positions" v-model="chosen.position"/>
+        </div>
+        <div>
+            Animation
+            <combobox :options="animations" v-model="chosen.animation"/>
+        </div>
+
         <button @click="open('simple')">Open Simple</button>
         <button @click="open('simpleNonClosing')">Open No Dismiss</button>
         <button @click="open('form')">Open Form</button>
@@ -11,13 +21,26 @@
 </template>
 
 <script>
+import lodash from 'lodash'
 import mousetrap from 'mousetrap'
 import dialog from '@/layout/dialog'
+import combobox from '@/input/combobox'
 import Toast from '@/vuePlugins/toasts'
 
+
 export default {
+    components: {
+        combobox
+    },
     data() {
         return {
+            animations: ['up', 'down', 'left', 'right', 'none'],
+            positions: ['up', 'down', 'left', 'right', 'center'],
+            chosen: {
+                animation: "up",
+                position: 'center'
+            },
+
             simple: {
                 title: 'Simple',
                 description: "This is a simple dialog",
@@ -186,7 +209,9 @@ export default {
     },
     methods: {
         open(v) {
-            dialog.create(this[v] || this.simple);
+            const conf = {  position: this.chosen.position, animation: this.chosen.animation }
+            lodash.assign(conf, this[v] || this.simple)
+            dialog.create(conf);
         }
     },
     beforeDestroy() {

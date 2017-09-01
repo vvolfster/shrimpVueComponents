@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import lodash from 'lodash'
 import '../modal/modal.css'
 import autoform from '../../input/autoform'
 import animator from '../../misc/animator'
@@ -37,6 +38,61 @@ export default {
         params: {
             type: [Object, null, undefined],
             default: null,
+        },
+        position: {
+            type: String,
+            default: "center",
+            validator(v) {
+                return ["up", "down", "left", "right", "center", ""].indexOf(v) !== -1;
+            }
+        },
+        animation: {
+            type: String,
+            default: "up",
+            validator(v) {
+                return ["up", "down", "left", "right", "none", ""].indexOf(v) !== -1;
+            }
+        },
+        duration: {
+            type: Number,
+            default: 300
+        }
+    },
+    mounted() {
+        // animate fam!
+        const position = this.position;
+        const animation = this.animation;
+        const animationDuration = this.duration;
+        const modal = this.$el;
+        const container = this.$el.parentNode;
+
+        const fnNames = {
+            up: "animateInTop",
+            down: "animateInBottom",
+            center: "animateInCenter",
+            left: "animateInLeft",
+            right: "animateInRight"
+        }
+
+        const startingPos = {
+            up: 'down',
+            left: 'right',
+            down: 'up',
+            right: 'left',
+            center: 'center'
+        }
+
+        const fn = lodash.get(animator, `${fnNames[position]}`)
+        if(typeof fn === 'function' && animation && animation !== 'none') {
+            fn({
+                element: modal,
+                elementParent: container,
+                startingPosition: startingPos[animation],
+                duration: animationDuration
+            });
+        }
+        else {
+            animator.setPositionWithinParent({ element: modal, position });
         }
     },
     computed: {
@@ -84,8 +140,25 @@ export default {
                     })
                     .catch((err) => {
                         self.busy = false;
-                        if(typeof err === 'string' || typeof err === 'number')
-                            Toast.negative(err);
+                        self.progress = 0;
+
+                        function displayable(e) {
+                            return typeof e === 'string' || typeof e === 'number'
+                        }
+
+                        if(err) {
+                            if(displayable(err))
+                                Toast.negative(err);
+                            else if(displayable(err.message))
+                                Toast.negative(err.message);
+                            else if(displayable(err.msg))
+                                Toast.negative(err.msg);
+                            else
+                                Toast.negative(err) // just show OBJ OBJ i guess.
+                        }
+                        else {
+                            Toast.negative(`Error Occurred: 8125`)
+                        }
                     })
                 }
                 else

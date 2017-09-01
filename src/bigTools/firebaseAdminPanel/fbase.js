@@ -1,7 +1,7 @@
 import Firebase from 'firebase'
 import lodash from 'lodash'
 import axios from 'axios'
-import Chance from 'chance'
+// import Chance from 'chance'
 import Dialog from '../../layout/dialog'
 import Toast from '../../vuePlugins/toasts'
 
@@ -61,31 +61,104 @@ const functions = {
         })
     },
     validateConfigObject(fbConfig) {
-        return typeof fbConfig === 'object' && fbConfig.apiKey && fbConfig.authDomain && fbConfig.databaseURL && fbConfig.projectId
+        function isObj(o) {
+            const arr = lodash.isArray(o) ? o : [o];
+            return lodash.every(arr, v => toString.call(v) === '[object Object]')
+        }
+
+        function isStr(s){
+            const arr = lodash.isArray(s) ? s : [s];
+            return lodash.every(arr, v => v && typeof v === 'string')
+        }
+
+        function getProps(obj, arr) {
+            return lodash.reduce(arr, (acc, v) => {
+                acc.push(obj[v]);
+                return acc;
+            }, [])
+        }
+
+        if(!isObj(fbConfig))
+            return false;
+
+        const requiredConfigProps = ["apiKey", "authDomain", "databaseURL", "projectId"];
+        const masterAuthConfig = fbConfig.masterAuthConfig;
+
+        if(masterAuthConfig) {
+            if(!isObj(masterAuthConfig))
+                return false;
+
+            return isStr(getProps(fbConfig, requiredConfigProps)) && isStr(getProps(masterAuthConfig, ["remoteRestAuthLinkFunction"].concat(requiredConfigProps)))
+        }
+
+        return isStr(getProps(fbConfig, requiredConfigProps))
     },
     getApp(appName) {
-        return lodash.find(Firebase.apps, (v) => { return v.name === appName; })
+        return lodash.find(Firebase.apps, v => v.name === appName)
     },
-    populateDummyData(db, n) {
-        const ref = db.ref('/test');
-        const chance = new Chance();
-        lodash.times(n, () => {
-            const person = {
-                first: chance.first(),
-                last: chance.last(),
-                age: chance.age(),
-                gender: chance.gender(),
-                address: chance.address(),
-                city: chance.city(),
-                state: chance.state(),
-                zip: chance.zip()
-            }
-            ref.push(person);
-        })
-    },
-    doAuth(app) {
+    doAuth(app, fbConfig) {
+        // fbConfig.masterAuthConfig, fbConfig.createNewUsers, fbConfig.allowedRoles
+        const canCreateNewUsers = typeof fbConfig.createNewUsers !== 'boolean' ? true : fbConfig.createNewUsers;
+        const masterAuthConfig = fbConfig.masterAuthConfig;
+        // console.warn(fbConfig.allowedRoles, "allowed roles not yet implemented. This is part of making the adminPanel more secure");
+
+        function signInUp(authApp, username, password) {
+            return new Promise((resolve, reject) => {
+                function success() {
+                    localStorage.setItem("fbAdminPanelUser", username);
+                    localStorage.setItem("fbAdminPanelPW", password);
+                    Toast.positive(`Logged in as ${username}`);
+                    resolve();
+                }
+
+                authApp.auth().signInWithEmailAndPassword(username, password).then(success).catch((err) => {
+                    if (err.message !== "There is no user record corresponding to this identifier. The user may have been deleted.")
+                        return reject(err.message);
+
+                    if (!canCreateNewUsers)
+                        return reject('User does not exist and we are not allowed to create one!');
+
+                    return authApp.auth().createUserWithEmailAndPassword(username, password).then(success).catch(reject);
+                })
+            })
+        }
+
+
+        function basicAuth({ username, password }){
+            return signInUp(app, username, password);
+        }
+
+        function masterAuth({ username, password }) {
+            const authAppName = `masterAuth_${masterAuthConfig.projectId}`
+            const authApp = functions.getApp(authAppName) || Firebase.initializeApp(masterAuthConfig, authAppName)
+            return new Promise((resolve, reject) => {
+                if(!authApp)
+                    return reject(`failed to initialize masterAuthApp: ${authAppName}`);
+
+                function sendAuthTokenToServer() {
+                    return new Promise((resolve, reject) => {
+                        authApp.auth().currentUser.getIdToken(true)
+                        .then((token) => {
+                            axios.post(masterAuthConfig.remoteRestAuthLinkFunction, { token, projectId: fbConfig.projectId })
+                            .then((res) => {
+                                console.log(`response came back with`, res);
+                            })
+                            .catch(reject);
+                        })
+                        .catch(reject);
+                    })
+                }
+
+                function signInToLocalApp(token) {
+                    return authApp.auth().signInWithCustomToken(token); // returns a promise
+                }
+
+                return signInUp(authApp, username, password).then(sendAuthTokenToServer).then(signInToLocalApp).catch(reject);
+            })
+        }
+
         Dialog.dismissAll();
-        return new Promise((resolve) => {
+        return new Promise((rootResolve) => {
             Dialog.create({
                 title: "Sign In",
                 noDismiss: true,
@@ -100,25 +173,15 @@ const functions = {
                     }
                 },
                 buttons: {
-                    Submit({ username, password }){
-                        function success() {
-                            localStorage.setItem("fbAdminPanelUser", username);
-                            localStorage.setItem("fbAdminPanelPW", password);
-                            Toast.positive(`Logged in as ${username}`);
-                            resolve();
-                        }
-
-                        app.auth().signInWithEmailAndPassword(username, password).then(success).catch((err) => {
-                            if (err.message !== "There is no user record corresponding to this identifier. The user may have been deleted."){
-                                Toast.negative(err.message);
-                                return;
-                            }
-
-                            app.auth().createUserWithEmailAndPassword(username, password)
-                            .then(success)
-                            .catch(error => Toast.negative(error.message));
+                    Submit(params) {
+                        return new Promise((resolve, reject) => {
+                            const authFn = masterAuthConfig ? masterAuth : basicAuth;
+                            return authFn(params).then(() => {
+                                resolve();
+                                rootResolve();
+                            }).catch(reject);
                         })
-                    },
+                    }
                 },
             })
         })
@@ -164,7 +227,9 @@ export default {
                 }
 
                 if(fbConfig.requiresAuth && !app.auth().currentUser)
-                    return functions.doAuth(app).then(doInit).then(resolve).catch(reject);
+                    return functions.doAuth(app, fbConfig).then(doInit)
+                        .then(resolve)
+                        .catch(reject);
 
                 return doInit().then(resolve).catch(reject);
             }).catch(reject);

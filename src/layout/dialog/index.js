@@ -1,4 +1,5 @@
 /* eslint-disable import/no-webpack-loader-syntax */
+/* eslint-disable max-len */
 // import lodash from 'lodash'
 import Vue from 'vue'
 import lodash from 'lodash'
@@ -9,15 +10,21 @@ import '../modal/modal.css'
 function createContainer() {
     const frag = document.createDocumentFragment();
     const containerNode = document.createElement("div");
+    const wrapperNode = document.createElement("div");
+
     const containerId = `dialogContainer_${shared.dialogs.newKey}`
     const instanceId = `dialogObject_${shared.dialogs.newKey}`
 
     containerNode.id = containerId;
     containerNode.className = "modalContainer";
-    containerNode.innerHTML = `<instance id="${instanceId}" :params="params" @close="dismiss" ref="instance"/>`
     containerNode.style.display = "flex";
     containerNode.style.alignItems = "center";
     containerNode.style.justifyContent = "center";
+
+    wrapperNode.className = "modalObjectWrapper";
+    wrapperNode.innerHTML = `<instance id="${instanceId}" :params="params" :position="position" :animation="animation" :duration="duration" @close="dismiss" ref="instance"/>`
+
+    containerNode.appendChild(wrapperNode);
     frag.appendChild(containerNode);
     document.body.appendChild(frag);
     return {
@@ -27,14 +34,37 @@ function createContainer() {
     }
 }
 
+function getPositionAndAnimationInfo(params) {
+    const posAnim = {
+        position: "center",
+        animation: "up",
+        animationDuration: 300
+    }
+
+    const position = lodash.get(params, "position");
+    if(position && ["up", "down", "left", "right", "center", ""].indexOf(position) !== -1)
+        posAnim.position = position;
+
+    const animation = lodash.get(params, "animation");
+    if(animation && ["up", "down", "left", "right", "none", ""].indexOf(animation) !== -1)
+        posAnim.animation = animation;
+
+    const animationDuration = lodash.get(params, "animationDuration")
+    if(animationDuration && typeof animationDuration === 'number' && animationDuration >= 0)
+        posAnim.animationDuration = animationDuration;
+
+    return posAnim;
+}
+
 function create(params) {
     const retObj = createContainer();
-    const onDismiss = params.onDismiss;
     const container = retObj.container;
+    const onDismiss = params.onDismiss;
     const busyCanBeDismissed = params.dismissBusy;
-    container.style.cursor = params.noDismiss ? 'not-allowed' : 'pointer';
-
+    const posAnim = getPositionAndAnimationInfo(params);
     const instanceId = retObj.instanceId;
+
+    container.style.cursor = params.noDismiss ? 'not-allowed' : 'pointer';
     const dialog = new Vue({
         el: `#${instanceId}`,
         methods: {
@@ -71,6 +101,9 @@ function create(params) {
                 params,
                 isDismissed: false,
                 dismissFns: [],
+                position: posAnim.position,
+                animation: posAnim.animation,
+                duration: posAnim.animationDuration
             }
         },
         components: { instance }

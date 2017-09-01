@@ -27,6 +27,8 @@ export default {
 
                 // custom key
                 requiresAuth: true,
+                createNewUsers: false, // defaults to true. SignUp if user don't exist
+                allowedRoles: ["admin"] // defaults to any
             },
             tableConfig: {
                 pageSize: 25,
