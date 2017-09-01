@@ -25,10 +25,20 @@ export default {
                 storageBucket: "gs://wolf-2d385.appspot.com",
                 messagingSenderId: "866199527356",
 
-                // custom key
+                // custom keys
                 requiresAuth: true,
                 createNewUsers: false, // defaults to true. SignUp if user don't exist
-                allowedRoles: ["admin"] // defaults to any
+                allowedRoles: ["admin"], // defaults to any,
+                masterAuthConfig: {
+                    apiKey: "AIzaSyBHU-zPRVHBjygG7iG_XwlI_dODF9Rj7Fs",
+                    authDomain: "studiiio-9274f.firebaseapp.com",
+                    databaseURL: "https://studiiio-9274f.firebaseio.com",
+                    projectId: "studiiio-9274f",
+                    storageBucket: "studiiio-9274f.appspot.com",
+                    messagingSenderId: "866199527356",
+                    // custom key
+                    remoteRestAuthLinkFunction: 'https://us-central1-studiiio-9274f.cloudfunctions.net/remoteRestAuthLink' // sends params ({ projectId, token, email })
+                }
             },
             tableConfig: {
                 pageSize: 25,

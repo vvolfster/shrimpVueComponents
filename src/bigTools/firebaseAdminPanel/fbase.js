@@ -104,21 +104,14 @@ const functions = {
 
         function signInUp(authApp, username, password) {
             return new Promise((resolve, reject) => {
-                function success() {
-                    localStorage.setItem("fbAdminPanelUser", username);
-                    localStorage.setItem("fbAdminPanelPW", password);
-                    Toast.positive(`Logged in as ${username}`);
-                    resolve();
-                }
-
-                authApp.auth().signInWithEmailAndPassword(username, password).then(success).catch((err) => {
+                authApp.auth().signInWithEmailAndPassword(username, password).then(resolve).catch((err) => {
                     if (err.message !== "There is no user record corresponding to this identifier. The user may have been deleted.")
                         return reject(err.message);
 
                     if (!canCreateNewUsers)
                         return reject('User does not exist and we are not allowed to create one!');
 
-                    return authApp.auth().createUserWithEmailAndPassword(username, password).then(success).catch(reject);
+                    return authApp.auth().createUserWithEmailAndPassword(username, password).then(resolve).catch(reject);
                 })
             })
         }
@@ -139,21 +132,33 @@ const functions = {
                     return new Promise((resolve, reject) => {
                         authApp.auth().currentUser.getIdToken(true)
                         .then((token) => {
-                            axios.post(masterAuthConfig.remoteRestAuthLinkFunction, { token, projectId: fbConfig.projectId })
+                            const sendObj =  { token, projectId: fbConfig.projectId }
+                            axios.post(masterAuthConfig.remoteRestAuthLinkFunction, sendObj, { 'Content-Type': 'application/json' })
                             .then((res) => {
-                                console.log(`response came back with`, res);
+                                const responseToken = lodash.get(res, "data.token") || lodash.get(res, "token");
+                                if(!responseToken)
+                                    return reject(`Master auth server sent no token back!`);
+
+                                return resolve(responseToken);
                             })
-                            .catch(reject);
+                            .catch(err => reject(`${err.response.status}: ${err.response.data}`));
                         })
                         .catch(reject);
                     })
                 }
 
                 function signInToLocalApp(token) {
-                    return authApp.auth().signInWithCustomToken(token); // returns a promise
+                    // console.log(`signInToLocalApp with token ${token}`)
+                    return new Promise((resolve, reject) => {
+                        return app.auth().signInWithCustomToken(token).then(resolve).catch(reject);
+                    })
                 }
 
-                return signInUp(authApp, username, password).then(sendAuthTokenToServer).then(signInToLocalApp).catch(reject);
+                return signInUp(authApp, username, password)
+                .then(sendAuthTokenToServer)
+                .then(signInToLocalApp)
+                .then(resolve)
+                .catch(reject);
             })
         }
 
@@ -177,6 +182,9 @@ const functions = {
                         return new Promise((resolve, reject) => {
                             const authFn = masterAuthConfig ? masterAuth : basicAuth;
                             return authFn(params).then(() => {
+                                localStorage.setItem("fbAdminPanelUser", params.username);
+                                localStorage.setItem("fbAdminPanelPW", params.password);
+                                Toast.positive(`Logged in as ${params.username}`);
                                 resolve();
                                 rootResolve();
                             }).catch(reject);
@@ -211,16 +219,21 @@ export default {
                         const database = state.app.database();
                         // functions.populateDummyData(database, 100);
 
+                        const authAppName = `masterAuth_${lodash.get(fbConfig, `masterAuthConfig.projectId`)}`
+                        const authApp = functions.getApp(authAppName) || app
+
                         // console.log(`resolving`, state.app.auth().currentUser);
                         functions.getTableNames(fbConfig.databaseURL).then((tables) => {
                             state.appVars = {
+                                authApp,
                                 app: state.app,
                                 database,
                                 tables,
-                                auth: state.app.auth(),
+                                auth: authApp.auth(),
                                 messaging: state.app.messaging(),
                                 storage: state.app.storage(),
                             }
+                            // console.log(state.appVars);
                             resolve(state.appVars)
                         })
                     })
