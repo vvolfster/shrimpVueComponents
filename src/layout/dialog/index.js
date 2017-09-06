@@ -106,7 +106,8 @@ function create(params) {
             }
         },
         destroyed() {
-            container.parentNode.removeChild(container);
+            if(container && container.parentNode)
+                container.parentNode.removeChild(container);
         },
         data() {
             return {
