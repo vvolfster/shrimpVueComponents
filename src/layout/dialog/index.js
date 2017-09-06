@@ -7,7 +7,7 @@ import shared from '../shared'
 import instance from './instance'
 import '../modal/modal.css'
 
-function createContainer() {
+function createContainer(attributes, style, className) {
     const frag = document.createDocumentFragment();
     const containerNode = document.createElement("div");
     const wrapperNode = document.createElement("div");
@@ -16,10 +16,18 @@ function createContainer() {
     const instanceId = `dialogObject_${shared.dialogs.newKey}`
 
     containerNode.id = containerId;
-    containerNode.className = "modalContainer";
+    containerNode.className = className ? `modalContainer ${className}` : "modalContainer";
     containerNode.style.display = "flex";
     containerNode.style.alignItems = "center";
     containerNode.style.justifyContent = "center";
+
+    if(toString.call(attributes) === '[object Object]')
+        lodash.each(attributes, (v, k) => { containerNode.setAttribute(k, v); })
+
+    if(toString.call(style) === '[object Object]')
+        lodash.each(style, (v, k) => { containerNode.style[k] = v })
+    else if(typeof style === 'string')
+        containerNode.style = style;
 
     wrapperNode.className = "modalObjectWrapper";
     wrapperNode.innerHTML = `<instance id="${instanceId}" :params="params" :position="position" :animation="animation" :duration="duration" @close="dismiss" ref="instance"/>`
@@ -57,7 +65,11 @@ function getPositionAndAnimationInfo(params) {
 }
 
 function create(params) {
-    const retObj = createContainer();
+    const attributes = params.attributes;
+    const style = params.style;
+    const className = params.className || params.class;
+
+    const retObj = createContainer(attributes, style, className);
     const container = retObj.container;
     const onDismiss = params.onDismiss;
     const busyCanBeDismissed = params.dismissBusy;
