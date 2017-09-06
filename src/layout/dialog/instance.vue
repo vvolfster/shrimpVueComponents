@@ -1,13 +1,14 @@
 <template>
     <div class='modalObject column instanceRoot' :style="ui.style" @click.stop="doNothing">
-        <div class="dialog__title">{{ ui.title }}</div>
-        <div class="dialog__description">{{ ui.description }}</div>
+        <div class="dialog__title" :style="styles.title">{{ ui.title }}</div>
+        <div class="dialog__description" :style="styles.description">{{ ui.description }}</div>
         <autoform v-if="ui.form"
             ref="form"
             :fields="ui.form"
             @value="formVal = $event"
+            :style="styles.autoform"
         />
-        <div class='buttonRow' v-if="!busy">
+        <div class='buttonRow' v-if="!busy" :style="styles.buttonRow">
             <button v-for="(button, name) in buttons" :key="name" @click="pressButton(name)">
                 {{ name }}
             </button>
@@ -112,7 +113,32 @@ export default {
         buttons() {
             const params = this.params;
             return params.buttons || {}
-        }
+        },
+        styles() {
+            const params = this.params;
+            const styles = params.style || params.styles;
+
+            function isValidStyle(o) {
+                return typeof o === 'string' || toString.call(o) === '[object Object]'
+            }
+
+            function getStyle(name) {
+                if(styles && isValidStyle(styles[name]))
+                    return styles[name]
+
+                if(params && isValidStyle(params[`${name}Style`]))
+                    return params[`${name}Style`]
+
+                return ''
+            }
+
+            return {
+                description: getStyle('description'),
+                title: getStyle('title'),
+                buttonRow: getStyle('buttonRow'),
+                autoform: getStyle('autoform')
+            }
+        },
     },
     methods: {
         close(){
