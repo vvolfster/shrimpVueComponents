@@ -10,7 +10,7 @@ EVENTS: opened, closed
                 :css="false"
                 ref="content"
             >
-                <slot name="content" v-if="isOpen"></slot>
+                <slot name="content" v-if="d_open"></slot>
             </transition>
 
             <div class="collapsibleHeader" ref="header"  @click="toggle()">
@@ -27,7 +27,7 @@ EVENTS: opened, closed
                 :css="false"
                 ref="content"
             >
-                <slot name="content" v-if="isOpen"></slot>
+                <slot name="content" v-if="d_open"></slot>
             </transition>
         </div>
     </div>
@@ -57,26 +57,26 @@ EVENTS: opened, closed
         },
         data() {
             return {
-                isOpen: false,
+                d_open: false,
             }
         },
         mounted() {
-            this.isOpen = this.open;
+            this.d_open = this.open;
         },
         watch: {
             open(v) {
-                this.isOpen = v;
+                this.d_open = v;
             },
         },
         methods: {
             toggle() {
-                this.isOpen = !this.isOpen;
+                this.d_open = !this.d_open;
             },
             expand() {
-                this.isOpen = true;
+                this.d_open = true;
             },
             collapse() {
-                this.isOpen = false;
+                this.d_open = false;
             },
             enter(el, done) {
                 const self = this;
@@ -109,6 +109,9 @@ EVENTS: opened, closed
                 // },
                 // { complete: done })
             },
+            isOpen() {
+                return this.d_open
+            }
         },
     }
 </script>
