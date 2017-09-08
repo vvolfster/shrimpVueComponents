@@ -85,7 +85,7 @@ EVENTS: opened, closed
                     self.$emit(`opened`);
                 }
                 if(this.animated)
-                    Velocity(el, 'slideDown');
+                    Velocity(el, 'slideDown', { duration: this.duration, easing: 'ease-out', complete: finish });
                 else
                     finish();
             },
