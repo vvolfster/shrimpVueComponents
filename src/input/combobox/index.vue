@@ -130,8 +130,6 @@ export default {
         height: inherit;
         min-height: 32px;
         min-width: 32px;
-        background: white;
-        color: black;
     }
 
     .select {
@@ -139,8 +137,8 @@ export default {
         height: inherit;
         min-width: inherit;
         min-height: inherit;
-        color: inherit;
-        background: inherit;
+        background: white;
+        color: black;
         font: inherit;
 
         border: solid;
