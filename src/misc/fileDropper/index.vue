@@ -29,6 +29,7 @@
 <script>
 import lodash from 'lodash'
 import idGen from './idGen'
+import fns from '../functions'
 
 function supportsDragDrop() {
     const div = document.createElement('div');
@@ -132,7 +133,7 @@ export default {
 
             if(typeof fn === 'function') {
                 self.busy = true;
-                Promise.resolve(fn(files, unbusy)).then(unbusy).catch(unbusy);
+                fns.genericResolver(fn, files, unbusy).then(unbusy).catch(unbusy);
             }
             else {
                 self.$emit('files', files);

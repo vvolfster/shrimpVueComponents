@@ -25,6 +25,7 @@ import lodash from 'lodash'
 import '../modal/modal.css'
 import autoform from '../../input/autoform'
 import animator from '../../misc/animator'
+import fns from '../../misc/functions'
 import Toast from '../../vuePlugins/toasts'
 
 export default {
@@ -157,9 +158,7 @@ export default {
             if(typeof fn === 'function'){
                 if(formIsValid){
                     self.busy = true;
-                    Promise.resolve(fn(formVal, (progress) => {
-                        self.progress = progress;
-                    }))
+                    fns.genericResolver(fn, formVal, (progress) => { self.progress = progress })
                     .then(() => {
                         self.busy = false;
                         self.close();

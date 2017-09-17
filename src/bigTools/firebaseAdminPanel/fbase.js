@@ -4,6 +4,7 @@ import axios from 'axios'
 // import Chance from 'chance'
 import Dialog from '../../layout/dialog'
 import Toast from '../../vuePlugins/toasts'
+import importedFunctions from '../../misc/functions'
 
 // import Vue from 'vue'
 // import VueTable from 'vuetable-2'
@@ -49,6 +50,7 @@ const functions = {
             // }).catch(reject);
         })
     },
+    genericResolver: importedFunctions.genericResolver,
     /**
      * @function getTableNames
      * @param  {type} databaseURL {The url of the database}
@@ -97,14 +99,21 @@ const functions = {
         return lodash.find(Firebase.apps, v => v.name === appName)
     },
     doAuth(app, fbConfig) {
-        // fbConfig.masterAuthConfig, fbConfig.createNewUsers, fbConfig.allowedRoles
         const canCreateNewUsers = typeof fbConfig.createNewUsers !== 'boolean' ? true : fbConfig.createNewUsers;
         const masterAuthConfig = fbConfig.masterAuthConfig;
-        // console.warn(fbConfig.allowedRoles, "allowed roles not yet implemented. This is part of making the adminPanel more secure");
+        let userRequirementFn = fbConfig.authRequirementFn || fbConfig.authRequirement || fbConfig.userRequirementFn || fbConfig.userRequirement
+        if(typeof userRequirementFn !== 'function')
+            userRequirementFn = () => true;
 
         function signInUp(authApp, username, password) {
             return new Promise((resolve, reject) => {
-                authApp.auth().signInWithEmailAndPassword(username, password).then(resolve).catch((err) => {
+                authApp.auth().signInWithEmailAndPassword(username, password).then(() => {
+                    function failUserCheck() {
+                        authApp.auth().signOut().then(() => reject(`This user does not have permission`))
+                    }
+
+                    functions.genericResolver(userRequirementFn, authApp.auth().currentUser).then(resolve).catch(failUserCheck);
+                }).catch((err) => {
                     if (err.message !== "There is no user record corresponding to this identifier. The user may have been deleted.")
                         return reject(err.message);
 

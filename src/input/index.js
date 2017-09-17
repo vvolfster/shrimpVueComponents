@@ -3,6 +3,7 @@ import boolean from './boolean'
 import combobox from './combobox'
 import date from './date'
 import file from './file'
+import markdown from './markdown'
 import number from './number'
 import textLine from './textLine'
 import textLineAutoComplete from './textLineAutoComplete'
@@ -16,6 +17,7 @@ export default {
     combobox,
     date,
     file,
+    markdown,
     number,
     textLine,
     textLineAutoComplete,

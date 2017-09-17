@@ -28,7 +28,6 @@ export default {
                 // custom keys
                 requiresAuth: true,
                 createNewUsers: false, // defaults to true. SignUp if user don't exist
-                allowedRoles: ["admin"], // defaults to any,
                 masterAuthConfig: {
                     apiKey: "AIzaSyBHU-zPRVHBjygG7iG_XwlI_dODF9Rj7Fs",
                     authDomain: "studiiio-9274f.firebaseapp.com",
@@ -38,6 +37,13 @@ export default {
                     messagingSenderId: "866199527356",
                     // custom key
                     remoteRestAuthLinkFunction: 'https://us-central1-studiiio-9274f.cloudfunctions.net/remoteRestAuthLink' // sends params ({ projectId, token, email })
+                },
+                userRequirement(user) {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            return user.email !== 'shahan@iii.global' ? reject() : resolve()
+                        }, 1000)
+                    })
                 }
             },
             tableConfig: {

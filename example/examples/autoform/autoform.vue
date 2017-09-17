@@ -91,6 +91,9 @@ export default {
                 aboutMe: {
                     type: "paragraph",
                     model: "I am the maddest wolf",
+                    options: {
+                        markdown: true
+                    },
                     validateFn(v) {
                         if(!v || !v.length)
                             return 'Too short'
@@ -103,6 +106,15 @@ export default {
                 },
                 married: {
                     type: Boolean
+                },
+                markdown: {
+                    type: "markdown",
+                    required: true,
+                    validator(v) {
+                        if(v.indexOf('lincoln') !== -1)
+                            return 'Cannot contain the lincoln'
+                        return true;
+                    }
                 },
                 "embedded.field": {
                     type: String,

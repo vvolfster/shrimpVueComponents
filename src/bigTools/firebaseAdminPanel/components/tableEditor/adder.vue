@@ -24,6 +24,7 @@
     import autoform from '../../../../input/autoform'
     import modal from '../../../../layout/modal'
     import animator from '../../../../misc/animator'
+    import functions from '../../../../misc/functions'
 
     export default {
         components: { tabView, autoform, modal },
@@ -107,7 +108,7 @@
                             const val = autoForm.getValue();
                             return amalgamateValueIntoFormVal(step, val).then(() => {
                                 if(lodash.isFunction(step.after)){
-                                    return Promise.resolve(step.after(formVal)).then(resolve).catch(reject);
+                                    return functions.genericResolver(step.after, formVal).then(resolve).catch(reject);
                                 }
                                 return resolve();
                             }).catch(reject);

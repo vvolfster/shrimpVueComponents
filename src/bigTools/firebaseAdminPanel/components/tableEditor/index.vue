@@ -96,7 +96,7 @@
     import modal from '../../../../layout/modal'
     import Dialog from '../../../../layout/dialog'
     import collapsible from '../../../../misc/collapsible'
-    
+    import importedFunctions from '../../../../misc/functions'
 
     const functions = {
         getColumns(data, storageKey) {
@@ -136,6 +136,7 @@
                 return aVal - bVal;
             })
         },
+        genericResolver: importedFunctions.genericResolver
     }
 
     export default {
@@ -370,7 +371,7 @@
                 this.busyMessage = `Peforming ${name}. Please wait...`
                 this.$refs.busyModal.open();
 
-                Promise.resolve(action(id, value, this.navFn)).then((msg) => {
+                functions.genericResolver(action, id, value, this.navFn).then((msg) => {
                     console.warn(msg);
                     this.$refs.busyModal.close();
                 }).catch((err) => {
@@ -459,7 +460,7 @@
                         return reject(`no such action to call: ${name}`);
 
                     return fbase.getTableRef(pageName).then((ref) => {
-                        Promise.resolve(action(ref)).then(resolve).catch(reject);
+                        functions.genericResolver(action, ref).then(resolve).catch(reject);
                     }).catch(reject);
                 })
             },

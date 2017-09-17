@@ -19,6 +19,7 @@ import pbar from './helpers/progressBar'
 import string from './componentsInline/string'
 import paragraph from './componentsInline/paragraph'
 import { extendComponentsInline } from './'
+import fns from '../../misc/functions'
 
 function getComponents() {
     const localComponents = { string, paragraph }
@@ -32,7 +33,6 @@ const helperComponents = {
     voverlay,
     pbar,
 }
-
 
 function paramsAreValid(p) {
     if(toString.call(p) !== `[object Object]`)
@@ -87,7 +87,7 @@ export default {
                 else if(!name)
                     return reject("name is no longer valid")
                 else if(lodash.isFunction(mapTo))
-                    return Promise.resolve(mapTo(name)).then(resolve).catch(reject);
+                    return fns.genericResolver(mapTo, name).then(resolve).catch(reject);
 
                 return resolve(mapTo[name]);
             })
@@ -118,7 +118,7 @@ export default {
                 if(!lodash.isFunction(setFn))
                     return reject(`setFn is no longer valid`);
 
-                return Promise.resolve(setFn(valueObj)).then(resolve).catch((err) => {
+                return fns.genericResolver(setFn, valueObj).then(resolve).catch((err) => {
                     // alert(`err occured when trying to submit ${err}`);
                     reject(`err occured when trying to submit ${err}`);
                 })

@@ -49,6 +49,7 @@ close - emitted when the user successfully submits or hits close. In Cms.js , th
     import pbar from './helpers/progressBar';
     import string from './components/string';
     import { extendComponents } from './';
+    import fns from '../../misc/functions'
     
     function getComponents() {
         const localComponents = { string }
@@ -133,7 +134,7 @@ close - emitted when the user successfully submits or hits close. In Cms.js , th
 
                 function generatePromise(key, fn, type, validator, options){
                     return new Promise((resolve) => {
-                        Promise.resolve(fn(key)).then((value) => {
+                        fns.genericResolver(fn, key).then((value) => {
                             loading.loadedOne();
                             resolve({ key, result: { type, value, validator, options, validated: validator(value) } })
                         })
@@ -195,7 +196,8 @@ close - emitted when the user successfully submits or hits close. In Cms.js , th
                         return a;
                     }, {})
 
-                    Promise.resolve(setFn(valueObj)).then(() => {
+                    fns.genericResolver(setFn, valueObj)
+                    .then(() => {
                         this.close();
                         resolve();
                     }).catch((err) => {

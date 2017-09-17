@@ -5,6 +5,7 @@ import lodash from 'lodash';
 import Vue from 'vue';
 import cmsStyle from './cms.css';
 import cmsAddChooser from './cmsAddChooser'
+import functions from '../../misc/functions'
 
 let cmsform = null; // we will require them in the install method. They need to be aware of this thing's components.
 let cmsInlineLoader = null; // we will require them in the install method. They need to be aware of this thing's componentsInline
@@ -132,7 +133,7 @@ const helpers = {
 
             function generatePromise(key, fn){
                 return new Promise((resolve) => {
-                    Promise.resolve(fn(key)).then((value) => { resolve({ key, value }); })
+                    functions.genericResolver(fn, key).then((value) => { resolve({ key, value }); })
                 })
             }
 
@@ -172,7 +173,7 @@ const helpers = {
             const isComplex = typeof v === 'object';
             const mappedTo  = isComplex && v.mapTo ? v.mapTo : rootMappedTo;
             if(typeof mappedTo === `function`) {
-                Promise.resolve(mappedTo(k)).then((val) => { valueObject[k] = val; })
+                functions.genericResolver(mappedTo, k).then((val) => { valueObject[k] = val; })
             }
             else {
                 valueObject[k] =  mappedTo[k];
@@ -389,13 +390,13 @@ const list = {
 
             const type = typeof addDescriptor;
             if(type === `function`)
-                return Promise.resolve(addDescriptor()).then(resolve);
+                return functions.genericResolver(addDescriptor).then(resolve);
 
             const cmsAddInstance = helpers.createPopup(`cmsaddchooser`, cmsAddChooser, (fn) => {
                 if(typeof fn === `function`) {
                     const chosenAddOption = lodash.findKey(addDescriptor, v => v === fn) || ``;
                     const beautify = chosenAddOption.charAt(0).toUpperCase() + chosenAddOption.slice(1);
-                    Promise.resolve(fn()).then((result) => {
+                    functions.genericResolver(fn).then((result) => {
                         const addMsg = typeof result === `string` ? result : beautify;
                         config.toastFn(addMsg, "Added", "success");
                         resolve();
@@ -430,7 +431,7 @@ const list = {
                         // isInList: lodash.find(data, (v) => { return v === cmsState.dragee.value }) !== undefined, Removed cause it is not useful in many cases since it doesnt return accurately.
                     }
                     cmsState.canDrag = false;
-                    Promise.resolve(moveFn(params)).then(() => { cmsState.canDrag = true; refreshFn(); });
+                    functions.genericResolver(moveFn, params).then(() => { cmsState.canDrag = true; refreshFn(); });
                 }
             },
             dragenter(e) {
@@ -559,7 +560,7 @@ const list = {
                     if(createdDeleteButton) {
                         const delButton = helpers.findChildRecursive(child, `.${cssClasses.overlayListRemoveButton}`);
                         $(delButton).on('click', () => {
-                            Promise.resolve(listDescriptor.remove(relatedDataItem)).then(refreshFn);
+                            functions.genericResolver(listDescriptor.remove, relatedDataItem).then(refreshFn);
                         })
                     }
                 }
