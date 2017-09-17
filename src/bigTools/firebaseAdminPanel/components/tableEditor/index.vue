@@ -30,7 +30,7 @@
                                 #{{ (page.idx * page.pageSize) + index + 1  }}
                             </div>
                             <div v-if="typeof header.displayFn === 'function'">
-                                {{ header.displayFn(entry) }}
+                                {{ header.displayFn(entry, id) }}
                             </div>
                             <div class="componentHeader__actions">
                                 <button class="btn btn--detail" @click="openDetailView(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
