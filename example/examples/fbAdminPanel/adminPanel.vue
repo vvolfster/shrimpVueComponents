@@ -12,40 +12,27 @@
 import lodash from 'lodash'
 import fbAdminPanel from '@/bigTools/firebaseAdminPanel'
 import person from './person'
+import fbconf from './fbconf'
 
 export default {
     components: { fbAdminPanel, person },
     data() {
         return {
-            fbConfig: {
-                apiKey: "AIzaSyC97H_bXdMzXbg2DHv9NwvDn2KatyAGdWY",
-                authDomain: "wolf-2d385.firebaseio.com",
-                databaseURL: "https://wolf-2d385.firebaseio.com",
-                projectId: "wolf-2d385",
-                storageBucket: "gs://wolf-2d385.appspot.com",
-                messagingSenderId: "866199527356",
-
+            fbConfig: lodash.assign({
                 // custom keys
                 requiresAuth: true,
                 createNewUsers: false, // defaults to true. SignUp if user don't exist
-                masterAuthConfig: {
-                    apiKey: "AIzaSyBHU-zPRVHBjygG7iG_XwlI_dODF9Rj7Fs",
-                    authDomain: "studiiio-9274f.firebaseapp.com",
-                    databaseURL: "https://studiiio-9274f.firebaseio.com",
-                    projectId: "studiiio-9274f",
-                    storageBucket: "studiiio-9274f.appspot.com",
-                    messagingSenderId: "866199527356",
-                    // custom key
-                    remoteRestAuthLinkFunction: 'https://us-central1-studiiio-9274f.cloudfunctions.net/remoteRestAuthLink' // sends params ({ projectId, token, email })
-                },
                 userRequirement(user) {
                     return new Promise((resolve, reject) => {
                         setTimeout(() => {
                             return user.email !== 'shahan@iii.global' ? reject() : resolve()
                         }, 1000)
                     })
-                }
-            },
+                },
+                masterAuthConfig: lodash.assign({
+                    remoteRestAuthLinkFunction: 'https://us-central1-studiiio-9274f.cloudfunctions.net/remoteRestAuthLink' // sends params ({ projectId, token, email })
+                }, fbconf.master)
+            }, fbconf.db),
             tableConfig: {
                 pageSize: 25,
                 test: {
