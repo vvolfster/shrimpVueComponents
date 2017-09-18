@@ -122,6 +122,7 @@ export default {
             return new Promise((resolve, reject) => {
                 const subscriptions =  {
                     child_added(snap) {
+                        // console.log('child_added', snap.key);
                         if(lodash.isArray(self.ids)) {
                             const idx = self.ids.indexOf(snap.key);
                             if(idx === -1)
