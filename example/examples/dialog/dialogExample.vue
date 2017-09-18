@@ -21,6 +21,8 @@
 </template>
 
 <script>
+/* eslint-disable no-tabs */
+/* eslint-disable max-len */
 import lodash from 'lodash'
 import mousetrap from 'mousetrap'
 import dialog from '@/layout/dialog'
@@ -78,6 +80,10 @@ export default {
                                 return "No benji buttons allowed"
                             return true;
                         }
+                    },
+                    html: {
+                        type: "markdown",
+                        model: `<tr> 	<td style="color: #153643; font-family: Arial, sans-serif; font-size: 24px;text-align:center"> 		<b>It's go time!</b> 	</td> </tr> <tr> 	<td style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;text-align:center"> 		Dear { user }, 		<br> 		Your Imagination International class is now live. Please login to access the class. Your class can be found in your Account, under “My Classes”.  		The class will be open from { date_start } through { date_end }.   		  		<br><br><br>   		<center> 		<a href="{ url }" style="background-color: #44c7f4;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;border-radius:5px" target="_blank">My Classes</a> 		</center>  		<br><br><br>  		If you have any questions, please contact us at classes@iii.global.  		<br><br><br>  		If this is incorrect, please ignore this message. 	</td> </tr>`
                     }
                 },
                 buttons: {

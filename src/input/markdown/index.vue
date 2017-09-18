@@ -49,6 +49,10 @@ export default {
         this.editor.codemirror.on('change', this.updateValue);
         this.editor.value(this.value);
     },
+    beforeDestroy() {
+        if(this.editor)
+            this.editor.codemirror.off('change', this.updateValue);
+    },
     data() {
         return {
             editor: null,
@@ -224,10 +228,13 @@ export default {
         isInError() { return !!this.error }
     },
     watch: {
-        // value() {
-            // this.d_value = this.value;
-            // this.editor.value(this.value);
-        // }
+        value() {
+            if(!this.editor || this.value === this.editor.value())
+                return;
+
+            this.d_value = this.value;
+            this.editor.value(this.value);
+        }
     }
 }
 </script>
