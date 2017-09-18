@@ -1,7 +1,7 @@
 <template>
     <div class="autoform">
         <div>{{ title }}</div>
-        <div>{{ description }}</div>
+        <pre>{{ description }}</pre>
         <div class="autoComponents" v-if="fields">
             <div v-for="(field, name) in fields" :key="name" style="position:relative;">
                 <div class="autoform--input">

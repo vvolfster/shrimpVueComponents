@@ -1,7 +1,7 @@
 <template>
     <div class='modalObject column instanceRoot' :style="ui.style" @click.stop="doNothing">
         <div class="dialog__title" :style="styles.title">{{ ui.title }}</div>
-        <div class="dialog__description" :style="styles.description">{{ ui.description }}</div>
+        <pre class="dialog__description" :style="styles.description">{{ ui.description }}</pre>
         <autoform v-if="ui.form"
             ref="form"
             :fields="ui.form"
