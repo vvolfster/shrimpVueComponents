@@ -1,18 +1,20 @@
 <template>
-    <div class="line">
-        <input class="line__input"
-            ref="input"
-            type="number"
-            @input="updateValue"  
-            :class="error ? 'line__input--error' : ''"
-            :style="ui.style"
-            :placeholder="d_value === Infinity ? 'Infinity' : placeholder"
-        />
-        <div class="buttons">
-            <div v-if="ui.allowInfinity" class="btn" :class="d_value === Infinity ? 'btn--infinity' : ''" @click.stop="updateValue(Infinity)">∞</div>
-            <div class="buttons__updown">
-                <div class="fa fa-caret-up btn buttons__updown__up" @click.stop="increment"></div>
-                <div class="fa fa-caret-down btn buttons__updown__down" @click.stop="decrement"></div>
+    <div>
+        <div class="line">
+            <input class="line__input"
+                ref="input"
+                type="number"
+                @input="updateValue"  
+                :class="error ? 'line__input--error' : ''"
+                :style="ui.style"
+                :placeholder="d_value === Infinity ? 'Infinity' : placeholder"
+            />
+            <div class="buttons">
+                <div v-if="ui.allowInfinity" class="btn" :class="d_value === Infinity ? 'btn--infinity' : ''" @click.stop="updateValue(Infinity)">∞</div>
+                <div class="buttons__updown">
+                    <div class="fa fa-caret-up btn buttons__updown__up" @click.stop="increment"></div>
+                    <div class="fa fa-caret-down btn buttons__updown__down" @click.stop="decrement"></div>
+                </div>
             </div>
         </div>
         <div v-if="error !== null" class="line__error">
@@ -164,7 +166,12 @@ export default {
 .line__input:hover { border-width: 0 0 1px 0; }
 .line__input:focus { border-width: 0 0 1px 0; }
 .line__input:focus:hover { border-width: 0 0 1px 0; }
-
+.line__input::-webkit-outer-spin-button,
+.line__input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
 .line__input--error { border-color: red; }
 .line__input--error:hover { border-color: red; }
 .line__input--error:focus { border-color: red; }
