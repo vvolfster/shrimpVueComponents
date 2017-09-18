@@ -19,6 +19,7 @@ import lodash from 'lodash'
 import Showdown from 'showdown'
 import SimpleMDE from 'simplemde'
 import 'simplemde/dist/simplemde.min.css'
+import './simpleMdeStyleOverride.css'
 
 const converter = new Showdown.Converter();
 
@@ -221,6 +222,12 @@ export default {
         isEmpty() { return !this.d_value; },
         getValue() { return this.d_value; },
         isInError() { return !!this.error }
+    },
+    watch: {
+        // value() {
+            // this.d_value = this.value;
+            // this.editor.value(this.value);
+        // }
     }
 }
 </script>
@@ -230,6 +237,7 @@ export default {
 .bordered { 
     border: solid 1px black;
 }
+
 
 
 .paragraph--error {

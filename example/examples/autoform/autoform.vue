@@ -109,6 +109,7 @@ export default {
                 },
                 markdown: {
                     type: "markdown",
+                    model: "** Si Si senior **",
                     required: true,
                     validator(v) {
                         if(v.indexOf('lincoln') !== -1)
