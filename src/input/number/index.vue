@@ -11,8 +11,8 @@
         <div class="buttons">
             <div v-if="ui.allowInfinity" class="btn" :class="d_value === Infinity ? 'btn--infinity' : ''" @click.stop="updateValue(Infinity)">∞</div>
             <div class="buttons__updown">
-                <div class="fa fa-caret-up btn" @click.stop="increment"></div>
-                <div class="fa fa-caret-down btn" @click.stop="decrement"></div>
+                <div class="fa fa-caret-up btn buttons__updown__up" @click.stop="increment"></div>
+                <div class="fa fa-caret-down btn buttons__updown__down" @click.stop="decrement"></div>
             </div>
         </div>
         <div v-if="error !== null" class="line__error">
@@ -145,6 +145,8 @@ export default {
     position: relative;
     width: inherit;
     height: inherit;
+    display: flex;
+    align-items: flex-end;
 }
 
 .line__input {
@@ -177,12 +179,27 @@ export default {
     position: absolute;
     top: 0;
     right: 0;
+    bottom: 0;
     display: flex;
 }
 
 .buttons__updown {
-    display: flex;
-    flex-flow: column;
+    position: relative;
+    height: 100%;
+}
+
+.buttons__updown__up {
+    position: absolute;
+    top: 0;
+    bottom: 50%;
+    margin: 0;
+}
+
+.buttons__updown__down {
+    position: absolute;
+    top: 50%;
+    bottom: 0;
+    margin: 0;
 }
 
 .btn {
@@ -193,6 +210,8 @@ export default {
     display: flex;
     align-items: center;
 }
+
+
 
 .btn--infinity {
     -webkit-animation:infinity 2s linear infinite alternate;
