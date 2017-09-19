@@ -445,7 +445,8 @@
                         fbase.getTableRef(tblName).then((ref) => {
                             ref.push(val).then(() => {
                                 const name = lodash.get(self, "page.name")
-                                Toast.positive(`Successfully created new entry in ${name}`);
+                                if(name)
+                                    Toast.positive(`Successfully created new entry in ${name}`);
                             })
                         }).catch(reject);
                     }).catch(reject);
