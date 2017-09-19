@@ -96,6 +96,7 @@
     import modal from '../../../../layout/modal'
     import Dialog from '../../../../layout/dialog'
     import collapsible from '../../../../misc/collapsible'
+    import Toast from '../../../../vuePlugins/toasts'
     import importedFunctions from '../../../../misc/functions'
 
     const functions = {
@@ -442,7 +443,9 @@
                     return adderRef.start().then((val) => {
                         // console.log(val);
                         fbase.getTableRef(tblName).then((ref) => {
-                            ref.push(val);
+                            ref.push(val).then(() => {
+                                Toast.positive(`Successfully created new entry in ${self.page.name}`);
+                            })
                         }).catch(reject);
                     }).catch(reject);
                 })
