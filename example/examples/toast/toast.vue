@@ -22,18 +22,25 @@ import Toast from '@/vuePlugins/toasts'
 export default {
     data(){
         return {
-            toastStyles: ['default', 'positive', 'negative', 'info'],
+            toastStyles: ['default', 'positive', 'negative', 'info', 'html'],
             useVue: false,
         }
     },
     methods: {
         showToast(name) {
-            const msg = 'Hello world. How are you?'
-            const fn = this.useVue ? Vue.toast : Toast;
-            if(name === 'default')
+            if(name !== 'html'){
+                const msg = 'Hello world. How are you?'
+                const fn = this.useVue ? Vue.toast : Toast;
+                if(name === 'default')
+                    fn(msg)
+                else
+                    fn[name](msg)
+            }
+            else {
+                const msg = `<b>Hello world</b><br>How are you?`
+                const fn = this.useVue ? Vue.toast : Toast;
                 fn(msg)
-            else
-                fn[name](msg)
+            }
         },
         dismissAll() {
             return this.useVue ? Vue.toast.dismissAll() : Toast.dismissAll();

@@ -110,7 +110,7 @@ const functions = {
         })
 
         // assign textNode style & text
-        textNode.innerText = msg;
+        textNode.innerHTML = msg;
         textNode.style.display = "table-cell";
         textNode.style.verticalAlign = "middle";
         textNode.style[`pointer-events`] = `auto`;
