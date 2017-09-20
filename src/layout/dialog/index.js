@@ -7,7 +7,7 @@ import shared from '../shared'
 import instance from './instance'
 import '../modal/modal.css'
 
-function createContainer(attributes, style, className) {
+function createContainer(attributes) {
     const frag = document.createDocumentFragment();
     const containerNode = document.createElement("div");
     const wrapperNode = document.createElement("div");
@@ -16,7 +16,7 @@ function createContainer(attributes, style, className) {
     const instanceId = `dialogObject_${shared.dialogs.newKey}`
 
     containerNode.id = containerId;
-    containerNode.className = className ? `modalContainer ${className}` : "modalContainer";
+    containerNode.className = "modalContainer";
     containerNode.style.display = "flex";
     containerNode.style.alignItems = "center";
     containerNode.style.justifyContent = "center";
@@ -24,13 +24,8 @@ function createContainer(attributes, style, className) {
     if(toString.call(attributes) === '[object Object]')
         lodash.each(attributes, (v, k) => { containerNode.setAttribute(k, v); })
 
-    if(toString.call(style) === '[object Object]')
-        lodash.each(style, (v, k) => { containerNode.style[k] = v })
-    else if(typeof style === 'string')
-        containerNode.style = style;
-
     wrapperNode.className = "modalObjectWrapper";
-    wrapperNode.innerHTML = `<instance id="${instanceId}" :params="params" :position="position" :animation="animation" :duration="duration" @close="dismiss" ref="instance"/>`
+    wrapperNode.innerHTML = `<instance id="${instanceId}" :params="params" :position="position" :animation="animation" :duration="duration" :style="style" :class="className" @close="dismiss" ref="instance"/>`
 
     containerNode.appendChild(wrapperNode);
     frag.appendChild(containerNode);
@@ -66,10 +61,10 @@ function getPositionAndAnimationInfo(params) {
 
 function create(params) {
     const attributes = params.attributes;
-    const style = params.style;
-    const className = params.className || params.class;
+    const style = params.style || '';
+    const className = params.className || params.class || '';
 
-    const retObj = createContainer(attributes, style, className);
+    const retObj = createContainer(attributes);
     const container = retObj.container;
     const onDismiss = params.onDismiss;
     const busyCanBeDismissed = params.dismissBusy;
@@ -116,7 +111,9 @@ function create(params) {
                 dismissFns: [],
                 position: posAnim.position,
                 animation: posAnim.animation,
-                duration: posAnim.animationDuration
+                duration: posAnim.animationDuration,
+                style,
+                className
             }
         },
         components: { instance }
