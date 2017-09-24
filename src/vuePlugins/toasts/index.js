@@ -141,7 +141,21 @@ const functions = {
     }
 }
 
-// this function is the one that is exported.
+/**
+ * @typedef {method} Toast
+ * @param  {string} [msg=""] The msg of the toast. Plain text or html will both work.
+ * @param  {Object} [params=null] Custom configuration for the toast
+ * @param  {Object} params.style Styling for the background of the toast
+ * @param  {number} params.duration The duration of the toast (ms)
+ * @property {function} positive Create a positive / success Toast
+ * @property {function} negative Create a negative / danger Toast
+ * @property {function} info Create a info Toast
+ * @property {function} warning Create a warning Toast
+ * @member {function} positive Create a positive / success Toast
+ * @member {function} negative Create a negative / danger Toast
+ * @member {function} info Create a info Toast
+ * @member {function} warning Create a warning Toast
+ */
 const publicToastFn = (msg, params) => {
     if(!state.container)
         state.container = functions.createToastContainer();
@@ -150,7 +164,7 @@ const publicToastFn = (msg, params) => {
         style: lodash.assign(lodash.cloneDeep(state.style.default), lodash.get(params, "style", {})),
         duration: lodash.get(params, "duration", state.duration),
         id: state.id++,
-        msg
+        msg: msg || ''
     }
 
     state.toastStack.push(p);
@@ -202,6 +216,10 @@ publicToastFn.install = (VuePtr, opts) => {
     VuePtr.toast = publicToastFn;
 }
 
+/**
+ * Toast object
+ * @type {Toast}
+*/
 export default publicToastFn;
 // export default {
 //     Toast(...args) {

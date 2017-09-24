@@ -64,11 +64,31 @@ function getPositions(element, elementParent, offset) {
     })
 }
 
+/**
+ * @function animateToPoint
+ * @param {Object} param The input to function
+ * @param {Object} element The element or Vue component instance. Element must be absolutely positioned.
+ * @param {number} x The x coord to animate to.
+ * @param {number} y The y coord to animate to.
+ * @param {type} duration The animation duration in (ms).
+ * @return {Promise}
+ */
 function animateToPoint({ element, x, y, duration }) {
     const el = lodash.get(element, "$el") || element;
     return Velocity(el, { top: y, left: x }, { duration });
 }
 
+/**
+ * @function setPositionWithinParent
+ * @param {Object} param Input parameter to the function
+ * @param  {(HtmlObject | VueComponentInstance)} param.element The element to position
+ * @param  {(HtmlObject | VueComponentInstance | null)} param.elementParent The parent container of the element (Defaults to element's parent)
+ * @param  {string} param.position One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+ * @param  {Object} param.offset Offset from position
+ * @param  {Object} param.offset.x x offset
+ * @param  {Object} param.offset.y y offset
+ * @return {Promise}
+ */
 function setPositionWithinParent({ element, elementParent, position, offset }) {
     return new Promise((resolve, reject) => {
         getElAndParent(element, elementParent).then(({ el, parent }) => {
@@ -269,35 +289,115 @@ function presetOutAnimation(element, elementParent, position, startingPosition, 
 export default {
     setPositionWithinParent,
     animateToPoint,
+    /**
+     * @function animateInCenter Animate element to center of elementParent
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {string} startingPosition Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+     * @param  {number} duration         The duration of the animation in ms.
+     * @return {Promise}
+     */
     animateInCenter({ element, elementParent, startingPosition, duration }) {
         return presetInAnimation(element, elementParent, "center",  startingPosition, duration)
     },
+    /**
+     * @function animateInTop Animate element to the inner top side of elementParent
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {string} startingPosition Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+     * @param  {number} duration         The duration of the animation in ms.
+     * @return {Promise}
+     */
     animateInTop({ element, elementParent, startingPosition, duration }) {
         return presetInAnimation(element, elementParent, "up",  startingPosition, duration)
     },
+    /**
+     * @function animateInBottom Animate element to the inner bottom side of elementParent
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {string} startingPosition Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+     * @param  {number} duration         The duration of the animation in ms.
+     * @return {Promise}
+     */
     animateInBottom({ element, elementParent, startingPosition, duration }) {
         return presetInAnimation(element, elementParent, "down",  startingPosition, duration)
     },
+    /**
+     * @function animateInLeft Animate element to the inner left side of elementParent
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {string} startingPosition Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+     * @param  {number} duration         The duration of the animation in ms.
+     * @return {Promise}
+     */
     animateInLeft({ element, elementParent, startingPosition, duration }) {
         return presetInAnimation(element, elementParent, "left",  startingPosition, duration)
     },
+    /**
+     * @function animateInRight Animate element to the inner right side of elementParent
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {string} startingPosition Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+     * @param  {number} duration         The duration of the animation in ms.
+     * @return {Promise}
+     */
     animateInRight({ element, elementParent, startingPosition, duration }) {
         return presetInAnimation(element, elementParent, "right",  startingPosition, duration)
     },
 
+    /**
+     * @function animateOutTop Animate element to the outer top side of elementParent
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {string} startingPosition Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+     * @param  {number} duration         The duration of the animation in ms.
+     * @return {Promise}
+     */
     animateOutTop({ element, elementParent, startingPosition, duration }) {
         return presetOutAnimation(element, elementParent, "up",  startingPosition, duration)
     },
+    /**
+     * @function animateOutBottom Animate element to the outter bottom side of elementParent
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {string} startingPosition Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+     * @param  {number} duration         The duration of the animation in ms.
+     * @return {Promise}
+     */
     animateOutBottom({ element, elementParent, startingPosition, duration }) {
         return presetOutAnimation(element, elementParent, "down",  startingPosition, duration)
     },
+    /**
+     * @function animateOutLeft Animate element to outer left side of elementParent
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {string} startingPosition Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+     * @param  {number} duration         The duration of the animation in ms.
+     * @return {Promise}
+     */
     animateOutLeft({ element, elementParent, startingPosition, duration }) {
         return presetOutAnimation(element, elementParent, "left",  startingPosition, duration)
     },
+    /**
+     * @function animateOutRight Animate element to the outer right side of elementParent
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {string} startingPosition Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
+     * @param  {number} duration         The duration of the animation in ms.
+     * @return {Promise}
+     */
     animateOutRight({ element, elementParent, startingPosition, duration }) {
         return presetOutAnimation(element, elementParent, "right",  startingPosition, duration)
     },
 
+    /**
+     * @function shake Shakes element in place (horizontally or vertically)
+     * @param  {object} element          Target element or Vue Component.
+     * @param  {object} elementParent    Target's parent container or a container to treat as such.
+     * @param  {number} duration         The duration of the animation in ms.
+     * @param  {boolean} vertical        Makes the shaking vertical.
+     * @return {Promise}
+     */
     shake({ element, magnitude, duration, vertical }) {
         return new Promise((resolve, reject) => {
             getElAndParent(element).then(({ el }) => {
