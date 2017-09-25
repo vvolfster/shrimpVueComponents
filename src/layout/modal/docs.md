@@ -1,6 +1,6 @@
-## Popover (Vue component)
+## modal (Vue component)
 
-Shows a popover.
+Shows a modal.
 
 #### Usage
 ```html
