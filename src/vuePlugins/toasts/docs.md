@@ -92,7 +92,7 @@ Toast.info(msg, params); // create an informational Toast
 Toast.warning(msg, params); // createa a warning Toast
 ```
 #### Params
-1. msg(***string=''***)  - Plain text or HTML. The message of the toast.
+1. msg(***string***)  - Plain text or HTML. The message of the toast.
 2. params(***Object***) - Customization object. Can contain style and duration.
  - style ***(Object)*** - Style CSS Object.
  - duration ***(number)*** - Duration of the toast in ms.
