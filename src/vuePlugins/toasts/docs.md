@@ -73,11 +73,11 @@ import Toast from 'shrimp-vue-components/src/vuePlugins/toasts'
 Vue.use(Toast)
 
 // Can do the following anywhere when importing Vue
-Vue.Toast(msg, params);	// create std Toast
-Vue.Toast.positive(msg, params); // create a positive / success Toast
-Vue.Toast.negative(msg, params); // create a negative / danger Toast
-Vue.Toast.info(msg, params); // create an informational Toast
-Vue.Toast.warning(msg, params); // createa a warning Toast
+Vue.toast(msg, params);	// create std Toast
+Vue.toast.positive(msg, params); // create a positive / success Toast
+Vue.toast.negative(msg, params); // create a negative / danger Toast
+Vue.toast.info(msg, params); // create an informational Toast
+Vue.toast.warning(msg, params); // createa a warning Toast
 
 
 ```
