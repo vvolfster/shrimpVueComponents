@@ -368,11 +368,12 @@
                 const action = this.actions[name];
                 const id = selectedItem.id;
                 const value = selectedItem.value;
+                const fbRef = selectedItem.fbRef;
 
                 this.busyMessage = `Peforming ${name}. Please wait...`
                 this.$refs.busyModal.open();
 
-                functions.genericResolver(action, id, value, this.navFn).then((msg) => {
+                functions.genericResolver(action, id, value, fbRef, this.navFn).then((msg) => {
                     console.warn(msg);
                     this.$refs.busyModal.close();
                 }).catch((err) => {
