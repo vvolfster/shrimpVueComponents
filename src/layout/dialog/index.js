@@ -59,6 +59,22 @@ function getPositionAndAnimationInfo(params) {
     return posAnim;
 }
 
+/**
+ * @typedef {Object} DialogObject
+ * @property {function} dismiss programatically dismiss the dialog.
+ * @property {function} isBusy returns whether the dialog is busy (can be closed).
+ */
+
+/**
+ * @function create Creates a dialog
+ * @param  {object} params The configurator object for the dialog
+ * @param  {(object | string)} params.style The style of the dialog object. Optional.
+ * @param  {object} params.attributes The attributes to assign to the top level dialog object. Optional.
+ * @param  {string} params.class The class to assign to the dialog object. This must be non scoped.
+ * @param  {function} params.onDismiss The function to run on dismissal of the dialog. Optional.
+ * @param  {boolean} params.noDismiss Cannot dismiss by clicking the background if true. Optional.
+ * @return {DialogObject} Newly created dialog object
+ */
 function create(params) {
     const attributes = params.attributes;
     const style = params.style || '';
@@ -129,6 +145,9 @@ function create(params) {
 
 const Dialog = {
     create,
+    /**
+     * @function dismissAll dismisses all dialogs.
+     */
     dismissAll() {
         shared.dialogs.dismissAll();
         // also delete remove any dangling diaogs that may be left from last reload
