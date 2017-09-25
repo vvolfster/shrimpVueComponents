@@ -10,7 +10,6 @@ A very basic file dropper component. It supports one or more files being dropped
 **files** - Emitted on files being dropped/added.
 
 ### Usage
-There is no need to supply a @click handler. The collapsible will auto provide that on the heading.
 ``` html
 <template>
 	<div>
