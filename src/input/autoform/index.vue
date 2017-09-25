@@ -172,8 +172,6 @@ export default {
             if(!cmp)
                 return false;
 
-            window[name] = cmp;
-
             return typeof cmp.isEmpty === 'function' ? cmp.isEmpty() : cmp.getValue();
         }
     },
