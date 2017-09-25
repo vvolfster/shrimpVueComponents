@@ -25,7 +25,7 @@ const dictonary = {
 }
 
 export default {
-	components: { autoform },
+	components: { autoform: svt.input.autoform },
 	data() {
 		return {
 			title: "Autoform title...",

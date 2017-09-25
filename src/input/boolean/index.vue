@@ -1,6 +1,6 @@
 <template>
     <div class="boolean">
-        <div class="boolean__input">
+        <div class="boolean__input" :style="ui.style">
             <div>{{ placeholder }}</div>
             <i class="fa boolean__icon" :class="d_value ? 'fa-toggle-on' : 'fa-toggle-off'" @click="updateValue(d_value ? false : true)"/>
         </div>
