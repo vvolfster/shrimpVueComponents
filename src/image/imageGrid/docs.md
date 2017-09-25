@@ -33,9 +33,9 @@ export default {
 ```
 
 ### Props
-- **collection (object | array) ** - The collection of images to show in the grid.
+- **collection (object | array)** - The collection of images to show in the grid.
 - **cellSize (string | number)**  - The size of each image cell. If **number** is used, it will be considered **pixels**. Otherwise, a CSS string is acceptable. e.g., "50px", "50vh", etc.
-- **addFn (function) ** - Optional. If provided, there will be a fileDropper component visible in the grid and dropping files onto it will call this function.
+- **addFn (function)** - Optional. If provided, there will be a fileDropper component visible in the grid and dropping files onto it will call this function.
 - **removeFn (function)** - Optional. If provided, there will be delete buttons for each entry.
 
 
