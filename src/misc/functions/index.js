@@ -1,4 +1,10 @@
 export default {
+    /**
+     * @function genericResolver Resolves a promise or function. If the returned value is truthy for a non-promise, the promise will resolve. Else, it will reject. The only exception to this rule is undefined. Undefined is resolved, not rejected.
+     * @param  {(function | Promise)} fn The promise or function to resolve.
+     * @param  {Object} ...params arguments to fn
+     * @return {Promise}
+     */
     genericResolver(fn, ...params) {
         return new Promise((resolve, reject) => {
             if(typeof fn !== 'function')

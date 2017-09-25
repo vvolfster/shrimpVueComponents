@@ -1,4 +1,4 @@
-## Collapsible
+## Collapsible (Vue Component)
 The collapsible is an object that contains a header and content. They are both slots and must be passed in.
 They can styled however you want.
 
