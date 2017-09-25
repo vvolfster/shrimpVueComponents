@@ -13,7 +13,7 @@ Shows a popover.
 			<div>
 				HELLO WORLD POPOVER
 			</div>
-		</modal>
+		</popover>
 	</div>
 </template>
 ```
