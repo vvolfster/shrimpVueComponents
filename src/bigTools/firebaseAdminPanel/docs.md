@@ -47,7 +47,7 @@ This object has quite a lot of properties and features. Go to your firebase cons
 You need all those keys to be present int he fbConfig object. The storageBucket is optional & only needed if you want to upload to storage using this tool.
 
 On top of these properties, the fbConfig object has some extra properties that can be included to customize the tool.
-- **requiresAuth (boolean) ** - Optional. Determines whether user must be logged in to use the tool.
+- **requiresAuth (boolean)** - Optional. Determines whether user must be logged in to use the tool.
 - **createNewUsers (boolean)** - Optional. Determines whether to create new users if account does not exist.
 - **userRequirement (function)** - Optional. The user object is passed to this function and it must either return truthy or a promise that resolves. Exception is that if the function returns undefined, it is considered okay.
 - **masterAuthConfig (object)** - Optional. Allows this tool to use another firebase db as the auth for this db. Has the same keys as above (apiKey, authDomain, databaseURL, projectId, storageBucket, messagingSenderId). **Note: This cannot work without somehow getting an IdToken from the masterAuthDb. To do this, a REST function url must be provided.** 
