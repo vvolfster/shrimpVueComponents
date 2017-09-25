@@ -32,11 +32,11 @@ Vue.use(svt)
 #### Usage as a plugin
 The toast is not installed into each component but rather on Vue itself.
 ```javascript
-Vue.Toast(msg, params);	// create std Toast
-Vue.Toast.positive(msg, params); // create a positive / success Toast
-Vue.Toast.negative(msg, params); // create a negative / danger Toast
-Vue.Toast.info(msg, params); // create an informational Toast
-Vue.Toast.warning(msg, params); // createa a warning Toast
+Vue.toast(msg, params);	// create std Toast
+Vue.toast.positive(msg, params); // create a positive / success Toast
+Vue.toast.negative(msg, params); // create a negative / danger Toast
+Vue.toast.info(msg, params); // create an informational Toast
+Vue.toast.warning(msg, params); // createa a warning Toast
 ```
 #### Params
 1. msg(***string=""***)  - Plain text or HTML. The message of the toast.
@@ -65,23 +65,6 @@ const Toast = svt.vuePlugins.toasts;
 ```
 
 #### Usage
-The toast is not installed into each component but rather on Vue itself.
-```javascript
-import Vue from 'vue'
-import Toast from 'shrimp-vue-components/src/vuePlugins/toasts'
-
-Vue.use(Toast)
-
-// Can do the following anywhere when importing Vue
-Vue.toast(msg, params);	// create std Toast
-Vue.toast.positive(msg, params); // create a positive / success Toast
-Vue.toast.negative(msg, params); // create a negative / danger Toast
-Vue.toast.info(msg, params); // create an informational Toast
-Vue.toast.warning(msg, params); // createa a warning Toast
-
-
-```
-
 ```javascript
 import Toast from 'shrimp-vue-components/src/vuePlugins/toasts'
 
