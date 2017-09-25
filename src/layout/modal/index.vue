@@ -176,6 +176,7 @@ export default {
             function dismissFn() {
                 self.instance = null;
                 self.$emit('closed');
+                self.$emit('close');
             }
 
             this.instance = create({
@@ -189,7 +190,7 @@ export default {
             })
 
             this.$emit('opened');
-
+            this.$emit('open');
             return this.instance;
         },
         close() {

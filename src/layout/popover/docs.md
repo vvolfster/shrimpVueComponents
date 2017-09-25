@@ -6,9 +6,12 @@ Shows a popover.
 ```html
 <template>
 	<div>
-		<modal ref="modalRef">
+		<button @click="$refs.popoverRef.toggle()">
+			Show popover
+		</button>
+		<popover ref="popoverRef">
 			<div>
-				HELLO WORLD MODAL
+				HELLO WORLD POPOVER
 			</div>
 		</modal>
 	</div>
@@ -20,36 +23,31 @@ import svt from 'shrimp-vue-components'
 
 export default {
 	components: {
-		modal: svt.layout.modal
-	},
-	mounted() {
-		this.$refs.modalRef.open();
+		popover: svt.layout.popover
 	}
 }
 
 
 ```
 
-You can also import **Modal** like so:
+You can also import **Popover** like so:
 ```javascript
-import Modal from 'shrimp-vue-components/src/layout/modal'
+import popover from 'shrimp-vue-components/src/layout/popover'
 ```
 
 ### Props
-**- containerStyle (Object | String)** - CSS style of the modal.
 **- position (String)** - The position the modal is displayed. One of ["up", "down", "left", "right", "center"]. Default center.
-**- animation (String)** - Defines the animation to **position**. One of ["up", "down", "left", "right", "none"]. Default up.
-**- animationDuration (Number)** - The animation time in milliseconds. Default 300.
+
 
 ### Events
 **- close** - Emitted when the modal is closed.
 **- open** - Emitted when the modal is opened.
 
 ### Methods
-- **open(config)** - Opens the modal
+- **open(config)** - Opens the popover
 	- config (object) - This is optional, in case you want the modal to overload the props for some reason.
 		- animation (string) - same as in the props section.
 		- animationDuration (number) - same as in the props section.
 		- position (string) - same as in the props section.
-- **close** - Closes the modal
-- **isOpen()** - Returns **true** if the modal is open. **false** otherwise.
+- **close** - Closes the popover
+- **isOpen()** - Returns **true** if the popoveris open. **false** otherwise.
