@@ -32,6 +32,7 @@ export default {
 			files.forEach(file => console.log(file))
 		}
 	}
+}
 </script>
 ```
 
