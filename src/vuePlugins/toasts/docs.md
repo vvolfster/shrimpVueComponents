@@ -67,6 +67,22 @@ const Toast = svt.vuePlugins.toasts;
 #### Usage
 The toast is not installed into each component but rather on Vue itself.
 ```javascript
+import Vue from 'vue'
+import Toast from 'shrimp-vue-components/src/vuePlugins/toasts'
+
+Vue.use(Toast)
+
+// Can do the following anywhere when importing Vue
+Vue.Toast(msg, params);	// create std Toast
+Vue.Toast.positive(msg, params); // create a positive / success Toast
+Vue.Toast.negative(msg, params); // create a negative / danger Toast
+Vue.Toast.info(msg, params); // create an informational Toast
+Vue.Toast.warning(msg, params); // createa a warning Toast
+
+
+```
+
+```javascript
 import Toast from 'shrimp-vue-components/src/vuePlugins/toasts'
 
 Toast(msg, params);	// create std Toast
