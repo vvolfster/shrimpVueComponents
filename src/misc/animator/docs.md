@@ -6,7 +6,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  
 	- ***position( String)*** - One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***offset (Object)*** - Offset from position
