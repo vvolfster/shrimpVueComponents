@@ -155,6 +155,9 @@ export default {
         this.close();
     },
     methods: {
+        isOpen() {
+            return !!this.instance;
+        },
         open(config) {
             const self = this;
             const slotParent = this.$el;
@@ -185,11 +188,16 @@ export default {
                 style: self.containerStyle
             })
 
+            this.$emit('opened');
+
             return this.instance;
         },
         close() {
             if(this.instance)
                 this.instance.dismiss();
+        },
+        toggle() {
+            return this.instance ? this.close() : this.open();
         },
         keyHandler(e) {
             // console.log(`escape`)

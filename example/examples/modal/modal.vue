@@ -57,9 +57,10 @@ export default {
     },
     methods: {
         showModal(idx) {
-            this.$refs[`modal${idx}`].open();
+            this.$refs[`modal${idx}`].toggle();
         },
         dismissAll() {
+
         }
     },
     components: {
