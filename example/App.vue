@@ -18,6 +18,7 @@ import toggleButton from "@/button/toggleButton"
 
 import autoform from './examples/autoform/autoform'
 import fbAdminPanel from "./examples/fbAdminPanel/adminPanel"
+import fbAuthentication from "./examples/fbAuthentication/fbAuthentication"
 import toast from './examples/toast/toast'
 import modal from './examples/modal/modal'
 import dialogExample from './examples/dialog/dialogExample'
@@ -30,12 +31,13 @@ export default {
     data() {
         return {
             myComponent: null,
-            examples: ["fbAdminPanel", "animator", "toast", "modal", "autoform", "dialogExample", "fileExample", "adder"]
+            examples: ["fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "dialogExample", "fileExample", "adder"]
         }
     },
     components: {
         toggleButton,
         fbAdminPanel,
+        fbAuthentication,
         animator,
         toast,
         modal,

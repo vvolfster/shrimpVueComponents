@@ -2,9 +2,10 @@ import lodash from 'lodash'
 
 import cms from './cms'
 import toasts from './toasts'
+import firebaseAuthentication from './firebaseAuthentication'
 
 const plugins = {
-    cms, toasts
+    cms, toasts, firebaseAuthentication
 }
 
 export default {
