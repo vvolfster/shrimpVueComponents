@@ -11,6 +11,7 @@ import lodash from 'lodash'
 import combobox from '../../../../input/combobox'
 import fbase from '../../fbase'
 import pageControls from "./pageControls"
+import "../../../../../cssImporter"
 
 
 export default {
@@ -229,14 +230,12 @@ export default {
 </script>
 
 <style>
-    .navigationBar {
-        display: flex;
-        flex-flow: row;
-        align-items: center;
-        justify-content: space-between;
-        background: #a45;
-        color: white;
-        font-size: 20px;
-        font-style: bold;
-    }
+.navigationBar {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 20px;
+    font-style: bold;
+}
 </style>

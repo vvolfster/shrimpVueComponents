@@ -1,15 +1,15 @@
 <template>
-    <div>
+    <div style="margin-top: 20px;">
         <!-- Rounded switch -->
-        <label class="switch">            
-            <input type="checkbox" v-model="useVue">
-            <span class>Use Vue.toast</span>
+        <input type="checkbox" v-model="useVue" id="useVueToastRadio"/>
+        <label class="switch" for="useVueToastRadio">
+            Use Vue.toast
         </label>
-
-        <button v-for="style in toastStyles" :key="style" @click="showToast(style)">
+        <br>
+        <button class='btn waves-effect waves-light' v-for="style in toastStyles" :key="style" @click="showToast(style)">
             {{ style }}
         </button>
-        <button @click="dismissAll">
+        <button class='btn' @click="dismissAll">
              dismissAll
         </button>
     </div>
@@ -18,6 +18,7 @@
 <script>
 import Vue from 'vue'
 import Toast from '@/vuePlugins/toasts'
+
 
 export default {
     data(){
@@ -48,9 +49,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-    button {
-        border: solid 1px;
-    }
-</style>

@@ -3,7 +3,7 @@
 
         <div v-if="page">
             <!-- if a custom delegate component is provided, we will just use a list of that component instead of the default table view -->
-            <tableView v-if="!delegateComponent" class="ztable" style="margin:auto;"
+            <tableView v-if="!delegateComponent" style="margin:auto;"
                 :columns="columns"
                 :page="page"
                 :pageData="pageData"
@@ -18,23 +18,24 @@
             >
             </tableView>
             <div v-else>
-                <div class="ztableHeader--custom">
-                    <button class="btn btn--tableHeaderCustom" v-for="(action,name) in actionsTableRoot" :key="name" @click="callTableRootAction(name)">
+                <div class='margin-bottom'>
+                    <button class="btn margin-right" v-for="(action,name) in actionsTableRoot" :key="name" @click="callTableRootAction(name)">
                         {{ name }}
                     </button>
                 </div>
                 <div style="position:relative;margin-bottom:10px;" v-for="(entry, id, index) in pageData" :key="id">
                     <collapsible :open="header.openMode">
-                        <div class="componentHeader" slot="heading">
-                            <div class="componentHeader__index">
+                        <!-- <div class="componentHeader" slot="heading"> -->
+                        <div class="flexrow justify-between items-center grey padding5 white-text black-border" slot="heading">
+                            <div>
                                 #{{ (page.idx * page.pageSize) + index + 1  }}
                             </div>
                             <div v-if="typeof header.displayFn === 'function'">
                                 {{ header.displayFn(entry, id) }}
                             </div>
                             <div class="componentHeader__actions">
-                                <button class="btn btn--detail" @click="openDetailView(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
-                                <button v-if="!tableConfig.noDelete" class="btn btn--delete" @click="remove(id)"><i class='fa fa-trash'/></i></button>
+                                <button class="btn" @click="openDetailView(id, entry, pageFbRefs[id])" v-if="hasDetailView"><i class='fa fa-ellipsis-h'/></i></button>
+                                <button v-if="!tableConfig.noDelete" class="red btn" @click="remove(id)"><i class='fa fa-trash'/></i></button>
                             </div>
                         </div>
                         <component 
@@ -59,7 +60,7 @@
                 <!-- actions -->
                 <div class="magicModal__actions" v-if="typeof actions === 'object' && Object.keys(actions).length">
                     <h5>Actions</h5>
-                    <button v-for="(action, name) in actions" :key="name" @click="performAction(name, selectedItem)" class="magicModal__button shrimpTabView__header">
+                    <button v-for="(action, name) in actions" :key="name" @click="performAction(name, selectedItem)" class="btn white black-text margin-bottom">
                         {{ name }}
                     </button>
                 </div>
@@ -98,6 +99,7 @@
     import collapsible from '../../../../misc/collapsible'
     import Toast from '../../../../vuePlugins/toasts'
     import importedFunctions from '../../../../misc/functions'
+    import '../../../../../cssImporter'
 
     const functions = {
         getColumns(data, storageKey) {
@@ -574,7 +576,7 @@
     text-transform: uppercase;
     color: white;
     height: 50px;
-    position: relative;
+    
     align-items: center;
     justify-content: space-between;
     padding-left: 5px;
@@ -595,9 +597,6 @@
 }
 
 /* button css */
-.btn {
-    border: solid 1px;
-}
 
 .btn--delete {
     background-color: red;
@@ -629,11 +628,7 @@
 }
 
 .btn--tableHeaderCustom {
-    border: solid 1px black;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    background-color: #42b983;
+    margin-right: 5px;
 }
 
 .idx {

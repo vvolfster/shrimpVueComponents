@@ -9,7 +9,7 @@
             <div class="box__input">
                 <input ref="input" class="box__file" type="file" name="files[]" multiple :accept="extensions"/>
                 <label class="box__fileLabel" ref='label'>
-                    <div class="box__inputContainer">
+                    <div class="box__inputContainer flexcol items-center justify-center">
                         <i class="fa fa-plus box__inputIcon" v-show="!busy"></i>
                         <i class="fa fa-circle-o-notch box__inputIcon box__inputIcon--spinning" v-show="busy" @click.stop.prevent="doNothing"></i>
                     </div>
@@ -195,12 +195,9 @@ export default {
     width: 100% !important;
     height: 100% !important;
     text-align: center;
-    vertical-align: middle;
-    display: table;    
 }
 
 .box__inputIcon {
-    display: table-cell;
     text-align: center;
     font-size: 20pt;
     line-height: normal;

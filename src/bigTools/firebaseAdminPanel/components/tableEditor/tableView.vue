@@ -1,33 +1,35 @@
 <template>
-    
     <table>
-        <thead class="zthead">
-            <th class="ztableHeader" :colspan="columns.length ? columns.length + 1 : 1">
+        <thead>
+            <th :colspan="columns.length ? columns.length + 1 : 1" class="grey white-text border">
                 {{ page ? page.name : "" }}
-                <div class="ztableWideActions" v-if="actions">
+                <div v-if="actions">
                     <button class="btn btn--tableWide" v-for="(action,name) in actions" :key="name" @click="$emit('callAction', { name })">
                         {{ name }}
                     </button>
                 </div>
             </th>
-            <tr class="ztr">
-                <th class='zth idx'>#</th>
-                <th v-for="field in columns" :key="field" class="zth" :style="getFieldStyle(field)">
+            <tr>
+                <th class="smallCol grey white-text">#</th>
+                <th v-for="field in columns" :key="field" :class="field === '★' ? 'smallCol' : ''" class="grey white-text">
                     {{ field }}
                 </th>
             </tr>
         </thead>
-        <tbody class="ztbody" v-if="pageData && columns">
-            <tr v-for="(entry, id, index) in pageData" :key="id" class="ztr">
-                <td class="ztd idx">
+        <tbody v-if="pageData && columns">
+            <tr v-for="(entry, id, index) in pageData" :key="id" :class="index % 2 !== 0 ? 'grey lighten-4' : ''">
+                <td class="smallCol">
                     #{{ (page.idx * page.pageSize) + index + 1  }}
                 </tv>
-                <td v-for="field in columns" :key="field" class="ztd" @click="field !== '★' ? $emit('edit', { id, field, value: entry[field] }) : null">
+                <td v-for="field in columns" :key="field"
+                    :class="getFieldClass(field)"
+                    @click="field !== '★' ? $emit('edit', { id, field, value: entry[field] }) : null"
+                >
                     <div v-if="field !== '★'">
                         {{ entry ? entry[field] : '?' }}
                     </div>
                     <div v-else class="specialActionsColumn">
-                        <button v-if="hasMenu" @click="$emit('openDetailView', { id, entry  })" class="btn btn--detail">
+                        <button v-if="hasMenu" @click="$emit('openDetailView', { id, entry  })" class="green btn">
                             <i class='fa fa-ellipsis-h'/>
                         </button>
                         <button v-if="hasDelete" class="btn btn--delete" @click="$emit('delete', { id } )">
@@ -38,10 +40,10 @@
             </tr>
         </tbody>
     </table>
-    
 </template>
 
 <script>
+import '../../../../../cssImporter'
 
 export default {
     props: {
@@ -77,13 +79,11 @@ export default {
     },
     methods: {
         // ui
-        getFieldStyle(fieldName) {
+        getFieldClass(fieldName) {
             if(fieldName !== "★")
-                return {};
+                return '';
 
-            return {
-                'background-color': 'orange'
-            }
+            return 'smallCol'
         },
     },
     computed: {
@@ -93,76 +93,29 @@ export default {
 </script>
 
 <style scoped>
-.ztableHeader {
-    align-items: center;
-    justify-content: center;
-    background-color: #42b983;
-    text-transform: uppercase;
-    color: white;
-    height: 40px;
-    position: relative;
+.smallCol {
+    width: 96px;
 }
 
-.ztableHeader--custom {
-    align-items: center;
-    justify-content: start;
-    background: transparent;    
-    text-transform: uppercase;
-    color: white;
-    height: 40px;
-    position: relative;
+button {
+    padding: 0 5px 0 5px;
 }
 
-.ztableWideActions {
-    height: 100%;
-    display: flex;
-    justify-content: flex-end;
-    position: absolute;
-    top: 0;
-    right: 0;
-}
-
-
-.specialActionsColumn {
+td {
+    border: solid 1px lightgray;
+    cursor: pointer;
     text-align: center;
-    vertical-align: center;
 }
 
-.ztable {
-    border: 2px solid #42b983;
-    border-radius: 3px;
-    background-color: #fff;
-}
-
-.zth {
-    background-color: #42b983;
-    color: #fff;
+th {
+    border: solid 1px lightgray;
     cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-.ztd {
-    background-color: #f9f9f9;
-    cursor: pointer;
-}
-
-
-.zth, .ztd {
-    min-width: 120px;
-    padding: 10px 20px;
-}
-
-.btn {
-    border: solid 1px;
+    text-align: center;
 }
 
 .btn--delete {
     background-color: red;
     color: white;
-    border-color: black;
 }
 
 .btn--tableWide {

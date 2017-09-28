@@ -8,15 +8,15 @@
             Animation
             <combobox :options="animations" v-model="chosen.animation"/>
         </div>
-        <button @click="showModal(0)">
+        <button class="btn" @click="showModal(0)">
             SHOW MODAL
         </button>
 
-        <button @click="showModal(1)">
+        <button class="btn" @click="showModal(1)">
             SHOW Modal 2
         </button>
 
-        <button @click="dismissAll">
+        <button class="btn red" @click="dismissAll">
              dismissAll
         </button>
 
@@ -79,8 +79,6 @@ export default {
 }
 
 button {
-    border: solid 1px;
-    border-radius: 2px;
     margin-top: 20px;
     width: 10vw;
 }

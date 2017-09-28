@@ -1,16 +1,18 @@
 <template>
-    <div class="pageControls">
-        <button class="fa fa-fast-backward" :class="idx <= 0 ? 'pgcbtn pgcbtn--disabled' : 'pgcbtn'" @click="backward(true)"/>
-        <button class="fa fa-step-backward" :class="idx <= 0 ? 'pgcbtn pgcbtn--disabled' : 'pgcbtn'" @click="backward"/>
-        <div class="pgctext">
-        {{ Math.min(idx + 1, total) }} / {{ total }}
+    <div class="flexrow items-center">
+        <button class="btn fa fa-fast-backward padding10 margin-right" :class="idx <= 0 ? 'grey lighten-2 grey-text' : 'black-text'" @click="backward(true)"/>
+        <button class="btn fa fa-step-backward padding10 margin-right" :class="idx <= 0 ? 'grey lighten-2 grey-text' : 'black-text'" @click="backward"/>
+        <div class="pgctext margin-right">
+            {{ Math.min(idx + 1, total) }} / {{ total }}
         </div>
-        <button class="fa fa-step-forward" :class="idx >= total - 1 ? 'pgcbtn pgcbtn--disabled' : 'pgcbtn'" @click="forward"/>
-        <button class="fa fa-fast-forward" :class="idx >= total - 1 ? 'pgcbtn pgcbtn--disabled' : 'pgcbtn'" @click="forward(true)"/>
+        <button class="btn fa fa-step-forward padding10 margin-right" :class="idx >= total - 1 ? 'grey lighten-2 grey-text' : 'black-text'" @click="forward"/>
+        <button class="btn fa fa-fast-forward padding10 margin-right" :class="idx >= total - 1 ? 'grey lighten-2 grey-text' : 'black-text'" @click="forward(true)"/>
     </div>
 </template>
 
 <script>
+    import "../../../../../cssImporter"
+
     export default {
         props: {
             total: {
@@ -51,23 +53,7 @@
 </script>
 
 <style scoped>
-.pageControls {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
 .pgctext {
     font-size: 20px;
 }
-
-.pgcbtn {
-    background: transparent;
-    color: black;
-}
-
-.pgcbtn--disabled {
-    color: lightgray;
-}
-
 </style>

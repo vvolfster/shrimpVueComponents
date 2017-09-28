@@ -6,8 +6,9 @@
             Your Firebase config requires you log in.
         </div>
         <div v-else>
-            <div class="fbAdminPanel__topBar">
-                <button class="topBar__user" @click="login">
+            <div class="flexrow items-center nowrap grey darken-3 white-text">
+                <button class="btn self-center margin-left white black-text text-no-transform" @click="login">
+                    <i class='fa fa-user'/>
                     {{ username || "Login..." }}
                 </button>
                 <navigation 
@@ -36,6 +37,7 @@
 import fbase from './fbase'
 import tableEditor from "./components/tableEditor"
 import navigation from './components/navigation'
+import '../../../cssImporter'
 
 function getURLParameter(name) {
     /* eslint-disable prefer-template */
