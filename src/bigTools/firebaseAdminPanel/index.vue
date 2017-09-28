@@ -6,7 +6,7 @@
             Your Firebase config requires you log in.
         </div>
         <div v-else>
-            <div class="flexrow items-center nowrap grey darken-3 white-text">
+            <div class="row items-center nowrap bg-grey-4">
                 <button class="btn self-center margin-left white black-text text-no-transform" @click="login">
                     <i class='fa fa-user'/>
                     {{ username || "Login..." }}

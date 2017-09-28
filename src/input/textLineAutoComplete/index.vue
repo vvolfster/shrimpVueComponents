@@ -278,6 +278,7 @@ export default {
 <style scoped>
 .line {
     position: relative;
+    text-align: left;
 }
 
 .line__input {

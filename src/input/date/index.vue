@@ -197,6 +197,7 @@ export default {
     width: inherit;
     height: inherit;
     position: relative;
+    text-align: left;
 }
 
 .datetime {

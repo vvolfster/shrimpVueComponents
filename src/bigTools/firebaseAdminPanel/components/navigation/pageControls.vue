@@ -1,5 +1,5 @@
 <template>
-    <div class="flexrow items-center">
+    <div class="row items-center">
         <button class="btn fa fa-fast-backward padding10 margin-right" :class="idx <= 0 ? 'grey lighten-2 grey-text' : 'black-text'" @click="backward(true)"/>
         <button class="btn fa fa-step-backward padding10 margin-right" :class="idx <= 0 ? 'grey lighten-2 grey-text' : 'black-text'" @click="backward"/>
         <div class="pgctext margin-right">

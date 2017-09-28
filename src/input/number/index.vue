@@ -149,6 +149,7 @@ export default {
     height: inherit;
     display: flex;
     align-items: flex-end;
+    text-align: left;
 }
 
 .line__input {
@@ -186,13 +187,14 @@ export default {
     position: absolute;
     top: 0;
     right: 0;
-    bottom: 0;
+    bottom: 2px;
     display: flex;
 }
 
 .buttons__updown {
     position: relative;
     height: 100%;
+    width: 21.16px;
 }
 
 .buttons__updown__up {

@@ -113,6 +113,7 @@ export default {
     position: relative;
     width: inherit;
     height: inherit;
+    text-align: left;
 }
 
 .line__input {

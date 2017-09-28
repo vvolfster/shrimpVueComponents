@@ -15,6 +15,7 @@
 
 <script>
 import animator from '../../misc/animator'
+import '../../../cssImporter'
 
 export default {
     props: {
@@ -110,6 +111,7 @@ export default {
 <style scoped>
 .line {
     position: relative;
+    text-align: left;
 }
 
 .line__input {
@@ -117,9 +119,9 @@ export default {
     border-width: 0 0 1px 0;
     width: 100%;
     height: 100%;
-    text-align: inherit;
     font: inherit;
     color: inherit;
+    text-align: inherit;
     background: inherit;
     outline: none;
 }

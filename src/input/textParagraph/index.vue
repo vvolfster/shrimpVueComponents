@@ -124,6 +124,7 @@ export default {
 .paragraph {
     position: relative;
     border: solid 1px;
+    text-align: left;
 }
 .paragraph--error {
     color: red;

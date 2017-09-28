@@ -1,7 +1,7 @@
 <template>
     <table>
         <thead>
-            <th :colspan="columns.length ? columns.length + 1 : 1" class="grey white-text border">
+            <th :colspan="columns.length ? columns.length + 1 : 1" class="bg-grey text-white">
                 {{ page ? page.name : "" }}
                 <div v-if="actions">
                     <button class="btn btn--tableWide" v-for="(action,name) in actions" :key="name" @click="$emit('callAction', { name })">
@@ -10,8 +10,8 @@
                 </div>
             </th>
             <tr>
-                <th class="smallCol grey white-text">#</th>
-                <th v-for="field in columns" :key="field" :class="field === '★' ? 'smallCol' : ''" class="grey white-text">
+                <th class="smallCol bg-grey text-white">#</th>
+                <th v-for="field in columns" :key="field" :class="field === '★' ? 'smallCol' : ''" class="bg-grey text-white">
                     {{ field }}
                 </th>
             </tr>
@@ -111,6 +111,10 @@ th {
     border: solid 1px lightgray;
     cursor: pointer;
     text-align: center;
+}
+
+td, th {
+    padding: 5px;
 }
 
 .btn--delete {

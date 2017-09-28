@@ -13,6 +13,7 @@
 <script>
 /* eslint-disable no-unneeded-ternary */
 import animator from '../../misc/animator'
+import '../../../cssImporter'
 
 export default {
     props: {
