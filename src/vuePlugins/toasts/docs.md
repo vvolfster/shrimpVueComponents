@@ -32,14 +32,14 @@ Vue.use(svt)
 #### Usage as a plugin
 The toast is not installed into each component but rather on Vue itself.
 ```javascript
-Vue.Toast(msg, params);	// create std Toast
-Vue.Toast.positive(msg, params); // create a positive / success Toast
-Vue.Toast.negative(msg, params); // create a negative / danger Toast
-Vue.Toast.info(msg, params); // create an informational Toast
-Vue.Toast.warning(msg, params); // createa a warning Toast
+Vue.toast(msg, params);	// create std Toast
+Vue.toast.positive(msg, params); // create a positive / success Toast
+Vue.toast.negative(msg, params); // create a negative / danger Toast
+Vue.toast.info(msg, params); // create an informational Toast
+Vue.toast.warning(msg, params); // createa a warning Toast
 ```
 #### Params
-1. msg(***string=""***)  - Plain text or HTML. The message of the toast.
+1. msg(***string***)  - Plain text or HTML. The message of the toast.
 2. params(***Object***) - Customization object. Can contain style and duration.
  - style ***(Object)*** - Style CSS Object.
  - duration ***(number)*** - Duration of the toast in ms.
@@ -65,7 +65,6 @@ const Toast = svt.vuePlugins.toasts;
 ```
 
 #### Usage
-The toast is not installed into each component but rather on Vue itself.
 ```javascript
 import Toast from 'shrimp-vue-components/src/vuePlugins/toasts'
 
@@ -76,7 +75,7 @@ Toast.info(msg, params); // create an informational Toast
 Toast.warning(msg, params); // createa a warning Toast
 ```
 #### Params
-1. msg(***string=""***)  - Plain text or HTML. The message of the toast.
+1. msg(***string***)  - Plain text or HTML. The message of the toast.
 2. params(***Object***) - Customization object. Can contain style and duration.
  - style ***(Object)*** - Style CSS Object.
  - duration ***(number)*** - Duration of the toast in ms.

@@ -6,7 +6,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  
 	- ***position( String)*** - One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***offset (Object)*** - Offset from position
@@ -30,7 +30,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  	- ***startingPosition( String)*** - Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***duration(number)*** - The duration of the animation in ms.
 - Returns **Promise**
@@ -40,7 +40,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  	- ***startingPosition( String)*** - Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***duration(number)*** - The duration of the animation in ms.
 - Returns **Promise**
@@ -51,7 +51,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  	- ***startingPosition( String)*** - Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***duration(number)*** - The duration of the animation in ms.
 - Returns **Promise**
@@ -61,7 +61,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  	- ***startingPosition( String)*** - Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***duration(number)*** - The duration of the animation in ms.
 - Returns **Promise**
@@ -72,7 +72,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  	- ***startingPosition( String)*** - Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***duration(number)*** - The duration of the animation in ms.
 - Returns **Promise**
@@ -82,7 +82,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  	- ***startingPosition( String)*** - Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***duration(number)*** - The duration of the animation in ms.
 - Returns **Promise**
@@ -92,7 +92,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  	- ***startingPosition( String)*** - Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***duration(number)*** - The duration of the animation in ms.
 - Returns **Promise**
@@ -102,7 +102,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  	- ***startingPosition( String)*** - Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***duration(number)*** - The duration of the animation in ms.
 - Returns **Promise**
@@ -112,7 +112,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
  	- ***startingPosition( String)*** - Starting position of the element. (optional) One of ['top', 'bottom', 'topRight', 'topLeft', 'bottomRight', 'bottomLeft']
 	- ***duration(number)*** - The duration of the animation in ms.
 - Returns **Promise**
@@ -122,7 +122,7 @@ Leverages **Velocity.js** to provide animations to Vue components. Has a bunch o
 
 -	Params (obj)
 	- ***element( HtmlObject | VueComponent)*** - The element to position
-	- ***elementParent (HtmlObject | VueComponent) *** - The parent container of the element (Defaults to element's parent)
+	- ***elementParent (HtmlObject | VueComponent)*** - The parent container of the element (Defaults to element's parent)
 	- ***duration(number)*** - The duration of the animation in ms.
   	- ***vertical(boolean)*** - Makes the shaking vertical.
 
