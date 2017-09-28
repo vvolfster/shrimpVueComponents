@@ -16,6 +16,7 @@
 
 <script>
 import animator from '../../misc/animator'
+import '../../../cssImporter'
 
 export default {
     props: {

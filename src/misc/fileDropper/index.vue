@@ -30,6 +30,7 @@
 import lodash from 'lodash'
 import idGen from './idGen'
 import fns from '../functions'
+import '../../../cssImporter'
 
 function supportsDragDrop() {
     const div = document.createElement('div');

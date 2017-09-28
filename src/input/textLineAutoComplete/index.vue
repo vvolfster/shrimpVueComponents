@@ -28,6 +28,7 @@
 import lodash from 'lodash'
 import animator from '../../misc/animator'
 import popover from '../../layout/popover'
+import '../../../cssImporter'
 
 // dictionary: {
 //     type: [Object, Array, null, undefined],

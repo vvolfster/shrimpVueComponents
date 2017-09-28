@@ -19,7 +19,9 @@ import lodash from 'lodash'
 import Showdown from 'showdown'
 import SimpleMDE from 'simplemde'
 import 'simplemde/dist/simplemde.min.css'
+import '../../../cssImporter'
 import './simpleMdeStyleOverride.css'
+
 
 const converter = new Showdown.Converter();
 

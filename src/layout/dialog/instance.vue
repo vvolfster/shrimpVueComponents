@@ -27,6 +27,7 @@ import autoform from '../../input/autoform'
 import animator from '../../misc/animator'
 import fns from '../../misc/functions'
 import Toast from '../../vuePlugins/toasts'
+import '../../../cssImporter'
 
 export default {
     components: { autoform },

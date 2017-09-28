@@ -26,6 +26,7 @@
 <script>
 import lodash from 'lodash'
 import animator from '../../misc/animator'
+import '../../../cssImporter'
 
 export default {
     props: {

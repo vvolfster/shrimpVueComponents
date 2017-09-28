@@ -35,6 +35,7 @@ import markdown from '../markdown'
 import textLineAutoComplete from '../textLineAutoComplete'
 import textParagraph from '../textParagraph'
 import textPassword from '../textPassword'
+import '../../../cssImporter'
 
 function getDataModel(f){
     const obj = {};
