@@ -47,6 +47,15 @@ function GenericSubscriptionWrapper(params) {
     const listen = lodash.get(params, 'listen', 'on');
     const unlisten = lodash.get(params, 'unlisten', 'off');
 
+    self.ids = () => {
+        return lodash.reduce(self.subscriptions, (acc, v) => {
+            if(v.id)
+                acc.push(v.id)
+
+            return acc;
+        }, [])
+    }
+
     self.unsubscribe = (opts) => {
         const optId = lodash.get(opts, 'id')
         const optIdx = Number(lodash.get(opts, 'idx'))
