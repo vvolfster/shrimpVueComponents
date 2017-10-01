@@ -44,6 +44,7 @@ import json from 'shrimp-vue-components/src/input/json'
 - **value (object | array)** - The value passed into the component.
 - **placeholder (String)** - The name to display at the root.
 - **options (Object)** - Optional options object. 
+	- deepCheckOnUpdate (boolean) - **false by default. For performance sake, the json component has a built in uid system that makes it so it doesn't have to check objects super deep. Perform a deep check every time the updateValue function is called or when the value prop changes. You might want this if you change an object using this component, change it elsewhere and then use the same instance of this component. An edge-case for sure but it may happen!**
 	- style (string | object) - The style of the object.
 	- modes (string[]) - The modes that the user can choose from. Defaults to ['tree', 'form', 'view', 'code' ]
 	- mode (string) - One of ['tree', 'form', 'view', 'code' ]
@@ -59,13 +60,13 @@ import json from 'shrimp-vue-components/src/input/json'
 	- templates (object[]) - Allows for quick insertion of objects. See API. null by default. 
 	- ace (object) - See API
 	- ajv (object) - See API
-	- 
+	
 
 ### Events
 - **value(object)** - Emitted when the value changes.
 
 ### Methods
-- **updateValue(object | array)** - Sets the value of the component programatically.
+- **updateValue(object | array, forceBoolean)** - Sets the value of the component programatically. If the second argument is truthy, it will always update the jsonEditor instance (and won't bother checking for equality)
 - **getValue()** - Returns the value of the component. **object | array**
 - **isInError()** - Returns **true** if **validateFn** returns a string.
 - **isEmpty()** - If nothing is selected, this will return **true**.

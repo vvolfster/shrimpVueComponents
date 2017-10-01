@@ -418,7 +418,7 @@ export default {
                                         type: JSON,
                                         label: field,
                                         options: {
-                                            style: "min-width: 40vw; min-height: 200px;"
+                                            style: "min-width: 40vw;"
                                         }
                                     }
                                 },

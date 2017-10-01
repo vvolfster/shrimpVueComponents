@@ -9,6 +9,8 @@
 </template>
 
 <script>
+/* eslint-disable no-plusplus */
+
 import JsonEditor from 'jsoneditor'
 import lodash from 'lodash'
 import "jsoneditor/dist/jsoneditor.min.css"
@@ -45,6 +47,7 @@ const helpers = {
     }
 }
 
+const uidFieldName = '___jsonGeneratedUID___';
 
 export default {
     props: {
@@ -76,13 +79,16 @@ export default {
             mutex: false,
 
             editor: null,
-            error: null
+            error: null,
+            uidRand: null,
+            uidGen: -1,
         }
     },
     mounted() {
         const self = this;
         const options = self.options;
-        this.d_mode = getMode(options);
+        self.d_mode = getMode(options);
+        self.uidRand = +new Date();
         self.editor = new JsonEditor(self.$refs.jsoneditor, {
             mode: self.d_mode,
             modes: helpers.get(options, "modes", ['tree', 'form', 'view', 'code'], lodash.isArray),
@@ -94,7 +100,12 @@ export default {
             },
             onChange() {
                 try {
-                    const v = self.editor.get()
+                    const v = self.editor.get();
+                    Object.defineProperty(v, uidFieldName, {
+                        enumerable: false,
+                        value: `${self.uidRand}_${++self.uidGen}`
+                    })
+
                     // self.updateValue()
                     if (typeof self.validateFn === 'function') {
                         const err = self.validateFn(v);
@@ -108,7 +119,6 @@ export default {
 
                     self.d_value = v;
 
-                    // console.log(`mutex`, self.mutex);
                     if(self.mutex)
                         return;
 
@@ -118,9 +128,7 @@ export default {
                     if(fn)
                         fn(v)
                 }
-                catch(e) {
-                    // do nothing. this will only get triggered if self.editor.get() fails
-                }
+                catch(e) { /* do nothing. JSON parse error */ }
             },
             name: lodash.get(options, "name") || lodash.get(self, 'placeholder'),
             onError: helpers.get(options, "onError", false, lodash.isFunction),
@@ -161,12 +169,18 @@ export default {
 
             this.d_value = v;
             if(this.editor){
-                if(!force || lodash.get(this.options, "alwaysForceOnUpdate")) {
-                    try {
-                        if(JSON.stringify(this.editor.get()) === JSON.stringify(v)){
-                            return
-                        }
-                    } catch(e) { /* do nothing */ }
+                if(!force) {
+                    if(!lodash.get(this.options, "deepCheckOnUpdate")){
+                        // console.log(v[uidFieldName], `${this.uidRand}_${this.uidGen}`)
+                        if(v[uidFieldName] === `${this.uidRand}_${this.uidGen}`)
+                            return;
+                    }
+                    else {
+                        try {
+                            if(JSON.stringify(this.editor.get()) === JSON.stringify(v))
+                                return
+                        } catch(e) { /* do nothing */ }
+                    }
                 }
                 this.mutex = true;
                 this.editor.set(v);
