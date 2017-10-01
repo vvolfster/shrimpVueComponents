@@ -11,9 +11,17 @@ If you want to access the jsoneditor instance within this component, call the **
 		<json
 			placeholder="some placeholder"
 			:options="options"
-			:value="{ first: 'Shahan', last: 'Kazi' }"
+			:value="myObj"
 			@value="log(myValue)"
 		/>
+
+        <!-- OR you can use the v-model property -->
+        <json
+            placeholder="some placeholder"
+			:options="options"
+			v-model="myObj"
+        />
+
 	</div>
 </template>
 ```
@@ -24,10 +32,13 @@ import svt from 'shrimp-vue-components'
 export default {
 	components: { json: svt.input.json },
 	data() {
-		options:{
-			style: "min-width:50px;",
-			limit: 3 // only 3 files may be selected at once.
-		}
+        return {
+            myObj: { first: 'Shahan', last: 'Kazi' },
+            options:{
+			    style: "min-width:50px;",
+			    limit: 3 // only 3 files may be selected at once.
+            }
+        }
 	},
 	methods: {
 		log: console.log

@@ -20,10 +20,12 @@ import svt from 'shrimp-vue-components'
 export default {
 	components: { fileComponent: svt.input.file },
 	data() {
-		options:{
-			style: "min-width:50px;",
-			limit: 3 // only 3 files may be selected at once.
-		}
+        return {
+            options:{
+                style: "min-width:50px;",
+                limit: 3 // only 3 files may be selected at once.
+            }
+        }
 	}
 }
 

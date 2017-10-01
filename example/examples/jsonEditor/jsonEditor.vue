@@ -8,9 +8,8 @@
         </div>
 
         <json
-            :value="obj"
             :options="{ mode }"
-            
+            v-model='obj'
         />
 
         <pre>
