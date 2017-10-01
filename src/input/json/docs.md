@@ -28,6 +28,9 @@ export default {
 			style: "min-width:50px;",
 			limit: 3 // only 3 files may be selected at once.
 		}
+	},
+	methods: {
+		log: console.log
 	}
 }
 
