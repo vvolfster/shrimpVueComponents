@@ -53,14 +53,16 @@ export default {
             default: null
         },
         value: {
-            type: Object,
+            type: [String, Object],
             default() {
                 return null;
             }
         },
         placeholder: {
-            type: String,
-            default: "Json Object..."
+            type: [String, Object],
+            default() {
+                return null;
+            }
         },
         options: {
             type: [Object, null, undefined],
@@ -120,6 +122,7 @@ export default {
                     // do nothing. this will only get triggered if self.editor.get() fails
                 }
             },
+            name: lodash.get(options, "name") || lodash.get(self, 'placeholder'),
             onError: helpers.get(options, "onError", false, lodash.isFunction),
             search: helpers.get(options, "search", true, lodash.isBoolean),
             escapeUnicode: helpers.get(options, "sortObjectKeys", false, lodash.isBoolean),
@@ -132,16 +135,18 @@ export default {
             indentation: helpers.get(options, "indentation", 4, lodash.isNumber),
             templates: helpers.get(options, "templates", [], lodash.isArray)
         });
-        window.jsoneditor = self.editor;
+        // window.jsoneditor = self.editor;
 
-        if (self.value) {
+        if (lodash.isObject(self.value)) {
             self.d_value = self.value;
             self.editor.set(self.value);
         }
     },
     methods: {
         updateValue(v, force) {
-            this.mutex = true;
+            if(!lodash.isObject(v)){
+                return;
+            }
 
             if (typeof this.validateFn === 'function') {
                 const err = this.validateFn(v);
@@ -150,21 +155,23 @@ export default {
             else
                 this.error = null;
 
-            if (this.error)
+            if (this.error){
                 return;
+            }
 
             this.d_value = v;
             if(this.editor){
                 if(!force || lodash.get(this.options, "alwaysForceOnUpdate")) {
                     try {
-                        if(JSON.stringify(this.editor.get() === JSON.stringify(v)))
-                            return;
+                        if(JSON.stringify(this.editor.get()) === JSON.stringify(v)){
+                            return
+                        }
                     } catch(e) { /* do nothing */ }
                 }
+                this.mutex = true;
                 this.editor.set(v);
+                this.mutex = false;
             }
-
-            this.mutex = false;
         },
         getValue() {
             return this.d_value;
@@ -196,7 +203,12 @@ export default {
         }
     },
     watch: {
-        value: "updateValue",
+        value(v) {
+            this.updateValue(v);
+        },
+        placeholder(v) {
+            this.editor.setName(v);
+        },
         error(v, ov) {
             if (v && !ov)
                 animator.shake({ element: this.$el });
@@ -207,10 +219,10 @@ export default {
                 if(!this.editor)
                     return;
 
-                const m = lodash.get(v, 'mode')
-                const om = lodash.get(ov, 'mode')
-                if(m !== om)
-                    this.editor.setMode(m);
+                const mode = lodash.get(v, 'mode')
+                const oldMode = lodash.get(ov, 'mode')
+                if(mode !== oldMode)
+                    this.editor.setMode(mode);
             }
         }
     },

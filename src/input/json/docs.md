@@ -42,7 +42,7 @@ import json from 'shrimp-vue-components/src/input/json'
 ### Props
 - **validateFn (function)** - Optional validator function. If it returns a string, the component is set to be in error.
 - **value (object | array)** - The value passed into the component.
-- **placeholder (String)** - Unused. It is here just to make the API conistent.
+- **placeholder (String)** - The name to display at the root.
 - **options (Object)** - Optional options object. 
 	- style (string | object) - The style of the object.
 	- modes (string[]) - The modes that the user can choose from. Defaults to ['tree', 'form', 'view', 'code' ]
