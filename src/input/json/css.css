@@ -1,0 +1,51 @@
+.jsoneditor::-webkit-scrollbar{
+    width: 14px;
+    height: 10px;
+}
+
+.jsoneditor::-webkit-scrollbar-thumb {
+    height: 6px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    border-radius: 7px;
+    -webkit-border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.jsoneditor-tree::-webkit-scrollbar{
+    width: 14px;
+    height: 10px;
+}
+
+.jsoneditor-tree::-webkit-scrollbar-thumb {
+    height: 6px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    border-radius: 7px;
+    -webkit-border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.jsoneditor-outer::-webkit-scrollbar{
+    width: 14px;
+    height: 10px;
+}
+
+.jsoneditor-outer::-webkit-scrollbar-thumb {
+    height: 6px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    border-radius: 7px;
+    -webkit-border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.jsoneditor-contextmenu-root {
+    z-index: 9999;
+    position: fixed !important; /* the fixed position makes the drop down appear on top of everything */
+    margin-top: -24px;
+}
+
+.jsoneditor button {
+    min-height: unset;
+}

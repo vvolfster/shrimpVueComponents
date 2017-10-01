@@ -30,6 +30,7 @@ import combobox from '../combobox'
 import date from '../date'
 import file from '../file'
 import number from '../number'
+import json from '../json'
 import textLine from '../textLine'
 import markdown from '../markdown'
 import textLineAutoComplete from '../textLineAutoComplete'
@@ -65,7 +66,7 @@ export default {
             d_model: null,
         }
     },
-    components: { boolean, combobox, date, file, number, textLine, textLineAutoComplete, textParagraph, textPassword, markdown },
+    components: { boolean, combobox, date, file, json, number, textLine, textLineAutoComplete, textParagraph, textPassword, markdown },
     methods: {
         getFieldName(name) {
             const field = this.fields[name]
@@ -104,12 +105,14 @@ export default {
                 case "textlineautocomplete": return "textLineAutoComplete";
                 case "textparagraph": return "textParagraph";
                 case "textpassword": return "textPassword";
+                case "json": return "json";
 
                 case Boolean: return "boolean";
                 case String: return "textLine";
                 case Number: return "number";
                 case Date: return "date";
                 case File: return "file";
+                case JSON: return 'json';
 
                 default: return "textLine";
             }

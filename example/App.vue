@@ -25,13 +25,14 @@ import dialogExample from './examples/dialog/dialogExample'
 import animator from './examples/animator/animator'
 import fileExample from './examples/file/file'
 import adder from './examples/adder/adder'
+import jsonEditor from './examples/jsonEditor/jsonEditor'
 
 export default {
     name: 'app',
     data() {
         return {
             myComponent: null,
-            examples: ["fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "dialogExample", "fileExample", "adder"]
+            examples: ["fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "jsonEditor", "dialogExample", "fileExample", "adder"].sort()
         }
     },
     components: {
@@ -44,7 +45,8 @@ export default {
         dialogExample,
         autoform,
         fileExample,
-        adder
+        adder,
+        jsonEditor
     },
 };
 </script>

@@ -9,7 +9,7 @@ import textLine from './textLine'
 import textLineAutoComplete from './textLineAutoComplete'
 import textParagraph from './textParagraph'
 import textPassword from './textPassword'
-
+import json from './json'
 
 export default {
     autoform,
@@ -22,5 +22,6 @@ export default {
     textLine,
     textLineAutoComplete,
     textParagraph,
-    textPassword
+    textPassword,
+    json
 }
