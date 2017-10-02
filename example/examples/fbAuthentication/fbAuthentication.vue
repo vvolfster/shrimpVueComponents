@@ -12,12 +12,12 @@ import fbconf from '../fbAdminPanel/fbconf'
 
 Vue.use(fbAuthPlugin, {
     fbConfig: lodash.assign({
-        requiresAuth: true,
+        // requiresAuth: true,
         createNewUsers: true, // defaults to true. SignUp if user don't exist
         userRequirement(user) {
             return new Promise((resolve, reject) => {
                 setTimeout(() => {
-                    return user.email !== 'shahan@iii.global' ? reject() : resolve()
+                    return typeof user.email === 'string' && user.email.toLowerCase().endsWith('@iii.global') ? resolve() : reject(`User's email must be from iii.global`)
                 }, 1000)
             })
         },

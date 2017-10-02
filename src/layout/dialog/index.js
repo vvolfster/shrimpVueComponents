@@ -91,8 +91,8 @@ function create(params) {
     const dialog = new Vue({
         el: `#${instanceId}`,
         methods: {
-            dismiss() {
-                if(this.isBusy() && !busyCanBeDismissed)
+            dismiss(force) {
+                if(!force && (this.isBusy() && !busyCanBeDismissed))
                     return;
 
                 this.isDismissed = true;

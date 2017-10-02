@@ -8,6 +8,8 @@ import axios from 'axios'
 import GenericSubscriptionWrapper from '../../misc/genericSubscriptionWrapper'
 import Toast from '../toasts'
 import '../../../cssImporter'
+import gFuncs from '../../misc/functions'
+
 import Dialog from '../../layout/dialog'
 import './css.css'
 
@@ -30,8 +32,9 @@ const state = {
         d1: null,
         d2: null,
         dismiss() {
-            if (state.dialogs.d1)
-                state.dialogs.d1.dismiss();
+            if (state.dialogs.d1){
+                state.dialogs.d1.dismiss(true);
+            }
 
             if (state.dialogs.d2)
                 state.dialogs.d2.parentNode.removeChild(state.dialogs.d2);
@@ -91,6 +94,8 @@ const functions = {
             const createNewUsers = lodash.get(state, "createNewUsers", true);
             const authNeeded = !!(lodash.get(state, "fbConfig.authRequired") || lodash.get(state, "fbConfig.requiresAuth"))
 
+            state.dialogs.dismiss();
+
             state.dialogs.d1 = Dialog.create({
                 title: "LOG IN WITH EMAIL",
                 form: {
@@ -111,6 +116,7 @@ const functions = {
                     Submit({ email, password }) {
                         return new Promise((resolve, reject) => {
                             // indirect resolve here
+                            state.dialogs.d1Reject = reject;
                             subMgr.subscribe(document, 'authStateChanged', (e) => {
                                 if(e.detail) {
                                     localStorage.setItem('firebaseAuthPluginUser', email);
@@ -135,7 +141,9 @@ const functions = {
                 onDismiss() {
                     if(subMgr.has(`state.dialogs.d1`))
                         subMgr.unsubscribe({ id: `state.dialogs.d1` });
+
                     state.dialogs.d1 = null;
+                    state.dialogs.d1Reject = null;
                 }
             })
         },
@@ -251,12 +259,21 @@ const functions = {
                 if (fbApp === fbAppAuth)
                     return; // they are both the same.
 
+                function catcher() {
+                    fbAppAuth.auth().signOut();
+                    fbApp.auth().signOut();
+
+                    if(typeof state.dialogs.d1Reject === 'function')
+                        state.dialogs.d1Reject();
+                }
+
                 if (user) {
-                    functions.authChange.addUserToAuthDb({ fbAppAuth, user }).then(() => {
-                        functions.loginFlow.authenticateWithChildFirebase().catch(() => {
-                            fbAppAuth.auth().signOut();
-                            fbApp.auth().signOut();
-                        })
+                    functions.authChange.addUserToAuthDb({ fbAppAuth, user }).then((dbUserRecord) => {
+                        // at this point we know that fbApp and fbAuthApp are not the same. So let's look in authConfig for requirementFn here
+                        const requirementFn = lodash.get(state, "authConfig.userRequirement") || lodash.get(state, "authConfig.authRequirement")
+                        functions.authChange.meetsAuthRequirement({ requirementFn, user: dbUserRecord }).then(() => {
+                            functions.loginFlow.authenticateWithChildFirebase().catch(catcher)
+                        }).catch(catcher);
                     })
                 }
                 else {
@@ -284,11 +301,37 @@ const functions = {
                     // so the userName you get at first is incorrect. It is best to
                     // wait I guess for fbAppAuth.auth().currentUser
                     let appAuthUser = fbAppAuth.auth().currentUser;
-                    if (appAuthUser) {
-                        functions.authChange.addUserToChildDb({ fbApp, user: appAuthUser }).then(() => {
-                            greet(appAuthUser);
-                            finishUp(appAuthUser);
+                    const flow = () => {
+                        functions.authChange.addUserToChildDb({ fbApp, user: appAuthUser }).then((dbUser) => {
+                            const doRequirementCheckAndContinue = (appAuthDbUser) => {
+                                functions.authChange.meetsAuthRequirement({
+                                    user: dbUser,
+                                    requirementFn: lodash.get(state, "fbConfig.userRequirement") || lodash.get(state, "fbConfig.authRequirement"),
+                                    authUser: appAuthDbUser
+                                }).then(() => {
+                                    greet(appAuthUser);
+                                    finishUp(appAuthUser);
+                                }).catch((err) => {
+                                    fbApp.auth().signOut();
+                                    fbAppAuth.auth().signOut();
+
+                                    if(typeof state.dialogs.d1Reject === 'function')
+                                        state.dialogs.d1Reject(err);
+                                    else
+                                        Toast.negative(err);
+                                })
+                            }
+
+                            if(fbApp !== fbAppAuth){
+                                fbAppAuth.database().ref(`users/${appAuthUser.uid}`).once('value').then(snap => doRequirementCheckAndContinue(snap.val()))
+                            }
+                            else
+                                doRequirementCheckAndContinue();
                         })
+                    }
+
+                    if (appAuthUser) {
+                        flow();
                     }
                     else {
                         const intId = setInterval(() => {
@@ -297,10 +340,7 @@ const functions = {
                                 return;
 
                             clearInterval(intId);
-                            functions.authChange.addUserToChildDb({ fbApp, user: appAuthUser }).then(() => {
-                                greet(appAuthUser);
-                                finishUp(appAuthUser);
-                            })
+                            flow();
                         }, 250);
                     }
                 }
@@ -322,7 +362,7 @@ const functions = {
                 const userRef = fbAppAuth.database().ref(`users/${user.uid}`)
                 userRef.once('value', (snap) => {
                     if(snap.exists())
-                        return resolve();
+                        return resolve(snap.val());
 
                     function find(key) {
                         if(user[key])
@@ -353,7 +393,7 @@ const functions = {
                         }
                     }
 
-                    return userRef.set(userRecord).then(resolve);
+                    return userRef.set(userRecord).then(() => resolve(userRecord));
                 })
             })
         },
@@ -378,7 +418,9 @@ const functions = {
                     if(!dateCreatedResult)
                         outPromises.push(refs.dateCreated.set(new Date().toISOString()))
 
-                    Promise.all(outPromises).then(resolve).catch(reject);
+                    Promise.all(outPromises).then(() => {
+                        userRef.once('value').then(snap => resolve(snap.val()))
+                    }).catch(reject);
                 }).catch(reject);
             })
         },
@@ -423,6 +465,14 @@ const functions = {
                     el.parentNode.removeChild(linkedNode);
                 }
             }
+        },
+        meetsAuthRequirement({ user, authUser, requirementFn }) {
+            return new Promise((resolve, reject) => {
+                if(typeof requirementFn !== 'function')
+                    return resolve();
+
+                return gFuncs.genericResolver(requirementFn, user, authUser).then(resolve).catch(reject);
+            })
         }
     }
 }
