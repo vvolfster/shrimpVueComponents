@@ -534,7 +534,7 @@ export default {
 
         // assign to state & vuePtr
         VuePtr.fbApps.app = fbApp;
-        VuePtr.fbAppAuth.auth = fbAppAuth;
+        VuePtr.fbApps.auth = fbAppAuth;
 
         state.fbApp = fbApp;
         state.fbAppAuth = fbAppAuth;
