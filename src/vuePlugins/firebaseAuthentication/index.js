@@ -86,132 +86,10 @@ const functions = {
         return 'unknown'
     },
     loginFlow: {
-        start() {
-            // console.log(`start login flow pls`)
-            if (!state.ui)
-                state.ui = new FirebaseUI.auth.AuthUI(state.fbAppAuth.auth());
-
-            if (!document.getElementById('firebaseui-auth-container')) {
-                const frag = document.createDocumentFragment();
-                const topLevelNode = document.createElement('div');
-                topLevelNode.className = 'absolute fill column justify-center items-center'
-                topLevelNode.id = "auth-topLevel-container"
-                topLevelNode.style.backgroundColor = 'rgba(0,0,0, 0.5)'
-                topLevelNode.style.zIndex = 99999;
-                topLevelNode.style.top = 0;
-                topLevelNode.style.left = 0;
-                topLevelNode.addEventListener('click', () => {
-                    if(!topLevelNode.busy)
-                        topLevelNode.parentNode.removeChild(topLevelNode);
-                })
-
-                const backgroundNode = document.createElement('div');
-                backgroundNode.className = 'bg-white shadow-1 column justify-center items-center'
-                backgroundNode.style.borderRadius = '2px';
-
-                const formNode = document.createElement('div');
-                formNode.className = 'column justify-center items-center'
-                formNode.innerHTML = `<h5 style='margin-bottom:10px'>LOG IN</h5>`
-                formNode.style.padding = '5px';
-
-                const busyNode = document.createElement('div');
-                busyNode.className = 'fa fa-circle-o-notch spin text-blue'
-                busyNode.style.visibility = 'hidden';
-                busyNode.style.width = '0px';
-                busyNode.style.height = '0px';
-
-
-                const emailNode = document.createElement('div');
-                emailNode.innerHTML = [
-                    `<i class='fa fa-envelope' style='margin-left:20px;'></i>`,
-                    `<div class='firebaseui-idp-text'>Sign in with Email</div>`
-                ].join();
-
-                emailNode.className = 'bg-red text-white text-no-transform h40 row justify-start items-center shadow-2'
-                emailNode.style.width = '203px';
-                emailNode.style.cursor = 'pointer';
-                emailNode.addEventListener('click', functions.loginFlow.showEmailAndPasswordDialog)
-
-                const authUIContainerNode = document.createElement('div');
-                authUIContainerNode.id = 'firebaseui-auth-container';
-                // const x = new MutationObserver((e) => {
-                //     if(e[0].removedNodes)
-                //         console.log(e[0].removedNodes);
-                // })
-                // x.observe(authUIContainerNode, { childList: true })
-
-                formNode.appendChild(emailNode);
-                formNode.appendChild(authUIContainerNode);
-                backgroundNode.appendChild(formNode);
-                backgroundNode.appendChild(busyNode);
-                topLevelNode.appendChild(backgroundNode);
-
-                topLevelNode.showBusy = () => {
-                    topLevelNode.busy = true;
-
-                    formNode.style.visibility = 'hidden';
-                    formNode.style.width = '0px';
-                    formNode.style.height = '0px';
-
-                    busyNode.style.visibility = 'visible';
-                    busyNode.style.width = 'auto';
-                    busyNode.style.height = 'auto';
-
-                    backgroundNode.style.padding = "20px";
-                }
-
-                state.dialogs.d2 = topLevelNode;
-
-                frag.appendChild(topLevelNode);
-                document.body.appendChild(frag);
-            }
-
-            state.ui.start('#firebaseui-auth-container', state.uiConfig);
-
-            // state.dialogs.d1 = Dialog.create({
-            //     title: "Login",
-            //     style: 'width: 19.5vw; height: 20vh;',
-            //     buttons: {
-            //         Google() {
-            //             return functions.loginFlow.google();
-            //         },
-            //         Facebook() {
-            //             return functions.loginFlow.facebook();
-            //         },
-            //         EmailAndPassword() {
-            //             state.dialogs.d2 = Dialog.create({
-            //                 title: "Login",
-            //                 form: {
-            //                     email: {
-            //                         type: String,
-            //                         required: true,
-            //                         model: localStorage.getItem('firebaseAuthPluginUser')
-            //                     },
-            //                     password: {
-            //                         type: "password",
-            //                         required: true,
-            //                         model: localStorage.getItem('firebaseAuthPluginPw')
-            //                     }
-            //                 },
-            //                 buttons: {
-            //                     Submit(form, progress) {
-            //                         return functions.loginFlow.emailAndPassword(form, progress)
-            //                     }
-            //                 },
-            //                 onDismiss() {
-            //                     state.dialog2 = null;
-            //                 }
-            //             })
-            //         },
-            //     },
-            //     onDismiss() {
-            //         state.dialogs.d1 = null;
-            //     }
-            // })
-        },
         showEmailAndPasswordDialog() {
             const fbAppAuth = state.fbAppAuth;
             const createNewUsers = lodash.get(state, "createNewUsers", true);
+            const authNeeded = !!(lodash.get(state, "fbConfig.authRequired") || lodash.get(state, "fbConfig.requiresAuth"))
 
             state.dialogs.d1 = Dialog.create({
                 title: "LOG IN WITH EMAIL",
@@ -227,19 +105,23 @@ const functions = {
                         model: localStorage.getItem('firebaseAuthPluginPw')
                     }
                 },
-                style: `width:268px;`,
+                noDismiss: authNeeded,
                 buttons: {
+                    "Log In With Auth Providers": functions.loginFlow.showFirebaseAuth,
                     Submit({ email, password }) {
                         return new Promise((resolve, reject) => {
                             // indirect resolve here
-                            subMgr.subscribe(document, 'authStateChanged', () => {
-                                localStorage.setItem('firebaseAuthPluginUser', email)
-                                localStorage.setItem('firebaseAuthPluginPw', password)
-                                resolve();
+                            subMgr.subscribe(document, 'authStateChanged', (e) => {
+                                if(e.detail) {
+                                    localStorage.setItem('firebaseAuthPluginUser', email);
+                                    localStorage.setItem('firebaseAuthPluginPw', password);
+                                    resolve();
+                                }
                             }, `state.dialogs.d1`);
 
                             fbAppAuth.auth().signInWithEmailAndPassword(email, password).catch((err) => {
-                                if (err.message !== "There is no user record corresponding to this identifier. The user may have been deleted.")
+                                const errCode = lodash.get(err, "code");
+                                if(errCode !== `auth/user-not-found`)
                                     return reject(err.message);
 
                                 if (createNewUsers)
@@ -251,10 +133,77 @@ const functions = {
                     }
                 },
                 onDismiss() {
-                    subMgr.unsubscribe({ id: `state.dialogs.d1` });
+                    if(subMgr.has(`state.dialogs.d1`))
+                        subMgr.unsubscribe({ id: `state.dialogs.d1` });
                     state.dialogs.d1 = null;
                 }
             })
+        },
+        showFirebaseAuth() {
+            const authNeeded = !!(lodash.get(state, "fbConfig.authRequired") || lodash.get(state, "fbConfig.requiresAuth"))
+            if (!state.ui)
+                state.ui = new FirebaseUI.auth.AuthUI(state.fbAppAuth.auth());
+
+            if (!document.getElementById('firebaseui-auth-container')) {
+                const frag = document.createDocumentFragment();
+                const topLevelNode = document.createElement('div');
+                topLevelNode.className = 'absolute fill column justify-center items-center'
+                topLevelNode.id = "auth-topLevel-container"
+                topLevelNode.style.backgroundColor = 'rgba(0,0,0, 0.5)'
+                topLevelNode.style.zIndex = 99999;
+                topLevelNode.style.top = 0;
+                topLevelNode.style.left = 0;
+                topLevelNode.addEventListener('click', (e) => {
+                    if(e.stopPropagation)
+                        e.stopPropagation();
+
+                    if (!topLevelNode.busy){
+                        if(authNeeded)
+                            functions.loginFlow.showEmailAndPasswordDialog();
+
+                        topLevelNode.parentNode.removeChild(topLevelNode);
+                    }
+                })
+
+                const backgroundNode = document.createElement('div');
+                backgroundNode.className = 'bg-white shadow-2 column justify-center items-center'
+                backgroundNode.style.borderRadius = '2px';
+
+                const busyNode = document.createElement('div');
+                busyNode.className = 'fa fa-circle-o-notch spin text-black'
+                busyNode.style.visibility = 'hidden';
+                busyNode.style.width = '0px';
+                busyNode.style.height = '0px';
+
+                const authUIContainerNode = document.createElement('div');
+                authUIContainerNode.id = 'firebaseui-auth-container';
+                authUIContainerNode.style.paddingTop = "15px";
+
+                backgroundNode.appendChild(authUIContainerNode);
+                backgroundNode.appendChild(busyNode);
+                topLevelNode.appendChild(backgroundNode);
+
+                topLevelNode.showBusy = () => {
+                    topLevelNode.busy = true;
+
+                    if(authUIContainerNode) {
+                        authUIContainerNode.style.visibility = 'hidden';
+                        authUIContainerNode.style.width = '0px';
+                        authUIContainerNode.style.height = '0px';
+                    }
+
+                    busyNode.style.visibility = 'visible';
+                    busyNode.style.width = '50pt';
+                    busyNode.style.height = '50pt';
+                    backgroundNode.style.padding = "20px";
+                }
+
+                state.dialogs.d2 = topLevelNode;
+                frag.appendChild(topLevelNode);
+                document.body.appendChild(frag);
+            }
+
+            state.ui.start('#firebaseui-auth-container', state.uiConfig);
         },
         authenticateWithChildFirebase() {
             const fbAppAuth = state.fbAppAuth;
@@ -295,8 +244,145 @@ const functions = {
             })
         }
     },
-    components: {
-        handleAuthChg(user) {
+    authChange: {
+        subscribeToAuthChangeOnMaster({ fbApp, fbAppAuth }) {
+            fbAppAuth.auth().onAuthStateChanged((u) => {
+                const user = fbApp.auth().currentUser || u;
+                if (fbApp === fbAppAuth)
+                    return; // they are both the same.
+
+                if (user) {
+                    functions.authChange.addUserToAuthDb({ fbAppAuth, user }).then(() => {
+                        functions.loginFlow.authenticateWithChildFirebase().catch(() => {
+                            fbAppAuth.auth().signOut();
+                            fbApp.auth().signOut();
+                        })
+                    })
+                }
+                else {
+                    fbApp.auth().signOut();
+                }
+            });
+        },
+        subscribeToAuthChangeOnChild({ fbApp, fbAppAuth }) {
+            const authNeeded = !!(lodash.get(state, "fbConfig.authRequired") || lodash.get(state, "fbConfig.requiresAuth"))
+
+            function greet(user) {
+                Toast.positive(`Welcome ${functions.getDisplayName(user)}`)
+                state.dialogs.dismiss();
+            }
+
+            function finishUp(user) {
+                state.currentUser = user;
+                if (document)
+                    document.dispatchEvent(new CustomEvent('authStateChanged', { detail: user }));
+            }
+
+            fbApp.auth().onAuthStateChanged((u) => {
+                if (u) {
+                    // on reload of pages, sometimes the fbAppAuth logs in after.
+                    // so the userName you get at first is incorrect. It is best to
+                    // wait I guess for fbAppAuth.auth().currentUser
+                    let appAuthUser = fbAppAuth.auth().currentUser;
+                    if (appAuthUser) {
+                        functions.authChange.addUserToChildDb({ fbApp, user: appAuthUser }).then(() => {
+                            greet(appAuthUser);
+                            finishUp(appAuthUser);
+                        })
+                    }
+                    else {
+                        const intId = setInterval(() => {
+                            appAuthUser = fbAppAuth.auth().currentUser;
+                            if (!appAuthUser)
+                                return;
+
+                            clearInterval(intId);
+                            functions.authChange.addUserToChildDb({ fbApp, user: appAuthUser }).then(() => {
+                                greet(appAuthUser);
+                                finishUp(appAuthUser);
+                            })
+                        }, 250);
+                    }
+                }
+                else {
+                    // if there was a user in our state, that means we logged out here.
+                    if (state.currentUser)
+                        Toast("Logged out");
+
+                    if (authNeeded) {
+                        functions.loginFlow.showEmailAndPasswordDialog();
+                    }
+
+                    finishUp(null)
+                }
+            })
+        },
+        addUserToAuthDb({ fbAppAuth, user }) {
+            return new Promise((resolve) => {
+                const userRef = fbAppAuth.database().ref(`users/${user.uid}`)
+                userRef.once('value', (snap) => {
+                    if(snap.exists())
+                        return resolve();
+
+                    function find(key) {
+                        if(user[key])
+                            return user[key];
+
+                        const provider = lodash.find(user.providerData, p => p[key])
+                        if(provider)
+                            return provider[key];
+
+                        return null;
+                    }
+
+                    const userRecord =  {
+                        dateCreated: new Date().toISOString(),
+                        id: user.uid,
+                        email: find('email'),
+                        photoURL: find('photoURL'),
+                        displayName: find('displayName'),
+                        firstName: find('firstName') || find('first'),
+                        lastName: find('lastName') || find('last')
+                    }
+
+                    if(userRecord.displayName){
+                        const dArr = userRecord.displayName.split(' ');
+                        if(dArr.length > 1){
+                            userRecord.firstName = dArr[0];
+                            userRecord.lastName = lodash.last(dArr);
+                        }
+                    }
+
+                    return userRef.set(userRecord).then(resolve);
+                })
+            })
+        },
+        addUserToChildDb({ fbApp, user }){
+            return new Promise((resolve, reject) => {
+                const userRef = fbApp.database().ref(`users/${user.uid}`)
+                const refs = {
+                    id: userRef.child('id'),
+                    dateCreated: userRef.child('dateCreated'),
+                }
+
+                const promises = [refs.id.once('value'), refs.dateCreated.once('value')]
+                Promise.all(promises).then((results) => {
+                    const idRes = results[0].val();
+                    const dateCreatedResult = results[1].val();
+
+                    const outPromises = []
+
+                    if(!idRes)
+                        outPromises.push(refs.id.set(user.uid))
+
+                    if(!dateCreatedResult)
+                        outPromises.push(refs.dateCreated.set(new Date().toISOString()))
+
+                    Promise.all(outPromises).then(resolve).catch(reject);
+                }).catch(reject);
+            })
+        },
+        handleChangeOnComponent(user) {
             // console.log(`handleAuthChanged`, this, this.$el, user);
             this.authUser = user;
             this.authUserId = lodash.get(user, 'uid') || lodash.get(user, 'id') || lodash.get(user, ".key");
@@ -318,7 +404,7 @@ const functions = {
 
                     const loginBtn = lodash.get(newNode.querySelectorAll(`[qa='authRequiredBtn']`), '0');
                     if (loginBtn) {
-                        loginBtn.addEventListener('click', functions.loginFlow.start)
+                        loginBtn.addEventListener('click', functions.loginFlow.showEmailAndPasswordDialog)
                     }
 
                     el.parentNode.appendChild(frag);
@@ -345,102 +431,42 @@ export default {
     install(VuePtr, opts) {
         const config = lodash.get(opts, "fbConfig")
         const authConfig = lodash.get(opts, "authConfig") || lodash.get(opts, "masterAuthConfig") || config;
-        const authNeeded = !!(lodash.get(config, "authRequired") || lodash.get(config, "requiresAuth"))
         const authHtml = lodash.get(config, "authRequiredHtml") || lodash.get(opts, "authRequiredHtml")
 
         if (typeof authHtml === 'string')
             state.authRequiredHtml = authHtml;
-
-        // const authRequirementFn = lodash.get(config, "userRequirement") || lodash.get(config, "authRequirement");
 
         if (!config)
             return;
 
         const fbApp = Firebase.initializeApp(config);
         const fbAppAuth = config !== authConfig ? Firebase.initializeApp(authConfig, "auth") : fbApp;
+
+        // assign to state & vuePtr
         VuePtr.fbApp = fbApp;
         VuePtr.fbAppAuth = fbAppAuth;
+
         state.fbApp = fbApp;
         state.fbAppAuth = fbAppAuth;
         state.fbConfig = config;
         state.authConfig = authConfig;
+
+        // debugging only.
         window.fbAppAuth = fbAppAuth;
 
         // even though we log in thru fbApPAuth first, We must log into fbApp as well (using a token).
-        function authChgFn(u) {
-            const user = fbApp.auth().currentUser || u;
-            if (fbApp === fbAppAuth)
-                return; // they are both the same.
-
-            if (user) {
-                functions.loginFlow.authenticateWithChildFirebase().catch(() => {
-                    fbAppAuth.auth().signOut();
-                    fbApp.auth().signOut();
-                })
-            }
-            else {
-                fbApp.auth().signOut();
-            }
-        }
-
-        fbAppAuth.auth().onAuthStateChanged(authChgFn)
-
-        fbApp.auth().onAuthStateChanged((u) => {
-            function greet(user) {
-                Toast.positive(`Welcome ${functions.getDisplayName(user)}`)
-                state.dialogs.dismiss();
-            }
-
-            function finishUp(user) {
-                state.currentUser = user;
-                if (document) {
-                    const event = new CustomEvent('authStateChanged', { detail: user });
-                    document.dispatchEvent(event);
-                }
-            }
-
-            if(u) {
-                // on reload of pages, sometimes the fbAppAuth logs in after.
-                // so the userName you get at first is incorrect. It is best to
-                // wait I guess for fbAppAuth.auth().currentUser
-                let appAuthUser = fbAppAuth.auth().currentUser;
-                if(appAuthUser){
-                    greet(appAuthUser);
-                    finishUp(appAuthUser);
-                }
-                else {
-                    const intId = setInterval(() => {
-                        appAuthUser = fbAppAuth.auth().currentUser;
-                        if(!appAuthUser)
-                            return;
-
-                        greet(appAuthUser);
-                        finishUp(appAuthUser);
-                        clearInterval(intId);
-                    }, 250);
-                }
-            }
-            else {
-                if (state.currentUser)
-                    Toast("Logged out");
-
-                if (authNeeded) {
-                    functions.loginFlow.start();
-                }
-
-                finishUp(null)
-            }
-        })
+        functions.authChange.subscribeToAuthChangeOnMaster({ fbAppAuth, fbApp });
+        functions.authChange.subscribeToAuthChangeOnChild({ fbApp, fbAppAuth })
 
         VuePtr.mixin({
             beforeDestroy() {
                 subMgr.unsubscribe({ id: this });
             },
             mounted() {
-                // we are using the element itself as its id. This makes us not have to keep track of this thing.
+                // we are using the element itself as its id. This makes us not \have to keep track of this thing.
                 const self = this;
-                functions.components.handleAuthChg.apply(self, [state.currentUser]);
-                subMgr.subscribe(document, "authStateChanged", e => functions.components.handleAuthChg.apply(self, [e.detail]), self);
+                functions.authChange.handleChangeOnComponent.apply(self, [state.currentUser]);
+                subMgr.subscribe(document, "authStateChanged", e => functions.authChange.handleChangeOnComponent.apply(self, [e.detail]), self);
             },
             data() {
                 return { authUser: null, authUserId: null }
@@ -455,11 +481,8 @@ export default {
             }
             else if (!state.dialogs.d1) {
                 state.dialogs.dismiss();
-                functions.loginFlow.start();
+                functions.loginFlow.showEmailAndPasswordDialog();
             }
         })
-
-        // if (fbAppAuth.auth().currentUser)
-        //     authChgFn();
     }
 }

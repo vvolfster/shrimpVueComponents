@@ -11,6 +11,12 @@
     margin-bottom: 10px;
 }
 
+/* loogs ugly af when this is enabled. overlapping shadows. ugh */
+.mdl-shadow--2dp {
+    box-shadow: unset !important;
+}
+
+
 @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }

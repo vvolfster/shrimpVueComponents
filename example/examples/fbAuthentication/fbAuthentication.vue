@@ -12,8 +12,8 @@ import fbconf from '../fbAdminPanel/fbconf'
 
 Vue.use(fbAuthPlugin, {
     fbConfig: lodash.assign({
-        requiresAuth: false,
-        createNewUsers: false, // defaults to true. SignUp if user don't exist
+        requiresAuth: true,
+        createNewUsers: true, // defaults to true. SignUp if user don't exist
         userRequirement(user) {
             return new Promise((resolve, reject) => {
                 setTimeout(() => {
