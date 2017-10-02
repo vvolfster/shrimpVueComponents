@@ -1,5 +1,5 @@
 ## firebaseAuthentication (Vue Plugin)
-This is a powerful tool that allows the user to easily configure firebase authentication & manage firebase instances all in place.
+This is a powerful tool that allows the user to easily configure firebase authentication & manage firebase instances all in place. It is recommended that you install this plugin **before Vuex**. After installation, you can access the initiated firebase Apps through **Vue.fbApps.{appName}** (app & auth are always provided).
 
 ### TODO
 Allow for configuration of sign In providers. Not terribly hard but not needed atm.
@@ -29,6 +29,40 @@ import firebaseAuthentication from 'shrimp-vue-components/src/vuePlugins/firebas
 
 Vue.use(firebaseAuthentication, configObj);
 ```
+
+### Effect on Components (Mixin)
+Every component will have these in its **data:**
+
+ - **authUserId** - Id of the authUser
+ - **authUser** - The authUser object
+
+If the component has **requiresAuth** as a truthy value in its **data** or **properties**, the component will be hidden until there is an authenticated user (and you will see a login button by default instead).
+
+If the component has **requiresAuth** as a function in its **data** or **properties**, the user & authUser will be passed into the function. If the function returns a promise, it will be considered passed on resolve. If the function returns falsy values other  than undefined, it will be considered as failed. In the case of fail, the login button will be shown (by default).
+
+If the component has a **authHtml** property as a string or HTML. It will be shown instead of the default one. If it is set to a falsy value, nothing will be shown if the **requiresAuth** conditions are not met.
+
+An example of a vue component will be:
+```javascript
+import lodash from 'lodash'
+
+export default {
+	data() {
+		return {
+			requiresAuth: true,
+			authHtml: "<h2>boo hoo</h2>"
+			// or
+			requiresAuth(user, authUser) {
+				const role = lodash.get(user, "role") || lodash.get(authUser, "role");
+				return role === 'owner'
+			},
+			authHtml: "<h2>boo hoo</h2>"
+		}
+	}
+}
+```
+
+
 
 ### The config object
 This object has quite a lot of properties and features. It is divided into 4 main sections. You will need to retrieve the webAPI config object from the firebase console for each firebase project you are using. It looks something like this:
