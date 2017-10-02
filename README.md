@@ -33,7 +33,7 @@
 6. vuePlugins
 	1. [toasts](./src/vuePlugins/toasts/docs.md)
 	2. [cms](./src/vuePlugins/cms/docs/readme.md)
-    3. [firebaseAuthentication](./src/vuePlugins/firebaseAuthentication/docs/readme.md)
+    3. [firebaseAuthentication](./src/vuePlugins/firebaseAuthentication/docs.md)
 
 
 ## Build Setup
