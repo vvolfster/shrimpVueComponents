@@ -32,7 +32,7 @@ const state = {
         d1: null,
         d2: null,
         dismiss() {
-            if (state.dialogs.d1){
+            if (state.dialogs.d1) {
                 state.dialogs.d1.dismiss(true);
             }
 
@@ -54,7 +54,7 @@ const state = {
         signInOptions: [
             // Leave the lines as is for the providers you want to offer your users.
             Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            Firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+            // Firebase.auth.FacebookAuthProvider.PROVIDER_ID,
             // Firebase.auth.TwitterAuthProvider.PROVIDER_ID,
             // Firebase.auth.GithubAuthProvider.PROVIDER_ID,
             // Firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -67,6 +67,10 @@ const state = {
                 return false;
             }
         }
+    },
+    dbUser: {
+        app: null,
+        auth: null
     }
 }
 
@@ -118,7 +122,7 @@ const functions = {
                             // indirect resolve here
                             state.dialogs.d1Reject = reject;
                             subMgr.subscribe(document, 'authStateChanged', (e) => {
-                                if(e.detail) {
+                                if (e.detail) {
                                     localStorage.setItem('firebaseAuthPluginUser', email);
                                     localStorage.setItem('firebaseAuthPluginPw', password);
                                     resolve();
@@ -127,7 +131,7 @@ const functions = {
 
                             fbAppAuth.auth().signInWithEmailAndPassword(email, password).catch((err) => {
                                 const errCode = lodash.get(err, "code");
-                                if(errCode !== `auth/user-not-found`)
+                                if (errCode !== `auth/user-not-found`)
                                     return reject(err.message);
 
                                 if (createNewUsers)
@@ -139,7 +143,7 @@ const functions = {
                     }
                 },
                 onDismiss() {
-                    if(subMgr.has(`state.dialogs.d1`))
+                    if (subMgr.has(`state.dialogs.d1`))
                         subMgr.unsubscribe({ id: `state.dialogs.d1` });
 
                     state.dialogs.d1 = null;
@@ -162,11 +166,11 @@ const functions = {
                 topLevelNode.style.top = 0;
                 topLevelNode.style.left = 0;
                 topLevelNode.addEventListener('click', (e) => {
-                    if(e.stopPropagation)
+                    if (e.stopPropagation)
                         e.stopPropagation();
 
-                    if (!topLevelNode.busy){
-                        if(authNeeded)
+                    if (!topLevelNode.busy) {
+                        if (authNeeded)
                             functions.loginFlow.showEmailAndPasswordDialog();
 
                         topLevelNode.parentNode.removeChild(topLevelNode);
@@ -194,7 +198,7 @@ const functions = {
                 topLevelNode.showBusy = () => {
                     topLevelNode.busy = true;
 
-                    if(authUIContainerNode) {
+                    if (authUIContainerNode) {
                         authUIContainerNode.style.visibility = 'hidden';
                         authUIContainerNode.style.width = '0px';
                         authUIContainerNode.style.height = '0px';
@@ -263,7 +267,7 @@ const functions = {
                     fbAppAuth.auth().signOut();
                     fbApp.auth().signOut();
 
-                    if(typeof state.dialogs.d1Reject === 'function')
+                    if (typeof state.dialogs.d1Reject === 'function')
                         state.dialogs.d1Reject();
                 }
 
@@ -309,20 +313,23 @@ const functions = {
                                     requirementFn: lodash.get(state, "fbConfig.userRequirement") || lodash.get(state, "fbConfig.authRequirement"),
                                     authUser: appAuthDbUser
                                 }).then(() => {
+                                    state.dbUser.app = dbUser;
+                                    state.dbUser.auth = appAuthDbUser;
+
                                     greet(appAuthUser);
                                     finishUp(appAuthUser);
                                 }).catch((err) => {
                                     fbApp.auth().signOut();
                                     fbAppAuth.auth().signOut();
 
-                                    if(typeof state.dialogs.d1Reject === 'function')
+                                    if (typeof state.dialogs.d1Reject === 'function')
                                         state.dialogs.d1Reject(err);
                                     else
                                         Toast.negative(err);
                                 })
                             }
 
-                            if(fbApp !== fbAppAuth){
+                            if (fbApp !== fbAppAuth) {
                                 fbAppAuth.database().ref(`users/${appAuthUser.uid}`).once('value').then(snap => doRequirementCheckAndContinue(snap.val()))
                             }
                             else
@@ -353,6 +360,8 @@ const functions = {
                         functions.loginFlow.showEmailAndPasswordDialog();
                     }
 
+                    state.dbUser.app = null;
+                    state.dbUser.auth = null;
                     finishUp(null)
                 }
             })
@@ -361,21 +370,21 @@ const functions = {
             return new Promise((resolve) => {
                 const userRef = fbAppAuth.database().ref(`users/${user.uid}`)
                 userRef.once('value', (snap) => {
-                    if(snap.exists())
+                    if (snap.exists())
                         return resolve(snap.val());
 
                     function find(key) {
-                        if(user[key])
+                        if (user[key])
                             return user[key];
 
                         const provider = lodash.find(user.providerData, p => p[key])
-                        if(provider)
+                        if (provider)
                             return provider[key];
 
                         return null;
                     }
 
-                    const userRecord =  {
+                    const userRecord = {
                         dateCreated: new Date().toISOString(),
                         id: user.uid,
                         email: find('email'),
@@ -385,9 +394,9 @@ const functions = {
                         lastName: find('lastName') || find('last')
                     }
 
-                    if(userRecord.displayName){
+                    if (userRecord.displayName) {
                         const dArr = userRecord.displayName.split(' ');
-                        if(dArr.length > 1){
+                        if (dArr.length > 1) {
                             userRecord.firstName = dArr[0];
                             userRecord.lastName = lodash.last(dArr);
                         }
@@ -397,7 +406,7 @@ const functions = {
                 })
             })
         },
-        addUserToChildDb({ fbApp, user }){
+        addUserToChildDb({ fbApp, user }) {
             return new Promise((resolve, reject) => {
                 const userRef = fbApp.database().ref(`users/${user.uid}`)
                 const refs = {
@@ -412,10 +421,10 @@ const functions = {
 
                     const outPromises = []
 
-                    if(!idRes)
+                    if (!idRes)
                         outPromises.push(refs.id.set(user.uid))
 
-                    if(!dateCreatedResult)
+                    if (!dateCreatedResult)
                         outPromises.push(refs.dateCreated.set(new Date().toISOString()))
 
                     Promise.all(outPromises).then(() => {
@@ -426,21 +435,30 @@ const functions = {
         },
         handleChangeOnComponent(user) {
             // console.log(`handleAuthChanged`, this, this.$el, user);
-            this.authUser = user;
-            this.authUserId = lodash.get(user, 'uid') || lodash.get(user, 'id') || lodash.get(user, ".key");
+            const self = this;
+            self.authUser = user;
+            self.authUserId = lodash.get(user, 'uid') || lodash.get(user, 'id') || lodash.get(user, ".key");
 
-            const el = this.$el;
+            const el = self.$el;
             if (!el)
                 return;
 
-            const requiresAuth = lodash.get(this, "requiresAuth") || lodash.get(this, "authRequired") || false;
-            if (!user) {
-                if (requiresAuth) {
+            const html = lodash.get(self, "authHtml") || lodash.get(self, "authHTML") || state.authRequiredHtml;
+            const requiresAuth = lodash.get(self, "requiresAuth") || lodash.get(self, "authRequired") || false;
+
+            function findReplacementNode() {
+                const siblings = el.parentNode.childNodes;
+                const linkedNode = lodash.find(siblings, s => s.linkedVueComponent === self);
+                return linkedNode;
+            }
+
+            function hideComponent() {
+                if (html && !findReplacementNode()) {
                     const frag = document.createDocumentFragment();
                     const newNode = document.createElement("div");
 
-                    newNode.innerHTML = state.authRequiredHtml;
-                    newNode.linkedVueComponent = this;
+                    newNode.innerHTML = html;
+                    newNode.linkedVueComponent = self;
                     newNode.className = 'fill'
                     frag.appendChild(newNode);
 
@@ -450,25 +468,35 @@ const functions = {
                     }
 
                     el.parentNode.appendChild(frag);
-                    el.classList.add('hidden');
                 }
-            }
-            else {
-                // derp
-                // find the node. remove it.
-                el.classList.remove('hidden');
 
-                const siblings = el.parentNode.childNodes;
-                const linkedNode = lodash.find(siblings, s => s.linkedVueComponent === this);
+                el.classList.add('hidden');
+            }
+
+            function showComponent() {
+                el.classList.remove('hidden');
+                const linkedNode = findReplacementNode();
                 if (linkedNode) {
                     // console.log(`removing node`, linkedNode)
                     el.parentNode.removeChild(linkedNode);
                 }
             }
+
+
+            if (!user) {
+                if(requiresAuth)
+                    hideComponent();
+            }
+            else if(requiresAuth && typeof requiresAuth === 'function'){
+                gFuncs.genericResolver(requiresAuth, state.dbUser.app, state.dbUser.auth).then(showComponent).catch(hideComponent);
+            }
+            else {
+                showComponent();
+            }
         },
         meetsAuthRequirement({ user, authUser, requirementFn }) {
             return new Promise((resolve, reject) => {
-                if(typeof requirementFn !== 'function')
+                if (typeof requirementFn !== 'function')
                     return resolve();
 
                 return gFuncs.genericResolver(requirementFn, user, authUser).then(resolve).catch(reject);
@@ -481,7 +509,8 @@ export default {
     install(VuePtr, opts) {
         const config = lodash.get(opts, "fbConfig")
         const authConfig = lodash.get(opts, "authConfig") || lodash.get(opts, "masterAuthConfig") || config;
-        const authHtml = lodash.get(config, "authRequiredHtml") || lodash.get(opts, "authRequiredHtml")
+        const authHtml = lodash.get(config, "authRequiredHtml")
+        const otherApps = lodash.get(opts, "otherApps");
 
         if (typeof authHtml === 'string')
             state.authRequiredHtml = authHtml;
@@ -491,10 +520,21 @@ export default {
 
         const fbApp = Firebase.initializeApp(config);
         const fbAppAuth = config !== authConfig ? Firebase.initializeApp(authConfig, "auth") : fbApp;
+        if (!VuePtr.fbApps)
+            VuePtr.fbApps = {}
+
+        if (otherApps) {
+            lodash.each(otherApps, (v, k) => {
+                if (!k || !v)
+                    return;
+
+                VuePtr.fbApps[k] = Firebase.initializeApp(v, k);
+            })
+        }
 
         // assign to state & vuePtr
-        VuePtr.fbApp = fbApp;
-        VuePtr.fbAppAuth = fbAppAuth;
+        VuePtr.fbApps.app = fbApp;
+        VuePtr.fbAppAuth.auth = fbAppAuth;
 
         state.fbApp = fbApp;
         state.fbAppAuth = fbAppAuth;
@@ -502,7 +542,7 @@ export default {
         state.authConfig = authConfig;
 
         // debugging only.
-        window.fbAppAuth = fbAppAuth;
+        // window.fbAppAuth = fbAppAuth;
 
         // even though we log in thru fbApPAuth first, We must log into fbApp as well (using a token).
         functions.authChange.subscribeToAuthChangeOnMaster({ fbAppAuth, fbApp });
