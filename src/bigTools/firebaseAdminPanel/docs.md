@@ -94,6 +94,9 @@ Optional. This object allows us to configure each individual top level key in fi
 
 - tableConfig
 	- **pageSize (number)** - Amount of entries to show per page.
+    - **canAdd (boolean)** - Allows the user to add tables. Defaults to true.
+    - **canRemove (boolean)** - Allows the user to remove tables. Defaults to true.
+
 	- **{ tableName } (object)** - 
 		- **columnOrder (String[])** - Optional. Allows ordering of the columns in the tableView.
 		- **noDelete (boolean)** - Optional. Allows us to specify that entries can't be deleted from this table.
@@ -119,6 +122,12 @@ import lodash from 'lodash'
 import userDelegate from './path/to/my/userDelegateComponent'
 
 const tableConfig = {
+    /* reserved words for configuration */
+    pageSize: 50,
+    canAdd: true,
+    canRemove: false,
+
+    /* table specific settings. Name, value pairs */        
 	randomDump: {
 		storageKey: "storage"
 	},

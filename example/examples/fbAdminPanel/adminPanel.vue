@@ -35,6 +35,8 @@ export default {
             }, fbconf.db),
             tableConfig: {
                 pageSize: 25,
+                canAdd: true,
+                canRemove: true,
                 test: {
                     columnOrder: ["first", "last", "age", "address"],
                     actions: {

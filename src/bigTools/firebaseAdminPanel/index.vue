@@ -25,6 +25,8 @@
                     :tables="computedTables"
                     :pageSize="tableConfig.pageSize || 25" @pageLoaded="currentPage = $event"
                     class="topBar__navigation"
+                    :canAdd="typeof tableConfig.canAdd === 'boolean' ? tableConfig.canAdd : true"
+                    :canRemove="typeof tableConfig.canRemove === 'boolean' ? tableConfig.canRemove : true"
                     @add="handleTableAddition()"
                     @remove="handleTableRemoval($event)"
                 />

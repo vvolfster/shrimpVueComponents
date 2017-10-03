@@ -3,6 +3,7 @@
         <div class="row items-center">
             <combobox ref="combobox" :options="tables" @value="input_table = $event"/>
             <button 
+                v-if="canAdd"
                 class="btn self-center margin-left white black-text text-no-transform"
                 @click="$emit('add')"
             >
@@ -10,7 +11,7 @@
                 Add
             </button>
             <button 
-                v-if="input_table"
+                v-if="input_table && canRemove"
                 class="btn self-center margin-left red black-text text-no-transform"
                 @click="$emit('remove', input_table)"
             >
@@ -34,7 +35,7 @@ import "../../../../../cssImporter"
 
 export default {
     components: { combobox, pageControls },
-    props: ["tables", "pageSize"],
+    props: ["tables", "pageSize", "canAdd", "canRemove"],
     data() {
         return {
             input_table: "",
