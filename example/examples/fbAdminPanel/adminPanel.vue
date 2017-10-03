@@ -57,7 +57,7 @@ export default {
                             })
                         }
                     },
-                    delegateComponent: person,
+                    // delegateComponent: person,
                     add: [
                         {
                             description: "First and Last",

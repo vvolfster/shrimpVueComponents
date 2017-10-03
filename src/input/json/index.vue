@@ -279,20 +279,16 @@ export default {
         },
         options: {
             deep: true,
-            handler(v, ov) {
+            handler(v) {
                 if(!this.editor)
                     return;
 
                 const mode = lodash.get(v, 'mode')
-                const oldMode = lodash.get(ov, 'mode')
-                if(mode !== oldMode){
+                if(mode)
                     this.editor.setMode(mode);
-                }
 
                 const menu = lodash.get(v, "menu", true);
-                const oldMenu = lodash.get(v, "menu", true);
-                if(menu !== oldMenu)
-                    setMenu.apply(this, [menu]);
+                setMenu.apply(this, [menu]);
             }
         }
     },

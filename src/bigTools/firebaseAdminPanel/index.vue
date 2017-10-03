@@ -7,10 +7,19 @@
         </div>
         <div v-else>
             <div class="row items-center nowrap bg-grey-4">
-                <button class="btn self-center margin-left white black-text text-no-transform" @click="login">
-                    <i class='fa fa-user'/>
-                    {{ username || "Login..." }}
-                </button>
+                <div>
+                    <button class="btn self-center margin-left white black-text text-no-transform" @click="login">
+                        <i class='fa fa-user'/>
+                        {{ username || "Login..." }}
+                    </button>
+                    <button
+                        class="btn self-center margin-left white black-text text-no-transform"
+                        @click="$refs && $refs.navigation ? $refs.navigation.tableChanged() : null"
+                    >
+                        <i class="fa fa-refresh"/>
+                        Refresh
+                    </button>
+                </div>
                 <navigation 
                     ref="navigation"
                     :tables="computedTables"

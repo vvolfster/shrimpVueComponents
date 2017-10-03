@@ -1,26 +1,35 @@
 <template>
     <div>
         <div class="row justify-between items-center bg-grey text-white" style="padding:5px;">
-            <div>{{ page ? page.name : "" }}</div>
+            <div class="row items-center">
+                <div>{{ page ? page.name : "" }}</div>
+                <button 
+                    class="bg-white text-black btn btn--mini"
+                    @click="editorOptions.mode = editorOptions.mode === 'tree' ? 'code' : 'tree'"
+                >
+                    <i class="fa" :class="`fa-${editorOptions.mode}`"></i>
+                </button>
+                <button class="btn btn--tableWide btn--mini fa fa-plus" @click.stop="setExpansion(true)" />
+                <button class="btn btn--tableWide btn--mini fa fa-minus" @click.stop="setExpansion(false)" />
+                <button class="btn btn--tableWide btn--mini fa fa-file" @click.stop="createNew" v-if="page && page.name"/>
+                <div v-if="actions" style="border:solid 1px white; border-width: 0 0 0 1px;">
+                    <button class="btn btn--tableWide" v-for="(action,name) in actions" :key="name" @click="$emit('callAction', { name })">
+                        {{ name }}
+                    </button>
+                </div>
+            </div>
             <button class="bg-white text-black" @click="$emit('switchView', 'table')">Table</button>
         </div>
-        <div v-if="actions">
-            <button class="btn btn--tableWide btn--mini fa fa-plus" @click.stop="setExpansion(true)" />
-            <button class="btn btn--tableWide btn--mini fa fa-minus" @click.stop="setExpansion(false)" />
-            <button class="btn btn--tableWide" v-for="(action,name) in actions" :key="name" @click="$emit('callAction', { name })">
-                {{ name }}
-            </button>
-        </div>
+        
         <div v-for="(obj, key, idx) in pageData" :key="key" class="jsonCell">
+            <div v-if="editorOptions.mode !== 'tree'" class="header row items-center">{{ key }}</div>
             <json :value="obj" :placeholder="key" :options="editorOptions" :ref="`json_${idx}`" @input="$emit('edit', { id: key, value: $event })" />
             <div class="overlayControls row items-center">
-                <button 
-                    class="btn btn--mini btn--overlay"  
-                    @click="$refs[`json_${idx}`][0].d_mode === 'tree' ? $refs[`json_${idx}`][0].getEditor().setMode('code') : $refs[`json_${idx}`][0].getEditor().setMode('tree')"
-                >
-                    {{ $refs[`json_${idx}`][0].d_mode === 'tree' ? 'code' : 'tree' }}
+                <button v-if="hasMenu" @click="$emit('openDetailView', { id: key, entry: obj })" class="fa fa-ellipsis-h bg-green btn btn--mini btn--overlay"/>
+                <button class="yellow btn btn--mini btn--overlay text-black" @click="$emit('clone', { entry: obj } )">
+                    <i class='fa fa-clone'/>
                 </button>
-                <button v-if="hasDelete" class="btn btn--delete btn--mini btn--overlay fa fa-trash" @click="$emit('delete', { id } )"/>
+                <button v-if="hasDelete" class="btn btn--delete btn--mini btn--overlay fa fa-trash" @click="$emit('delete', { id: key } )"/>
             </div>
         </div>
     </div>
@@ -29,7 +38,11 @@
 <script>
 import lodash from 'lodash'
 import json from '../../../../input/json'
+import Toast from '../../../../vuePlugins/toasts'
+import Dialog from '../../../../layout/dialog'
+import fbase from '../../fbase'
 import '../../../../../cssImporter'
+
 
 export default {
     props: {
@@ -63,6 +76,7 @@ export default {
         return {
             editorOptions: {
                 menu: false,
+                mode: "tree",
                 style: 'border: none;',
                 deepCheckOnUpdate: true,
             }
@@ -79,13 +93,40 @@ export default {
                 if (!ref)
                     return false;
 
-                // console.log(ref);
-                // if(!ref.expandAll || !ref.collapseAll)
-                //     return false;
-
                 return val ? ref.expandAll() : ref.collapseAll();
             })
         },
+        createNew() {
+            const self = this;
+            const name = lodash.get(self, "page.name");
+            Dialog.create({
+                title: `Create New ${name}`,
+                form: {
+                    value: {
+                        type: JSON,
+                        options: {
+                            style: "min-width: 40vw;",
+                            mode: "code"
+                        }
+                    }
+                },
+                buttons: {
+                    Submit({ value }){
+                        return new Promise((resolve, reject) => {
+                            if(!name)
+                                return reject(`no name for table: ${name}`);
+
+                            return fbase.getTableRef(name).then((ref) => {
+                                ref.push(value).then(() => {
+                                    Toast.positive(`Successfully created new entry in ${name}. Refresh if it doesn't appear`);
+                                    resolve();
+                                }).catch(reject);
+                            }).catch(reject)
+                        })
+                    }
+                }
+            })
+        }
     }
 }
 </script>
@@ -94,6 +135,8 @@ export default {
 .jsonCell {
     margin-bottom: 10px;
     position: relative;
+    border: solid 1px lightgray;
+    min-height: 40px;
 }
 
 .btn--delete {
@@ -113,7 +156,7 @@ export default {
 }
 
 .btn--overlay {
-    
+    border: solid 1px black;    
 }
 
 .overlayControls {
@@ -121,13 +164,20 @@ export default {
     top: 0;
     right: 0;
     height: 30px;
-    z-index: 999999999999;
-    background-color: white;
-    border: solid 1px black;
+    z-index: 4;
+    background-color: gray;
+}
+
+.header {
+    height: 30px;
+    background-color: gray;
+    color: white;
+    padding: 5px;
 }
 
 .btn {
-    margin-left: 20px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 </style>

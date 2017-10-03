@@ -35,6 +35,9 @@
                         <button v-if="hasMenu" @click="$emit('openDetailView', { id, entry  })" class="green btn">
                             <i class='fa fa-ellipsis-h'/>
                         </button>
+                        <button class="yellow btn" @click="$emit('clone', { entry } )">
+                            <i class='fa fa-clone'/>
+                        </button>
                         <button v-if="hasDelete" class="btn btn--delete" @click="$emit('delete', { id } )">
                             <i class='fa fa-trash'/>
                         </button>

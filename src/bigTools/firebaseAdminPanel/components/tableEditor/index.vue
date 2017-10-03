@@ -16,6 +16,7 @@
                 @delete="remove($event.id)" 
                 @edit="edit($event.id, $event.field, $event.value)"
                 @switchView="view = $event"
+                @clone="push($event.entry)"
             />
             <jsonView v-else-if="!delegateComponent && view === 'json'"
                 style="margin:auto;"
@@ -30,6 +31,7 @@
                 @delete="remove($event.id)" 
                 @edit="set($event.id, $event.value)"
                 @switchView="view = $event"
+                @clone="push($event.entry)"
             />
             <div v-else>
                 <div class='margin-bottom'>
@@ -252,7 +254,7 @@ export default {
                 listen: false,
                 object: null
             },
-            view: "table"
+            view: "json"
         }
     },
     watch: {
@@ -490,20 +492,30 @@ export default {
                 if (!id)
                     return resolve('do nothing cause no id given');
 
-                // check for validity of all keys in object!!
-                if(!lodash.every(value, (v, k) => k)){
-                    console.warn('one of the keys is incorrect');
-                    return resolve('do nothing. One of the keys is incorrect.')
-                }
-
                 return fbase.getTableRef(self.page.name).then((ref) => {
                     ref.child(id).set(value).then(resolve).catch(reject);
+                }).catch(reject);
+            })
+        },
+        push(value) {
+            const self = this;
+            return new Promise((resolve, reject) => {
+                const name = lodash.get(self, "page.name");
+                if (!name)
+                    return reject("no page.name when pushing")
+
+                return fbase.getTableRef(self.page.name).then((ref) => {
+                    ref.push(value).then(() => {
+                        Toast.positive(`Successfully created new entry in ${name}. Refresh if it doesn't appear`);
+                        resolve();
+                    }).catch(reject);
                 }).catch(reject);
             })
         },
 
         // db opts table root
         add() {
+            // console.log(v);
             const self = this;
             return new Promise((resolve, reject) => {
                 const adderRef = self.$refs.adder;
@@ -517,7 +529,7 @@ export default {
                         ref.push(val).then(() => {
                             const name = lodash.get(self, "page.name")
                             if (name)
-                                Toast.positive(`Successfully created new entry in ${name}`);
+                                Toast.positive(`Successfully created new entry in ${name}. Refresh if it doesn't appear`);
                         })
                     }).catch(reject);
                 }).catch(reject);
@@ -727,11 +739,7 @@ export default {
     overflow-y: auto;
 }
 
-.magicModal__actions::-webkit-scrollbar {
-    width: 14px;
-    height: 10px;
-}
-
+.magicModal__actions::-webkit-scrollbar { width: 14px; height: 10px; }
 .magicModal__actions::-webkit-scrollbar-thumb {
     height: 6px;
     border: 4px solid rgba(0, 0, 0, 0);
