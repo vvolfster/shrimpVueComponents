@@ -319,5 +319,18 @@ export default {
             const auth = state.appVars.auth || state.app.auth();
             return auth.signOut().then(resolve).catch(reject);
         })
+    },
+    updateTableNames() {
+        // console.log(`resolving`, state.app.auth().currentUser);
+        return new Promise((resolve, reject) => {
+            const fbConfig = state.fbConfig;
+            if(!fbConfig)
+                return reject(`no fbConfig to updateTable names for`);
+
+            return functions.getTableNames(fbConfig.databaseURL).then((tables) => {
+                state.appVars.tables = tables
+                resolve(state.appVars.tables)
+            })
+        })
     }
 }

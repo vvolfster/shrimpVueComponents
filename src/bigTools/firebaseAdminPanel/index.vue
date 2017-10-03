@@ -25,6 +25,8 @@
                     :tables="computedTables"
                     :pageSize="tableConfig.pageSize || 25" @pageLoaded="currentPage = $event"
                     class="topBar__navigation"
+                    @add="handleTableAddition()"
+                    @remove="handleTableRemoval($event)"
                 />
             </div>
             <tableEditor 
@@ -44,6 +46,7 @@
 <script>
 // import lodash from 'lodash'
 import fbase from './fbase'
+import Dialog from '../../layout/dialog'
 import tableEditor from "./components/tableEditor"
 import navigation from './components/navigation'
 import '../../../cssImporter'
@@ -169,6 +172,74 @@ export default {
                     return clearData().then(resolve)
 
                 return fbase.initFb(fbConfig).then(initInstance).then(readUrlParams).catch(clearData)
+            })
+        },
+        handleTableRemoval(name){
+            const self = this;
+            Dialog.create({
+                title: `Delete ${name}`,
+                description: `Are you sure?`,
+                buttons: {
+                    Yes() {
+                        return new Promise((resolve, reject) => {
+                            fbase.getTableRef(name).then((ref) => {
+                                ref.remove()
+                                .then(fbase.updateTableNames)
+                                .then((tables) => {
+                                    self.fb.tables = tables;
+                                    resolve();
+                                })
+                                .catch(reject);
+                            }).catch(reject);
+                        })
+                    },
+                    No() {},
+                }
+            })
+        },
+        handleTableAddition() {
+            const self = this;
+            Dialog.create({
+                title: "Create New Table",
+                form: {
+                    title: {
+                        type: String,
+                        required: true
+                    },
+                    firstKeyOptional: String,
+                    firstObject: {
+                        type: JSON,
+                        required: true,
+                        options: {
+                            style: "min-width: 40vw;",
+                            mode: "code"
+                        }
+                    },
+                },
+                buttons: {
+                    Submit({ title, firstKeyOptional, firstObject }){
+                        return new Promise((resolve, reject) => {
+                            function updateTables() {
+                                fbase.updateTableNames().then((tables) => {
+                                    self.fb.tables = tables;
+                                    resolve();
+                                })
+                            }
+
+                            fbase.getTableRef(title).then((ref) => {
+                                ref.once('value').then((snap) => {
+                                    if(snap.exists())
+                                        return reject(`${title} already exists.`)
+
+                                    if(firstKeyOptional)
+                                        return ref.set({ [firstKeyOptional]: firstObject }).then(updateTables).catch(reject);
+
+                                    return ref.push(firstObject).then(updateTables).catch(reject);
+                                })
+                            })
+                        })
+                    }
+                }
             })
         },
         login() {

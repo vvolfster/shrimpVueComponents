@@ -1,6 +1,24 @@
 <template>
     <div class="navigationBar" style="padding:5px;">
-        <combobox ref="combobox" :options="tables" @value="input_table = $event"/>
+        <div class="row items-center">
+            <combobox ref="combobox" :options="tables" @value="input_table = $event"/>
+            <button 
+                class="btn self-center margin-left white black-text text-no-transform"
+                @click="$emit('add')"
+            >
+                <i class="fa fa-plus"/>
+                Add
+            </button>
+            <button 
+                v-if="input_table"
+                class="btn self-center margin-left red black-text text-no-transform"
+                @click="$emit('remove', input_table)"
+            >
+                <i class="fa fa-trash"/>
+                Delete
+            </button>
+        </div>
+
         Firebase Admin Panel
         <pageControls ref="pageControls" :total="totalPages" @value="input_page = $event"/>
     </div>
