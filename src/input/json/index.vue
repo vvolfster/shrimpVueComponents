@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div ref='jsoneditor' class="jsoneditor" :style="ui.style">
+        <div ref='jsoneditor' class="jsoneditorRoot">
         </div>
         <div v-if="error !== null" class="line__error">
             {{ error }}
@@ -19,11 +19,53 @@ import '../../../cssImporter'
 import './css.css'
 
 function getMode(options) {
-    if (!options)
+    if (!options || !options.mode)
         return 'tree'
 
     return ['tree', 'form', 'view', 'code'].indexOf(options.mode) !== -1 ? options.mode : 'tree'
 }
+
+function setMenu(showMenu) {
+    const menuEl = lodash.get(this, "editor.menu")
+    const outerEl = lodash.first(this.$el.querySelectorAll('.jsoneditor-outer'))
+    // console.log("outerEl", outerEl);
+    if(!menuEl)
+        return;
+
+    // console.log(menuEl);
+    if(showMenu) {
+        menuEl.classList.remove('hidden');
+        menuEl.removeAttribute('style')
+
+        if(outerEl) {
+            outerEl.removeAttribute('style')
+        }
+    }
+    else {
+        menuEl.classList.add('hidden')
+        menuEl.style.height = 0;
+
+        if(outerEl) {
+            outerEl.style.padding = 0;
+            outerEl.style.margin = 0;
+        }
+    }
+}
+
+function setStyle(style) {
+    const tableEl = lodash.first(this.$el.querySelectorAll('.jsoneditor'))
+    if(!tableEl)
+        return false;
+
+    if(!style)
+        return tableEl.removeAttribute('style')
+
+    if(typeof style === 'string')
+        return lodash.set(tableEl, "style", style);
+
+    return lodash.each(style, (v, k) => lodash.set(tableEl.style, k, v))
+}
+
 
 const helpers = {
     conditions: {
@@ -56,7 +98,7 @@ export default {
             default: null
         },
         value: {
-            type: [String, Object],
+            type: [String, Object, Array, null],
             default() {
                 return null;
             }
@@ -89,16 +131,21 @@ export default {
         const options = self.options;
         self.d_mode = getMode(options);
         self.uidRand = +new Date();
+
+        self.d_value = helpers.conditions.isObject(self.value) || lodash.isArray(self.value) ? self.value : null;
         self.editor = new JsonEditor(self.$refs.jsoneditor, {
             mode: self.d_mode,
             modes: helpers.get(options, "modes", ['tree', 'form', 'view', 'code'], lodash.isArray),
             onModeChange(v, ov) {
                 self.d_mode = v;
+                setMenu.apply(self, [lodash.get(options, "menu", true)])
+                setStyle.apply(self, [lodash.get(options, "style")])
                 const fn = helpers.get(options, "onModeChange", null, lodash.isFunction)
                 if(fn)
                     fn(v, ov)
             },
             onChange() {
+                // this thing always gets triggured even if nothing is passed to the editor??
                 try {
                     const v = self.editor.get();
                     Object.defineProperty(v, uidFieldName, {
@@ -142,16 +189,15 @@ export default {
             ajv: helpers.get(options, "ajv", null, "isObject"),
             indentation: helpers.get(options, "indentation", 4, lodash.isNumber),
             templates: helpers.get(options, "templates", [], lodash.isArray)
-        });
+        }, self.d_value);
         // window.jsoneditor = self.editor;
-
-        if (lodash.isObject(self.value)) {
-            self.d_value = self.value;
-            self.editor.set(self.value);
-        }
+        // console.log(self.editor);
+        setMenu.apply(self, [lodash.get(options, "menu", true)])
+        setStyle.apply(self, [lodash.get(options, "style")])
     },
     methods: {
         updateValue(v, force) {
+            // console.log(`called updateValue with`, v);
             if(!lodash.isObject(v)){
                 return;
             }
@@ -177,7 +223,7 @@ export default {
                     }
                     else {
                         try {
-                            if(JSON.stringify(this.editor.get()) === JSON.stringify(v))
+                            if(lodash.isEqual(this.editor.get(), v))
                                 return
                         } catch(e) { /* do nothing */ }
                     }
@@ -218,6 +264,7 @@ export default {
     },
     watch: {
         value(v) {
+            // console.log(`called updateValue`)
             this.updateValue(v);
         },
         placeholder(v) {
@@ -227,6 +274,9 @@ export default {
             if (v && !ov)
                 animator.shake({ element: this.$el });
         },
+        ui(v) {
+            setStyle.apply(this, [v.style]);
+        },
         options: {
             deep: true,
             handler(v, ov) {
@@ -235,8 +285,14 @@ export default {
 
                 const mode = lodash.get(v, 'mode')
                 const oldMode = lodash.get(ov, 'mode')
-                if(mode !== oldMode)
+                if(mode !== oldMode){
                     this.editor.setMode(mode);
+                }
+
+                const menu = lodash.get(v, "menu", true);
+                const oldMenu = lodash.get(v, "menu", true);
+                if(menu !== oldMenu)
+                    setMenu.apply(this, [menu]);
             }
         }
     },

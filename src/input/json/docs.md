@@ -74,6 +74,7 @@ import json from 'shrimp-vue-components/src/input/json'
 	- templates (object[]) - Allows for quick insertion of objects. See API. null by default. 
 	- ace (object) - See API
 	- ajv (object) - See API
+    - menu (boolean) - show menu. True by default.
 	
 
 ### Events

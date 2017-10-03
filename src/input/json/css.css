@@ -49,3 +49,7 @@
 .jsoneditor button {
     min-height: unset;
 }
+
+.hidden {
+    visibility: hidden;
+}

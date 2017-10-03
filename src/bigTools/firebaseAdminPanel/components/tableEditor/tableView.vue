@@ -2,7 +2,10 @@
     <table>
         <thead>
             <th :colspan="columns.length ? columns.length + 1 : 1" class="bg-grey text-white">
-                {{ page ? page.name : "" }}
+                <div class="row justify-between items-center">
+                    <div>{{ page ? page.name : "" }}</div>
+                    <button class="bg-white text-black" @click="$emit('switchView', 'json')">JSON</button>
+                </div>
                 <div v-if="actions">
                     <button class="btn btn--tableWide" v-for="(action,name) in actions" :key="name" @click="$emit('callAction', { name })">
                         {{ name }}

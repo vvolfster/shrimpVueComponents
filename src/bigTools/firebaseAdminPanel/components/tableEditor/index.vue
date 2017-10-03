@@ -3,8 +3,34 @@
 
         <div v-if="page">
             <!-- if a custom delegate component is provided, we will just use a list of that component instead of the default table view -->
-            <tableView v-if="!delegateComponent" style="margin:auto;" :columns="columns" :page="page" :pageData="pageData" :actions="actionsTableRoot" :hasMenu="hasDetailView" :hasDelete="tableConfig ? !tableConfig.noDelete : true" @callAction="callTableRootAction($event.name)" @openDetailView="openDetailView($event.id, $event.entry, pageFbRefs[$event.id])" @delete="remove($event.id)" @edit="edit($event.id, $event.field, $event.value)">
-            </tableView>
+            <tableView v-if="!delegateComponent && view === 'table'"
+                style="margin:auto;"
+                :columns="columns"
+                :page="page"
+                :pageData="pageData"
+                :actions="actionsTableRoot"
+                :hasMenu="hasDetailView"
+                :hasDelete="tableConfig ? !tableConfig.noDelete : true"
+                @callAction="callTableRootAction($event.name)"
+                @openDetailView="openDetailView($event.id, $event.entry, pageFbRefs[$event.id])"
+                @delete="remove($event.id)" 
+                @edit="edit($event.id, $event.field, $event.value)"
+                @switchView="view = $event"
+            />
+            <jsonView v-else-if="!delegateComponent && view === 'json'"
+                style="margin:auto;"
+                :columns="columns"
+                :page="page"
+                :pageData="pageData"
+                :actions="actionsTableRoot"
+                :hasMenu="hasDetailView"
+                :hasDelete="tableConfig ? !tableConfig.noDelete : true"
+                @callAction="callTableRootAction($event.name)"
+                @openDetailView="openDetailView($event.id, $event.entry, pageFbRefs[$event.id])"
+                @delete="remove($event.id)" 
+                @edit="set($event.id, $event.value)"
+                @switchView="view = $event"
+            />
             <div v-else>
                 <div class='margin-bottom'>
                     <button class="bordered margin-right" v-for="(action,name) in actionsTableRoot" :key="name" @click="callTableRootAction(name)">
@@ -77,6 +103,7 @@ import fbase from '../../fbase'
 import imageStorage from '../imageStorage'
 import tabView from '../../../../layout/tabView'
 import tableView from './tableView'
+import jsonView from './jsonView'
 import adder from './adder'
 import modal from '../../../../layout/modal'
 import Dialog from '../../../../layout/dialog'
@@ -127,7 +154,7 @@ const functions = {
 }
 
 export default {
-    components: { imageStorage, tabView, adder, tableView, modal, collapsible },
+    components: { imageStorage, tabView, jsonView, adder, tableView, modal, collapsible },
     props: ["page", "tableConfig", "navFn"],
     computed: {
         actions() {
@@ -221,11 +248,11 @@ export default {
             busyMessage: "",
             pageData: null,
             pageFbRefs: null,
-
             scrollInfo: {
                 listen: false,
                 object: null
             },
+            view: "table"
         }
     },
     watch: {
@@ -450,6 +477,27 @@ export default {
 
                 return fbase.getTableRef(self.page.name).then((ref) => {
                     ref.child(id).remove().then(resolve).catch(reject);
+                }).catch(reject);
+            })
+        },
+        set(id, value) {
+            const self = this;
+            return new Promise((resolve, reject) => {
+                const name = lodash.get(self, "page.name");
+                if (!name)
+                    return reject("no page.name when setting")
+
+                if (!id)
+                    return resolve('do nothing cause no id given');
+
+                // check for validity of all keys in object!!
+                if(!lodash.every(value, (v, k) => k)){
+                    console.warn('one of the keys is incorrect');
+                    return resolve('do nothing. One of the keys is incorrect.')
+                }
+
+                return fbase.getTableRef(self.page.name).then((ref) => {
+                    ref.child(id).set(value).then(resolve).catch(reject);
                 }).catch(reject);
             })
         },
