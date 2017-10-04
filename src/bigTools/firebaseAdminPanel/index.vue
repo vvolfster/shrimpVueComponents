@@ -209,6 +209,7 @@ export default {
                         required: true
                     },
                     firstKeyOptional: String,
+                    isEntireTable: Boolean,
                     firstObject: {
                         type: JSON,
                         required: true,
@@ -219,7 +220,7 @@ export default {
                     },
                 },
                 buttons: {
-                    Submit({ title, firstKeyOptional, firstObject }){
+                    Submit({ title, firstKeyOptional, isEntireTable, firstObject }){
                         return new Promise((resolve, reject) => {
                             function updateTables() {
                                 fbase.updateTableNames().then((tables) => {
@@ -232,6 +233,9 @@ export default {
                                 ref.once('value').then((snap) => {
                                     if(snap.exists())
                                         return reject(`${title} already exists.`)
+
+                                    if(isEntireTable)
+                                        return ref.set(firstObject).then(updateTables).catch(reject);
 
                                     if(firstKeyOptional)
                                         return ref.set({ [firstKeyOptional]: firstObject }).then(updateTables).catch(reject);
