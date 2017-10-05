@@ -88,9 +88,9 @@ Properties
 	- **{key}** - What to name the firebase app.
 	- **{value}** - *Firebase Config Object*. See above.
 
-- **requiresAuth (optional Boolean)** - Tells Vue to require auth no matter what. The log in dialog will not be cancellable!
-
-- **userRequirement(user, authUser) (optional Function)** - The plugin will pass the user & authUser (if different), to this function. If it returns undefined or a promise that resolves, the plugin will consider the userRequirement to be met. All other falsy values or rejected promise will be considered as failure to meet the requirement.
+- **requiresAuth (user, authUser) (optional Function | Boolean)** - Tells Vue to require auth no matter what. The log in dialog will not be cancellable.
+	- If boolean, any auth user will work fine.
+	- If function, the plugin will pass the user & authUser (if different), to this function. If it returns undefined or a promise that resolves, the plugin will consider the userRequirement to be met. All other falsy values or rejected promise will be considered as failure to meet the requirement.
 
 - **createNewUsers (optional Boolean)** - Tells the plugin that it can create new users if none exists. Only works with *emailAndPassword* auth method.
 

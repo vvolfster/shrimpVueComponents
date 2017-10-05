@@ -408,7 +408,7 @@ const functions = {
                                 functions.authChange.meetsAuthRequirement({
                                     user: dbUser,
                                     authUser: appAuthDbUser,
-                                    requirementFn: lodash.get(state, "opts.userRequirement") || lodash.get(state, "opts.authRequirement"),
+                                    requirementFn: lodash.get(state, "opts.requiresAuth") || lodash.get(state, "opts.authRequired"),
                                 }).then(() => {
                                     state.dbUser.app = dbUser;
                                     state.dbUser.auth = appAuthDbUser;
@@ -656,9 +656,9 @@ const functions = {
                 return reject(`The following apps in otherApps have keys missing: ${badApps.join(',')}`)
         }
 
-        const userRequirement = lodash.get(conf, "userRequirement") || lodash.get(conf, "authRequirement");
-        if (userRequirement && !lodash.isFunction(userRequirement))
-            return reject(`The requirement function should be a function!`)
+        const userRequirement = lodash.get(conf, "requiresAuth") || lodash.get(conf, "authRequired");
+        if (userRequirement !== null && (!lodash.isFunction(userRequirement) && !lodash.isBoolean(userRequirement)))
+            return reject(`requiresAuth/authRequired should be a function or a boolean!`)
 
         const signInOptions = lodash.get(conf, "signInOptions");
         if (signInOptions) {

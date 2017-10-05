@@ -13,7 +13,7 @@ Vue.use(fbAuthPlugin, {
     fbConfig: fbconf.db,
     masterAuthConfig: fbconf.master,
     createNewUsers: true, // defaults to true. SignUp if user don't exist
-    userRequirement(user) {
+    authRequired(user) {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 return typeof user.email === 'string' && user.email.toLowerCase().endsWith('@iii.global') ? resolve() : reject(`User's email must be from iii.global`)
