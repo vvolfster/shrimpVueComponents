@@ -79,9 +79,13 @@ export default {
             username: null,
             currentPage: null,
             isReady: false,
+            unsubberFn: null
         }
     },
     beforeDestroy() {
+        if(typeof this.unsubberFn === 'function')
+            this.unsubberFn();
+
         fbase.close();
     },
     mounted() {
@@ -125,6 +129,11 @@ export default {
             const self = this;
             const fb   = this.fb;
             const fbConfig = this.fbConfig;
+            if(typeof this.unsubberFn === 'function'){
+                this.unsubberFn();
+                this.unsubberFn = null;
+            }
+
             function clearData(err) {
                 return new Promise((resolve) => {
                     self.isReady = false;
@@ -149,9 +158,39 @@ export default {
                     fb.messaging = messaging;
                     fb.storage = storage;
                     fb.tables = tables;
-                    fb.auth.onAuthStateChanged((authe) => {
-                        self.username = authe ? (authe.displayName || authe.email) : null
+                    self.unsubberFn = fb.auth.onAuthStateChanged((authe) => {
+                        if(self){
+                            if(!authe){
+                                self.username = null;
+                            }
+                            else {
+                                const uid = authe.uid;
+                                const username = authe ? (authe.displayName || authe.email) : null
+                                if(username){
+                                    self.username = username;
+                                }
+                                else {
+                                    fb.database.ref(`users/${uid}`).once('value').then((snap) => {
+                                        const dbUser = snap.val();
+                                        if(!dbUser)
+                                            self.username = uid;
+                                        else {
+                                            const f = dbUser.firstName || dbUser.first;
+                                            const l = dbUser.lastName || dbUser.last;
+                                            const e = dbUser.email;
+                                            const d = dbUser.displayName;
+
+                                            if(f || l)  self.username = `${f} ${l}`
+                                            else if(d)  self.username = d
+                                            else if(e)  self.username = e;
+                                            else        self.username = uid;
+                                        }
+                                    })
+                                }
+                            }
+                        }
                     })
+
                     resolve();
                 })
             }

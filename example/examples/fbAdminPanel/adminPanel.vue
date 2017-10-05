@@ -29,9 +29,9 @@ export default {
                         }, 1000)
                     })
                 },
-                masterAuthConfig: lodash.assign({
-                    remoteRestAuthLinkFunction: 'https://us-central1-studiiio-9274f.cloudfunctions.net/remoteRestAuthLink' // sends params ({ projectId, token, email })
-                }, fbconf.master)
+                // masterAuthConfig: lodash.assign({
+                //     remoteRestAuthLinkFunction: 'https://us-central1-studiiio-9274f.cloudfunctions.net/remoteRestAuthLink' // sends params ({ projectId, token, email })
+                // }, fbconf.master)
             }, fbconf.db),
             tableConfig: {
                 pageSize: 25,

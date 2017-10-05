@@ -266,12 +266,14 @@ const exportObj = {
             }
 
             function start({ existingApp, existingAppAuth }) {
+                // console.log(existingApp, existingAppAuth)
                 const app = existingApp || functions.getApp(name) || Firebase.initializeApp(fbConfig, name);
                 if (!app)
                     reject("failed to initialize app");
 
                 const authAppName = `masterAuth_${lodash.get(fbConfig, `masterAuthConfig.projectId`)}`
                 const authApp = existingAppAuth || functions.getApp(authAppName) || app
+                // console.log(app === authApp)
 
                 state.dontDeleteAppOnClear = !!existingApp;
                 state.dontDeleteAppAuthOnClear = !!existingAppAuth;
@@ -305,6 +307,7 @@ const exportObj = {
 
                     functions.meetsAuthRequirement(fbConfig, authApp)
                     .then(() => {
+                        // console.log(`oh ho i meet the auth requirement`)
                         doInit().then(resolve).catch(reject)
                     }).catch(() => {
                         functions.signOut().then(() => {
