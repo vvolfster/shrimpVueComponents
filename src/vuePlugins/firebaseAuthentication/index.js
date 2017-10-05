@@ -17,7 +17,15 @@ import './css.css'
 const subMgr = new GenericSubscriptionWrapper({ listen: "addEventListener", unlisten: "removeEventListener" });
 const providerMap = {
     // Leave the lines as is for the providers you want to offer your users.
-    google: Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    google: {
+        provider: Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        scopes: ['https://www.googleapis.com/auth/plus.login'],
+        customParameters: {
+            // Forces account selection even when one account
+            // is available.
+            prompt: 'select_account'
+        }
+    },
     facebook: Firebase.auth.FacebookAuthProvider.PROVIDER_ID,
     twitter: Firebase.auth.TwitterAuthProvider.PROVIDER_ID,
     github: Firebase.auth.GithubAuthProvider.PROVIDER_ID,
@@ -50,14 +58,15 @@ const state = {
                 state.dialogs.d1.dismiss(true);
             }
 
-            if (state.dialogs.d2)
+            if (state.dialogs.d2 && state.dialogs.d2.parentNode){
                 state.dialogs.d2.parentNode.removeChild(state.dialogs.d2);
+            }
 
             state.dialogs.d1 = null;
             state.dialogs.d2 = null;
 
             const el = document.getElementById('auth-topLevel-container');
-            if (el)
+            if (el && el.parentNode)
                 el.parentNode.removeChild(el);
         },
     },
@@ -157,9 +166,9 @@ const functions = {
         start() {
             const signInProviders = lodash.get(state, "opts.signInOptions") || state.defaults.signInProviders;
             const federatedIDProviders = lodash.filter(signInProviders, s => s !== 'email')
-            if(signInProviders.indexOf('email') !== -1)
+            if (signInProviders.indexOf('email') !== -1)
                 return functions.loginFlow.showEmailAndPasswordDialog();
-            else if(federatedIDProviders.length)
+            else if (federatedIDProviders.length)
                 return functions.loginFlow.showFirebaseAuth();
 
             throw new Error(`firebaseAuthentication::No sign in options provided!`)
@@ -198,7 +207,7 @@ const functions = {
                 }
             }
 
-            if(otherSignInProviders.length)
+            if (otherSignInProviders.length)
                 buttons["Log In With Auth Providers"] = functions.loginFlow.showFirebaseAuth
 
             state.dialogs.dismiss();
@@ -232,7 +241,7 @@ const functions = {
             const authNeeded = !!(lodash.get(state, "opts.authRequired") || lodash.get(state, "opts.requiresAuth"));
             const signInProviders = lodash.get(state, "opts.signInOptions") || state.defaults.signInProviders;
             const signInOptions = lodash.reduce(signInProviders, (acc, v) => {
-                if(v === 'email')
+                if (v === 'email')
                     return acc;
 
                 acc.push(providerMap[v])
@@ -359,7 +368,7 @@ const functions = {
                     fbAppAuth.auth().signOut();
                     fbApp.auth().signOut();
 
-                    if (typeof state.dialogs.d1Reject === 'function'){
+                    if (typeof state.dialogs.d1Reject === 'function') {
                         state.dialogs.d1Reject();
                         state.dialogs.d1Reject = null;
                     }
@@ -410,7 +419,7 @@ const functions = {
                                     fbApp.auth().signOut();
                                     fbAppAuth.auth().signOut();
 
-                                    if (typeof state.dialogs.d1Reject === 'function'){
+                                    if (typeof state.dialogs.d1Reject === 'function') {
                                         state.dialogs.d1Reject(err);
                                         state.dialogs.d1Reject = null;
                                     }
