@@ -71,7 +71,13 @@ const state = {
     dbUser: {
         app: null,
         auth: null
-    }
+    },
+    authUnsubFunctions: {
+        app: null,
+        auth: null
+    },
+    otherApps: {},
+    opts: null
 }
 
 
@@ -91,6 +97,48 @@ const functions = {
         if (email.trim())
             return email;
         return 'unknown'
+    },
+    reset() {
+        return new Promise((resolve, reject) => {
+            // unsub authChange functions
+            if (state.authUnsubFunctions.app) {
+                state.authUnsubFunctions.app();
+                state.authUnsubFunctions.app = null;
+            }
+
+            if (state.authUnsubFunctions.auth) {
+                state.authUnsubFunctions.auth();
+                state.authUnsubFunctions.auth = null;
+            }
+
+            // delete app & auth firebase apps
+            const delPromises = [];
+            if (state.fbApp !== state.fbAppAuth) {
+                if (state.fbApp)
+                    delPromises.push(state.fbApp.delete())
+
+                if (state.fbAppAuth)
+                    delPromises.push(state.fbAppAuth.delete())
+            }
+            else if (state.fbApp) { // they are both the same in this case, so we can delete one and be done with it.
+                delPromises.push(state.fbApp.delete())
+            }
+
+            // delete other apps
+            lodash.each(state.otherApps, v => delPromises.push(v.delete()))
+
+            Promise.all(delPromises).then(() => {
+                state.fbApp = null;
+                state.fbAppAuth = null;
+                lodash.each(state.otherApps, (v, k) => delete state.otherApps[k])
+
+                // emit!
+                if (document)
+                    document.dispatchEvent(new CustomEvent('fbAuthenticationClear'));
+
+                resolve();
+            }).catch(reject);
+        })
     },
     loginFlow: {
         showEmailAndPasswordDialog() {
@@ -258,7 +306,7 @@ const functions = {
     },
     authChange: {
         subscribeToAuthChangeOnMaster({ fbApp, fbAppAuth }) {
-            fbAppAuth.auth().onAuthStateChanged((u) => {
+            state.authUnsubFunctions.auth = fbAppAuth.auth().onAuthStateChanged((u) => {
                 const user = fbApp.auth().currentUser || u;
                 if (fbApp === fbAppAuth)
                     return; // they are both the same.
@@ -299,7 +347,7 @@ const functions = {
                     document.dispatchEvent(new CustomEvent('authStateChanged', { detail: user }));
             }
 
-            fbApp.auth().onAuthStateChanged((u) => {
+            state.authUnsubFunctions.app = fbApp.auth().onAuthStateChanged((u) => {
                 if (u) {
                     // on reload of pages, sometimes the fbAppAuth logs in after.
                     // so the userName you get at first is incorrect. It is best to
@@ -484,10 +532,10 @@ const functions = {
 
 
             if (!user) {
-                if(requiresAuth)
+                if (requiresAuth)
                     hideComponent();
             }
-            else if(requiresAuth && typeof requiresAuth === 'function'){
+            else if (requiresAuth && typeof requiresAuth === 'function') {
                 gFuncs.genericResolver(requiresAuth, state.dbUser.app, state.dbUser.auth).then(showComponent).catch(hideComponent);
             }
             else {
@@ -502,77 +550,109 @@ const functions = {
                 return gFuncs.genericResolver(requirementFn, user, authUser).then(resolve).catch(reject);
             })
         }
-    }
+    },
 }
 
-export default {
+const exportFunctions = {
     install(VuePtr, opts) {
-        const config = lodash.get(opts, "fbConfig")
-        const authConfig = lodash.get(opts, "authConfig") || lodash.get(opts, "masterAuthConfig") || config;
-        const authHtml = lodash.get(config, "authRequiredHtml")
-        const otherApps = lodash.get(opts, "otherApps");
+        function copyAppsIntoVue() {
+            if (!VuePtr.fbApps)
+                VuePtr.fbApps = {}
 
-        if (typeof authHtml === 'string')
-            state.authRequiredHtml = authHtml;
-
-        if (!config)
-            return;
-
-        const fbApp = Firebase.initializeApp(config);
-        const fbAppAuth = config !== authConfig ? Firebase.initializeApp(authConfig, "auth") : fbApp;
-        if (!VuePtr.fbApps)
-            VuePtr.fbApps = {}
-
-        if (otherApps) {
-            lodash.each(otherApps, (v, k) => {
-                if (!k || !v)
-                    return;
-
-                VuePtr.fbApps[k] = Firebase.initializeApp(v, k);
+            VuePtr.fbApps.app = state.fbApp;
+            VuePtr.fbApps.auth = state.fbAppAuth;
+            lodash.each(state.otherApps, (v, k) => {
+                VuePtr.fbApps[k] = v;
             })
         }
 
-        // assign to state & vuePtr
-        VuePtr.fbApps.app = fbApp;
-        VuePtr.fbApps.auth = fbAppAuth;
+        if (!VuePtr.fbAuthenticationInstalled) {
+            document.addEventListener('fbAuthenticationInitialized', copyAppsIntoVue)
+            document.addEventListener('fbAuthenticationClear', () => { VuePtr.fbApps = {} })
+            VuePtr.mixin({
+                beforeDestroy() {
+                    subMgr.unsubscribe({ id: this });
+                },
+                mounted() {
+                    // we are using the element itself as its id. This makes us not \have to keep track of this thing.
+                    const self = this;
+                    functions.authChange.handleChangeOnComponent.apply(self, [state.currentUser]);
+                    subMgr.subscribe(document, "authStateChanged", e => functions.authChange.handleChangeOnComponent.apply(self, [e.detail]), self);
+                },
+                data() {
+                    return { authUser: null, authUserId: null }
+                },
+            })
 
-        state.fbApp = fbApp;
-        state.fbAppAuth = fbAppAuth;
-        state.fbConfig = config;
-        state.authConfig = authConfig;
+            MouseTrap.bind('f7', () => {
+                if (state.currentUser) {
+                    if (state.fbAppAuth)
+                        state.fbAppAuth.auth().signOut();
 
-        // debugging only.
-        // window.fbAppAuth = fbAppAuth;
+                    if (state.fbApp)
+                        state.fbApp.auth().signOut();
+                }
+                else if (!state.dialogs.d1) {
+                    state.dialogs.dismiss();
+                    functions.loginFlow.showEmailAndPasswordDialog();
+                }
+            })
 
-        // even though we log in thru fbApPAuth first, We must log into fbApp as well (using a token).
-        functions.authChange.subscribeToAuthChangeOnMaster({ fbAppAuth, fbApp });
-        functions.authChange.subscribeToAuthChangeOnChild({ fbApp, fbAppAuth })
+            copyAppsIntoVue();
+            VuePtr.fbAuthenticationInstalled = true;
+        }
 
-        VuePtr.mixin({
-            beforeDestroy() {
-                subMgr.unsubscribe({ id: this });
-            },
-            mounted() {
-                // we are using the element itself as its id. This makes us not \have to keep track of this thing.
-                const self = this;
-                functions.authChange.handleChangeOnComponent.apply(self, [state.currentUser]);
-                subMgr.subscribe(document, "authStateChanged", e => functions.authChange.handleChangeOnComponent.apply(self, [e.detail]), self);
-            },
-            data() {
-                return { authUser: null, authUserId: null }
-            },
-
-        })
-
-        MouseTrap.bind('f7', () => {
-            if (state.currentUser) {
-                fbAppAuth.auth().signOut();
-                fbApp.auth().signOut();
+        exportFunctions.initFb(opts).catch(() => { })
+    },
+    initFb(opts) {
+        return new Promise((resolve, reject) => {
+            if (lodash.isEqual(state.opts, opts)) {
+                // console.log(`initFb -> hello`)
+                return resolve();
             }
-            else if (!state.dialogs.d1) {
-                state.dialogs.dismiss();
-                functions.loginFlow.showEmailAndPasswordDialog();
-            }
+
+            state.opts = opts;
+            return functions.reset().then(() => {
+                const config = lodash.get(opts, "fbConfig")
+                const authConfig = lodash.get(opts, "authConfig") || lodash.get(opts, "masterAuthConfig") || config;
+                const authHtml = lodash.get(config, "authRequiredHtml")
+                const otherApps = lodash.get(opts, "otherApps");
+
+                if (typeof authHtml === 'string')
+                    state.authRequiredHtml = authHtml;
+
+                if (!config)
+                    return reject(`No Config in opts. ${JSON.stringify(opts, null, 2)}`);
+
+                const fbApp = Firebase.initializeApp(config);
+                const fbAppAuth = config !== authConfig ? Firebase.initializeApp(authConfig, "auth") : fbApp;
+
+                if (otherApps) {
+                    lodash.each(otherApps, (v, k) => {
+                        if (!k || !v)
+                            return;
+
+                        state.otherApps[k] = Firebase.initializeApp(v, k);
+                    })
+                }
+
+                // console.log(`initFb -> hello`)
+                state.fbApp = fbApp;
+                state.fbAppAuth = fbAppAuth;
+                state.fbConfig = config;
+                state.authConfig = authConfig;
+
+                functions.authChange.subscribeToAuthChangeOnMaster({ fbAppAuth, fbApp });
+                functions.authChange.subscribeToAuthChangeOnChild({ fbApp, fbAppAuth })
+
+                document.dispatchEvent(new CustomEvent('fbAuthenticationInitialized'));
+                return resolve();
+            }).catch(reject)
         })
+    },
+    getState() {
+        return state;
     }
 }
+
+export default exportFunctions;

@@ -2,9 +2,11 @@ import Firebase from 'firebase'
 import lodash from 'lodash'
 import axios from 'axios'
 // import Chance from 'chance'
+import fbAuthentication from '../../vuePlugins/firebaseAuthentication'
 import Dialog from '../../layout/dialog'
 import Toast from '../../vuePlugins/toasts'
 import importedFunctions from '../../misc/functions'
+
 
 // import Vue from 'vue'
 // import VueTable from 'vuetable-2'
@@ -35,7 +37,7 @@ const functions = {
     },
     shallowGet(url) {
         return new Promise((resolve, reject) => {
-            axios.get(`${url}.json?shallow=true`).then(res =>  resolve(res.data)).catch(reject);
+            axios.get(`${url}.json?shallow=true`).then(res => resolve(res.data)).catch(reject);
             // const auth =  lodash.get(state.appVars, "auth") || (state.app ? state.app.auth() : null)
             // if(!auth || !auth.currentUser)
             //     return axios.get(`${url}.json?shallow=true`).then(res =>  resolve(res.data)).catch(reject);
@@ -68,7 +70,7 @@ const functions = {
             return lodash.every(arr, v => toString.call(v) === '[object Object]')
         }
 
-        function isStr(s){
+        function isStr(s) {
             const arr = lodash.isArray(s) ? s : [s];
             return lodash.every(arr, v => v && typeof v === 'string')
         }
@@ -80,14 +82,14 @@ const functions = {
             }, [])
         }
 
-        if(!isObj(fbConfig))
+        if (!isObj(fbConfig))
             return false;
 
         const requiredConfigProps = ["apiKey", "authDomain", "databaseURL", "projectId"];
         const masterAuthConfig = fbConfig.masterAuthConfig;
 
-        if(masterAuthConfig) {
-            if(!isObj(masterAuthConfig))
+        if (masterAuthConfig) {
+            if (!isObj(masterAuthConfig))
                 return false;
 
             return isStr(getProps(fbConfig, requiredConfigProps)) && isStr(getProps(masterAuthConfig, ["remoteRestAuthLinkFunction"].concat(requiredConfigProps)))
@@ -98,21 +100,52 @@ const functions = {
     getApp(appName) {
         return lodash.find(Firebase.apps, v => v.name === appName)
     },
+    meetsAuthRequirement(fbConfig, app) {
+        return new Promise((resolve, reject) => {
+            const userRequirementFn = fbConfig.authRequirementFn || fbConfig.authRequirement || fbConfig.userRequirementFn || fbConfig.userRequirement
+            if (typeof userRequirementFn !== 'function')
+                resolve();
+
+            const authUser = app.auth().currentUser;
+            if(!authUser)
+                return functions.genericResolver(userRequirementFn, authUser).then(resolve).catch(reject);
+
+            return app.database().ref(`users/${authUser.uid}`).once('value').then((snap) => {
+                return functions.genericResolver(userRequirementFn, snap.val() || authUser).then(resolve).catch(reject);
+            })
+        })
+    },
+    signOut() {
+        return new Promise((resolve, reject) => {
+            if (!state.appVars)
+                return reject("app is not init")
+
+            const promises = [];
+            const app = state.appVars.app;
+            const authApp = state.appVars.authApp;
+
+            promises.push(app.auth().signOut())
+            if(app !== authApp)
+                promises.push(authApp.auth().signOut())
+
+            return Promise.all(promises).then(resolve).catch(reject);
+        })
+    },
     doAuth(app, fbConfig) {
         const canCreateNewUsers = typeof fbConfig.createNewUsers !== 'boolean' ? true : fbConfig.createNewUsers;
         const masterAuthConfig = fbConfig.masterAuthConfig;
-        let userRequirementFn = fbConfig.authRequirementFn || fbConfig.authRequirement || fbConfig.userRequirementFn || fbConfig.userRequirement
-        if(typeof userRequirementFn !== 'function')
-            userRequirementFn = () => true;
+        // let userRequirementFn = fbConfig.authRequirementFn || fbConfig.authRequirement || fbConfig.userRequirementFn || fbConfig.userRequirement
+        // if (typeof userRequirementFn !== 'function')
+        //     userRequirementFn = () => true;
 
         function signInUp(authApp, username, password) {
             return new Promise((resolve, reject) => {
                 authApp.auth().signInWithEmailAndPassword(username, password).then(() => {
                     function failUserCheck() {
-                        authApp.auth().signOut().then(() => reject(`This user does not have permission`))
+                        functions.signOut().then(() => reject(`This user does not have permission`))
                     }
 
-                    functions.genericResolver(userRequirementFn, authApp.auth().currentUser).then(resolve).catch(failUserCheck);
+                    functions.meetsAuthRequirement(fbConfig, authApp).then(resolve).catch(failUserCheck);
                 }).catch((err) => {
                     if (err.message !== "There is no user record corresponding to this identifier. The user may have been deleted.")
                         return reject(err.message);
@@ -126,7 +159,7 @@ const functions = {
         }
 
 
-        function basicAuth({ username, password }){
+        function basicAuth({ username, password }) {
             return signInUp(app, username, password);
         }
 
@@ -134,25 +167,25 @@ const functions = {
             const authAppName = `masterAuth_${masterAuthConfig.projectId}`
             const authApp = functions.getApp(authAppName) || Firebase.initializeApp(masterAuthConfig, authAppName)
             return new Promise((resolve, reject) => {
-                if(!authApp)
+                if (!authApp)
                     return reject(`failed to initialize masterAuthApp: ${authAppName}`);
 
                 function sendAuthTokenToServer() {
                     return new Promise((resolve, reject) => {
                         authApp.auth().currentUser.getIdToken(true)
-                        .then((token) => {
-                            const sendObj =  { token, projectId: fbConfig.projectId }
-                            axios.post(masterAuthConfig.remoteRestAuthLinkFunction, sendObj, { 'Content-Type': 'application/json' })
-                            .then((res) => {
-                                const responseToken = lodash.get(res, "data.token") || lodash.get(res, "token");
-                                if(!responseToken)
-                                    return reject(`Master auth server sent no token back!`);
+                            .then((token) => {
+                                const sendObj = { token, projectId: fbConfig.projectId }
+                                axios.post(masterAuthConfig.remoteRestAuthLinkFunction, sendObj, { 'Content-Type': 'application/json' })
+                                    .then((res) => {
+                                        const responseToken = lodash.get(res, "data.token") || lodash.get(res, "token");
+                                        if (!responseToken)
+                                            return reject(`Master auth server sent no token back!`);
 
-                                return resolve(responseToken);
+                                        return resolve(responseToken);
+                                    })
+                                    .catch(err => reject(`${err.response.status}: ${err.response.data}`));
                             })
-                            .catch(err => reject(`${err.response.status}: ${err.response.data}`));
-                        })
-                        .catch(reject);
+                            .catch(reject);
                     })
                 }
 
@@ -164,10 +197,10 @@ const functions = {
                 }
 
                 return signInUp(authApp, username, password)
-                .then(sendAuthTokenToServer)
-                .then(signInToLocalApp)
-                .then(resolve)
-                .catch(reject);
+                    .then(sendAuthTokenToServer)
+                    .then(signInToLocalApp)
+                    .then(resolve)
+                    .catch(reject);
             })
         }
 
@@ -206,19 +239,42 @@ const functions = {
 }
 
 
-export default {
+const exportObj = {
+    signOut: functions.signOut,
     initFb(fbConfig) {
         const self = this;
         const name = "fbAdminPanelApp"
 
         return new Promise((resolve, reject) => {
-            if(!functions.validateConfigObject(fbConfig))
+            if (!functions.validateConfigObject(fbConfig))
                 return reject("invalid fbConfig Object passed");
 
-            return self.close().then(() => {
-                const app = functions.getApp(name) || Firebase.initializeApp(fbConfig, name);
-                if(!app)
+            // let's see if this is already initized. If so, we can just use what we have
+            function getExistingAppsFromAuthPlugin() {
+                return new Promise((resolve) => {
+                    const fbAuthenticationState = fbAuthentication.getState();
+                    const appId = lodash.get(fbConfig, "projectId")
+                    const appAuthId = lodash.get(fbConfig, "masterAuthConfig.projectId")
+                    const resolverObj = {
+                        existingApp: appId === lodash.get(fbAuthenticationState, "fbApp.options.projectId") ? fbAuthenticationState.fbApp : null,
+                        existingAppAuth: appAuthId === lodash.get(fbAuthenticationState, "fbAppAuth.options.projectId") ? fbAuthenticationState.fbAppAuth : null,
+                    }
+
+                    // console.log(appId, appAuthId, resolverObj);
+                    resolve(resolverObj);
+                })
+            }
+
+            function start({ existingApp, existingAppAuth }) {
+                const app = existingApp || functions.getApp(name) || Firebase.initializeApp(fbConfig, name);
+                if (!app)
                     reject("failed to initialize app");
+
+                const authAppName = `masterAuth_${lodash.get(fbConfig, `masterAuthConfig.projectId`)}`
+                const authApp = existingAppAuth || functions.getApp(authAppName) || app
+
+                state.dontDeleteAppOnClear = !!existingApp;
+                state.dontDeleteAppAuthOnClear = !!existingAppAuth;
 
                 function doInit() {
                     // console.log(`do init`)
@@ -226,12 +282,7 @@ export default {
                         state.app = app;
                         state.fbConfig = fbConfig;
                         const database = state.app.database();
-                        // functions.populateDummyData(database, 100);
 
-                        const authAppName = `masterAuth_${lodash.get(fbConfig, `masterAuthConfig.projectId`)}`
-                        const authApp = functions.getApp(authAppName) || app
-
-                        // console.log(`resolving`, state.app.auth().currentUser);
                         functions.getTableNames(fbConfig.databaseURL).then((tables) => {
                             state.appVars = {
                                 authApp,
@@ -248,25 +299,50 @@ export default {
                     })
                 }
 
-                if(fbConfig.requiresAuth && !app.auth().currentUser)
-                    return functions.doAuth(app, fbConfig).then(doInit)
-                        .then(resolve)
-                        .catch(reject);
+                if (fbConfig.requiresAuth) {
+                    if (!app.auth().currentUser)
+                        return functions.doAuth(app, fbConfig).then(doInit).then(resolve).catch(reject);
+
+                    functions.meetsAuthRequirement(fbConfig, authApp)
+                    .then(() => {
+                        doInit().then(resolve).catch(reject)
+                    }).catch(() => {
+                        functions.signOut().then(() => {
+                            Toast.negative("Existing user did not meet auth requirment!");
+                            functions.doAuth(app, fbConfig).then(doInit).then(resolve).catch(reject);
+                        })
+                    })
+                }
 
                 return doInit().then(resolve).catch(reject);
-            }).catch(reject);
+            }
+
+            return self.close().then(getExistingAppsFromAuthPlugin).then(start).catch(reject);
         })
     },
     close() {
         return new Promise((resolve, reject) => {
-            function cleanup() {
+            const promises = [];
+            if (state.appVars && state.appVars.app && state.appVars.authApp) {
+                if (state.appVars.app === state.appVars.authApp) {
+                    if (!state.dontDeleteAppOnClear)
+                        promises.push(state.appVars.app.delete());
+                }
+                else {
+                    if (!state.dontDeleteAppOnClear)
+                        promises.push(state.appVars.app.delete())
+
+                    if (state.dontDeleteAppAuthOnClear)
+                        promises.push(state.appVars.authApp.delete())
+                }
+            }
+
+            Promise.all(promises).then(() => {
                 state.app = null;
                 state.fbConfig = null;
                 state.appVars = null;
                 resolve();
-            }
-
-            return !state.app ? cleanup() : state.app.delete().then(cleanup).catch(reject);
+            }).catch(reject);
         })
     },
     getState() {
@@ -280,7 +356,7 @@ export default {
     },
     getTableRef(name) {
         return new Promise((resolve, reject) => {
-            if(!state.appVars)
+            if (!state.appVars)
                 return reject('app is not initialized');
 
             const db = state.appVars.database || state.app.database();
@@ -290,7 +366,7 @@ export default {
     },
     getStorageUrl(path) {
         return new Promise((resolve, reject) => {
-            if(!state.appVars)
+            if (!state.appVars)
                 return reject('app is not initialized');
 
             const storage = state.appVars.storage || state.app.storage();
@@ -304,27 +380,18 @@ export default {
     },
     getStorageRef(path) {
         return new Promise((resolve, reject) => {
-            if(!state.appVars)
+            if (!state.appVars)
                 return reject('app is not initialized');
 
             const storage = state.appVars.storage || state.app.storage();
             return resolve(storage.ref(path));
         })
     },
-    signOut() {
-        return new Promise((resolve, reject) => {
-            if(!state.appVars)
-                return reject("app is not init")
-
-            const auth = state.appVars.auth || state.app.auth();
-            return auth.signOut().then(resolve).catch(reject);
-        })
-    },
     updateTableNames() {
         // console.log(`resolving`, state.app.auth().currentUser);
         return new Promise((resolve, reject) => {
             const fbConfig = state.fbConfig;
-            if(!fbConfig)
+            if (!fbConfig)
                 return reject(`no fbConfig to updateTable names for`);
 
             return functions.getTableNames(fbConfig.databaseURL).then((tables) => {
@@ -334,3 +401,6 @@ export default {
         })
     }
 }
+
+
+export default exportObj;

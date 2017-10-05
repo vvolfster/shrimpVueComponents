@@ -104,11 +104,11 @@ function GenericSubscriptionWrapper(params) {
                 const subObj = lodash.find(self.subscriptions, s => s.id === identifierOptional);
                 if(subObj) {
                     if(subObj.element !== element)
-                        return reject(`re-using an existing identifier and the element does not match`)
+                        return reject(`re-using an existing identifier and the element does not match. id: ${identifierOptional}`)
                     if(subObj.eventType !== eventType)
-                        return reject(`re-using an exisitng identifier and the eventType does not match`)
+                        return reject(`re-using an exisitng identifier and the eventType does not match. id: ${identifierOptional}`)
                     if(subObj.fn !== fn)
-                        return reject(`re-using an existing identifier and the fn does not match`)
+                        return reject(`re-using an existing identifier and the fn does not match. id: ${identifierOptional}`)
 
                     return resolve(`nothing to be done. we already have this subscribed`)
                 }
