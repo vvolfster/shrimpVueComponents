@@ -78,32 +78,26 @@ This object has quite a lot of properties and features. It is divided into 4 mai
  
 Properties
 
- - **fbConfig** - Config for the main firebase app.
-	- **apiKey** - From respective *Firebase Config Object*. See above.
-	- **authDomain** - From respective *Firebase Config Object*. See above.
-	- **databaseURL** - From respective *Firebase Config Object*. See above.
-	- **projectId** - From respective *Firebase Config Object*. See above.
-	- **storageBucket** - From respective *Firebase Config Object*. See above.
-	- **messagingSenderId** - From respective *Firebase Config Object*. See above.
-	- **createNewUsers (optional Boolean)** - Tells the plugin that it can create new users if none exists. Only works with *emailAndPassword* auth method.
-	- **requiresAuth (optional Boolean)** - Tells Vue to require auth no matter what. The log in dialog will not be cancellable!
-	- **userRequirement(user, authUser) (optional Function)** - The plugin will pass the user & authUser (if different), to this function. If it returns undefined or a promise that resolves, the plugin will consider the userRequirement to be met. All other falsy values or rejected promise will be considered as failure to meet the requirement.
+- **fbConfig** - Config for the main firebase app. Copy paste from firebase console. See above.
 
- - **authConfig | masterAuthConfig (optional)** - Config for the firebase app that acts as an auth provider. Same option as the adminPanel. The remoteRestAuthLink function **must** be provoided!
-	- **apiKey** - From respective *Firebase Config Object*. See above.
-	- **authDomain** - From respective *Firebase Config Object*. See above.
-	- **databaseURL** - From respective *Firebase Config Object*. See above.
-	- **projectId** - From respective *Firebase Config Object*. See above.
-	- **storageBucket** - From respective *Firebase Config Object*. See above.
-	- **messagingSenderId** - From respective *Firebase Config Object*. See above.
-	- **remoteRestAuthLinkFunction** - This URL must point to a REST function that accepts *{ projectId, token, email }* as request params. It must send back as response:  *{ token: someToken }* or *{ data: { token: someToken }}*.
-	- 	**userRequirement(user) (optional Function)** - The plugin will pass the authUser to this function. If it returns undefined or a promise that resolves, the plugin will consider the userRequirement to be met. All other falsy values or rejected promise will be considered as failure to meet the requirement.
+- **authConfig | masterAuthConfig (optional)** - Config for the firebase app that acts as an auth provider. Same option as the adminPanel. The remoteRestAuthLink function **must** be provided in the properties! Copy paste this from the firebase console. See above.
 
- - **otherApps (optional Object)** - Key Value pair dictionary of all other firebase apps you want to use.
+- **remoteRestAuthLinkFunction** - This URL must point to a REST function that accepts *{ projectId, token, email }* as request params. It must send back as response:  *{ token: someToken }* or *{ data: { token: someToken }}*.
+
+- **otherApps (optional Object)** - Key Value pair dictionary of all other firebase apps you want to use.
 	- **{key}** - What to name the firebase app.
 	- **{value}** - *Firebase Config Object*. See above.
 
- - **authRequiredHtml (optional Html | String)** - This html will be embedded into all Vue Components if they require the user to be authenticated & the user isn't. By default, this is a login button.
+- **requiresAuth (optional Boolean)** - Tells Vue to require auth no matter what. The log in dialog will not be cancellable!
+
+- **userRequirement(user, authUser) (optional Function)** - The plugin will pass the user & authUser (if different), to this function. If it returns undefined or a promise that resolves, the plugin will consider the userRequirement to be met. All other falsy values or rejected promise will be considered as failure to meet the requirement.
+
+- **createNewUsers (optional Boolean)** - Tells the plugin that it can create new users if none exists. Only works with *emailAndPassword* auth method.
+
+
+- **authRequiredHtml (optional Html | String)** - This html will be embedded into all Vue Components if they require the user to be authenticated & the user isn't. By default, this is a login button.
+
+- **signInOptions (optional Array | Object)** - Defaults to ["email", "google"]. Options are ["email", "google", "twitter", "github" ]
 
 -----
 
@@ -122,17 +116,6 @@ export default {
 	    projectId: "wolf-XXXXXXXXXXXX",
 	    storageBucket: "wolf-XXXXXXXXXXXX",
 	    messagingSenderId: "4487XXXXXXXXXXX",
-	    // custom keys here
-	    requiresAuth: true,
-	    createNewUsers: false,
-	    authRequirement(user, authUser) {
-		    return new Promise((resolve, reject) => {
-				const email = lodash.get(authuser, "email", "");
-				if(email.toLowerCase().endsWith("@howl.com"))
-					return resolve();
-				return reject(`only howl.com users are allowed`);
-		    })
-	    },
 	},
 	// This app will be accessible thru Vue.fbApps.auth
     authConfig: { 
@@ -144,15 +127,6 @@ export default {
 		projectId: "master-XXXXXXXXXXXX",
 		storageBucket: "master-XXXXXXXXXXXX",
 		messagingSenderId: "6667XXXXXXXXXXX",
-	    // custom keys here
-		authRequirement(user) {
-			const roles = lodash.get(user, "roles", []);
-			return roles.indexOf('someRole') !== -1;
-		},
-		// Will be sent { projectId, token, email }. 
-		// Expect to receive as a response as:
-		// { token: someToken } or { data: { token: someToken }}
-		remoteRestAuthLinkFunction: 'https://XXXX.cloudfunctions.net/getToken' 
     },
     otherApps: {
 	    // this app will be accessible thru Vue.fbApps.messaging
@@ -167,13 +141,28 @@ export default {
 	    // this app will be accessible thru Vue.fbApps.achievements
   	    achievements: {
 		    apiKey: "aeAIzaSyC97H_XXXXXXXXXXXXXXXXXXXXXXX",
-			authDomain: "mess-XXXXXXXXXXXXX",
-			databaseURL: "https://master-XXXXXXXXXXXX",
-			projectId: "mess-XXXXXXXXXXXX",
-			storageBucket: "mess-XXXXXXXXXXXX",
+			authDomain: "achiev-XXXXXXXXXXXXX",
+			databaseURL: "https://achiev-XXXXXXXXXXXX",
+			projectId: "achiev-XXXXXXXXXXXX",
+			storageBucket: "achiev-XXXXXXXXXXXX",
 			messagingSenderId: "5557XXXXXXXXXXX",
 	    },
-    }
+    },
+    // Will be sent { projectId, token, email }. 
+	// Expect to receive as a response as:
+	// { token: someToken } or { data: { token: someToken }}
+	remoteRestAuthLinkFunction: 'https://XXXX.cloudfunctions.net/getToken' 
+   	requiresAuth: true,
+	createNewUsers: false,
+	authRequirement(user, authUser) {
+	    return new Promise((resolve, reject) => {
+			const email = lodash.get(authuser, "email", "");
+			if(email.toLowerCase().endsWith("@howl.com"))
+				return resolve();
+			return reject(`only howl.com users are allowed`);
+	    })
+    },
+    signInOptions: ["google"],
 }
 ```
 

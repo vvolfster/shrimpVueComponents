@@ -15,15 +15,29 @@ import './css.css'
 
 
 const subMgr = new GenericSubscriptionWrapper({ listen: "addEventListener", unlisten: "removeEventListener" });
+const providerMap = {
+    // Leave the lines as is for the providers you want to offer your users.
+    google: Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    facebook: Firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+    twitter: Firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+    github: Firebase.auth.GithubAuthProvider.PROVIDER_ID,
+    email: Firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    phone: Firebase.auth.PhoneAuthProvider.PROVIDER_ID
+}
+
 const state = {
-    authRequiredHtml: `<div class='column items-center justify-center fill'>
-        <div class="row items-center">
-            You must be &nbsp<b>logged in</b>&nbsp to view this page.
-        </div>
-        <button qa="authRequiredBtn" class="black-border bg-primary text-white rounded margin-top text-no-transform">
-            Log in
-        </button>
-    </div>`,
+    defaults: {
+        authRequiredHtml: `<div class='column items-center justify-center fill'>
+            <div class="row items-center">
+                You must be &nbsp<b>logged in</b>&nbsp to view this page.
+            </div>
+            <button qa="authRequiredBtn" class="black-border bg-primary text-white rounded margin-top text-no-transform">
+                Log in
+            </button>
+        </div>`,
+        signInProviders: ["email", "google"]
+    },
+    opts: null,
     currentUser: null,
     fbApp: null,
     fbAppAuth: null,
@@ -51,15 +65,15 @@ const state = {
         // signInSuccessUrl: '<url-to-redirect-to-on-success>',
         tosUrl: '<your-tos-url>',
         signInFlow: "popup",
-        signInOptions: [
-            // Leave the lines as is for the providers you want to offer your users.
-            Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            // Firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-            // Firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-            // Firebase.auth.GithubAuthProvider.PROVIDER_ID,
-            // Firebase.auth.EmailAuthProvider.PROVIDER_ID,
-            // Firebase.auth.PhoneAuthProvider.PROVIDER_ID
-        ],
+        // signInOptions: [
+        //     // Leave the lines as is for the providers you want to offer your users.
+        //     Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        //     // Firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        //     // Firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+        //     // Firebase.auth.GithubAuthProvider.PROVIDER_ID,
+        //     // Firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        //     // Firebase.auth.PhoneAuthProvider.PROVIDER_ID
+        // ],
         callbacks: {
             signInSuccess() {
                 // console.log(`signInSuccess allegedly`)
@@ -77,7 +91,6 @@ const state = {
         auth: null
     },
     otherApps: {},
-    opts: null
 }
 
 
@@ -141,10 +154,52 @@ const functions = {
         })
     },
     loginFlow: {
+        start() {
+            const signInProviders = lodash.get(state, "opts.signInOptions") || state.defaults.signInProviders;
+            const federatedIDProviders = lodash.filter(signInProviders, s => s !== 'email')
+            if(signInProviders.indexOf('email') !== -1)
+                return functions.loginFlow.showEmailAndPasswordDialog();
+            else if(federatedIDProviders.length)
+                return functions.loginFlow.showFirebaseAuth();
+
+            throw new Error(`firebaseAuthentication::No sign in options provided!`)
+        },
         showEmailAndPasswordDialog() {
             const fbAppAuth = state.fbAppAuth;
-            const createNewUsers = lodash.get(state, "createNewUsers", true);
-            const authNeeded = !!(lodash.get(state, "fbConfig.authRequired") || lodash.get(state, "fbConfig.requiresAuth"))
+            const createNewUsers = lodash.get(state, "opts.createNewUsers", true);
+            const authNeeded = !!(lodash.get(state, "opts.authRequired") || lodash.get(state, "opts.requiresAuth"));
+            const signInProviders = lodash.get(state, "opts.signInOptions") || state.defaults.signInProviders;
+            const otherSignInProviders = lodash.filter(signInProviders, s => s !== 'email');
+
+            const buttons = {
+                Submit({ email, password }) {
+                    return new Promise((resolve, reject) => {
+                        // indirect resolve here
+                        state.dialogs.d1Reject = reject;
+                        subMgr.subscribe(document, 'authStateChanged', (e) => {
+                            if (e.detail) {
+                                localStorage.setItem('firebaseAuthPluginUser', email);
+                                localStorage.setItem('firebaseAuthPluginPw', password);
+                                resolve();
+                            }
+                        }, `state.dialogs.d1`);
+
+                        fbAppAuth.auth().signInWithEmailAndPassword(email, password).catch((err) => {
+                            const errCode = lodash.get(err, "code");
+                            if (errCode !== `auth/user-not-found`)
+                                return reject(err.message);
+
+                            if (createNewUsers)
+                                return fbAppAuth.auth().createUserWithEmailAndPassword(email, password).catch(reject);
+
+                            return reject(err.message);
+                        })
+                    })
+                }
+            }
+
+            if(otherSignInProviders.length)
+                buttons["Log In With Auth Providers"] = functions.loginFlow.showFirebaseAuth
 
             state.dialogs.dismiss();
 
@@ -163,33 +218,7 @@ const functions = {
                     }
                 },
                 noDismiss: authNeeded,
-                buttons: {
-                    "Log In With Auth Providers": functions.loginFlow.showFirebaseAuth,
-                    Submit({ email, password }) {
-                        return new Promise((resolve, reject) => {
-                            // indirect resolve here
-                            state.dialogs.d1Reject = reject;
-                            subMgr.subscribe(document, 'authStateChanged', (e) => {
-                                if (e.detail) {
-                                    localStorage.setItem('firebaseAuthPluginUser', email);
-                                    localStorage.setItem('firebaseAuthPluginPw', password);
-                                    resolve();
-                                }
-                            }, `state.dialogs.d1`);
-
-                            fbAppAuth.auth().signInWithEmailAndPassword(email, password).catch((err) => {
-                                const errCode = lodash.get(err, "code");
-                                if (errCode !== `auth/user-not-found`)
-                                    return reject(err.message);
-
-                                if (createNewUsers)
-                                    return fbAppAuth.auth().createUserWithEmailAndPassword(email, password).catch(reject);
-
-                                return reject(err.message);
-                            })
-                        })
-                    }
-                },
+                buttons,
                 onDismiss() {
                     if (subMgr.has(`state.dialogs.d1`))
                         subMgr.unsubscribe({ id: `state.dialogs.d1` });
@@ -200,7 +229,16 @@ const functions = {
             })
         },
         showFirebaseAuth() {
-            const authNeeded = !!(lodash.get(state, "fbConfig.authRequired") || lodash.get(state, "fbConfig.requiresAuth"))
+            const authNeeded = !!(lodash.get(state, "opts.authRequired") || lodash.get(state, "opts.requiresAuth"));
+            const signInProviders = lodash.get(state, "opts.signInOptions") || state.defaults.signInProviders;
+            const signInOptions = lodash.reduce(signInProviders, (acc, v) => {
+                if(v === 'email')
+                    return acc;
+
+                acc.push(providerMap[v])
+                return acc;
+            }, [])
+
             if (!state.ui)
                 state.ui = new FirebaseUI.auth.AuthUI(state.fbAppAuth.auth());
 
@@ -218,10 +256,16 @@ const functions = {
                         e.stopPropagation();
 
                     if (!topLevelNode.busy) {
-                        if (authNeeded)
-                            functions.loginFlow.showEmailAndPasswordDialog();
-
-                        topLevelNode.parentNode.removeChild(topLevelNode);
+                        if (authNeeded) {
+                            if (signInProviders.indexOf('email') !== -1) {
+                                functions.loginFlow.showEmailAndPasswordDialog();
+                                topLevelNode.parentNode.removeChild(topLevelNode);
+                            }
+                            // else case, too bad. You can't kill this since authIsNeeded :)
+                        }
+                        else {
+                            topLevelNode.parentNode.removeChild(topLevelNode);
+                        }
                     }
                 })
 
@@ -263,13 +307,13 @@ const functions = {
                 document.body.appendChild(frag);
             }
 
-            state.ui.start('#firebaseui-auth-container', state.uiConfig);
+            state.ui.start('#firebaseui-auth-container', lodash.assign({ signInOptions }, state.uiConfig));
         },
         authenticateWithChildFirebase() {
             const fbAppAuth = state.fbAppAuth;
             const fbApp = state.fbApp;
             const projectId = lodash.get(state, "fbConfig.projectId");
-            const remoteRestAuthLinkFn = lodash.get(state, "authConfig.remoteRestAuthLinkFunction")
+            const remoteRestAuthLinkFn = lodash.get(state, "opts.remoteRestAuthLinkFunction")
 
             function sendAuthTokenToServer() {
                 return new Promise((resolve, reject) => {
@@ -315,18 +359,14 @@ const functions = {
                     fbAppAuth.auth().signOut();
                     fbApp.auth().signOut();
 
-                    if (typeof state.dialogs.d1Reject === 'function')
+                    if (typeof state.dialogs.d1Reject === 'function'){
                         state.dialogs.d1Reject();
+                        state.dialogs.d1Reject = null;
+                    }
                 }
 
                 if (user) {
-                    functions.authChange.addUserToAuthDb({ fbAppAuth, user }).then((dbUserRecord) => {
-                        // at this point we know that fbApp and fbAuthApp are not the same. So let's look in authConfig for requirementFn here
-                        const requirementFn = lodash.get(state, "authConfig.userRequirement") || lodash.get(state, "authConfig.authRequirement")
-                        functions.authChange.meetsAuthRequirement({ requirementFn, user: dbUserRecord }).then(() => {
-                            functions.loginFlow.authenticateWithChildFirebase().catch(catcher)
-                        }).catch(catcher);
-                    })
+                    functions.authChange.addUserToAuthDb({ fbAppAuth, user }).then(functions.loginFlow.authenticateWithChildFirebase).catch(catcher);
                 }
                 else {
                     fbApp.auth().signOut();
@@ -334,7 +374,7 @@ const functions = {
             });
         },
         subscribeToAuthChangeOnChild({ fbApp, fbAppAuth }) {
-            const authNeeded = !!(lodash.get(state, "fbConfig.authRequired") || lodash.get(state, "fbConfig.requiresAuth"))
+            const authNeeded = !!(lodash.get(state, "opts.authRequired") || lodash.get(state, "opts.requiresAuth"))
 
             function greet(user) {
                 Toast.positive(`Welcome ${functions.getDisplayName(user)}`)
@@ -358,8 +398,8 @@ const functions = {
                             const doRequirementCheckAndContinue = (appAuthDbUser) => {
                                 functions.authChange.meetsAuthRequirement({
                                     user: dbUser,
-                                    requirementFn: lodash.get(state, "fbConfig.userRequirement") || lodash.get(state, "fbConfig.authRequirement"),
-                                    authUser: appAuthDbUser
+                                    authUser: appAuthDbUser,
+                                    requirementFn: lodash.get(state, "opts.userRequirement") || lodash.get(state, "opts.authRequirement"),
                                 }).then(() => {
                                     state.dbUser.app = dbUser;
                                     state.dbUser.auth = appAuthDbUser;
@@ -370,8 +410,10 @@ const functions = {
                                     fbApp.auth().signOut();
                                     fbAppAuth.auth().signOut();
 
-                                    if (typeof state.dialogs.d1Reject === 'function')
+                                    if (typeof state.dialogs.d1Reject === 'function'){
                                         state.dialogs.d1Reject(err);
+                                        state.dialogs.d1Reject = null;
+                                    }
                                     else
                                         Toast.negative(err);
                                 })
@@ -405,7 +447,7 @@ const functions = {
                         Toast("Logged out");
 
                     if (authNeeded) {
-                        functions.loginFlow.showEmailAndPasswordDialog();
+                        functions.loginFlow.start();
                     }
 
                     state.dbUser.app = null;
@@ -491,7 +533,7 @@ const functions = {
             if (!el)
                 return;
 
-            const html = lodash.get(self, "authHtml") || lodash.get(self, "authHTML") || state.authRequiredHtml;
+            const html = functions.get(self, ["authHtml", "authHTML"]) || functions.get(state, ["opts.authRequiredHtml", "opts.authRequiredHTML"]) || state.defaults.authRequiredHtml;
             const requiresAuth = lodash.get(self, "requiresAuth") || lodash.get(self, "authRequired") || false;
 
             function findReplacementNode() {
@@ -512,7 +554,7 @@ const functions = {
 
                     const loginBtn = lodash.get(newNode.querySelectorAll(`[qa='authRequiredBtn']`), '0');
                     if (loginBtn) {
-                        loginBtn.addEventListener('click', functions.loginFlow.showEmailAndPasswordDialog)
+                        loginBtn.addEventListener('click', functions.loginFlow.start)
                     }
 
                     el.parentNode.appendChild(frag);
@@ -551,6 +593,89 @@ const functions = {
             })
         }
     },
+    validateConfigObject(conf) {
+        function isObject(o) {
+            return toString.call(o) === '[object Object]'
+        }
+
+        function reject(msg) {
+            return `firebaseAuthenticationPlugin::${msg}`
+        }
+
+        function missingKeysInAppObject(o) {
+            const requiredKeys = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'storageBucket', 'messagingSenderId']
+            const keys = lodash.keys(o);
+            return lodash.reduce(requiredKeys, (acc, r) => {
+                if (keys.indexOf(r) === -1 || !o[r])
+                    acc.push(r);
+                return acc;
+            }, [])
+        }
+
+        if (!isObject(conf))
+            return reject(`opts is not an object`);
+
+        const fbConfig = lodash.get(conf, "fbConfig");
+        if (!isObject(fbConfig))
+            return reject(`fbConfig is not an object!`)
+
+        const fbConfigKeysMissing = missingKeysInAppObject(fbConfig);
+        if (fbConfigKeysMissing.length)
+            return reject(`The following keys are missing from fbConfig: ${fbConfigKeysMissing.join(',')}`)
+
+        const authConfig = lodash.get(conf, "authConfig") || lodash.get(conf, "masterAuthConfig");
+        if (authConfig) {
+            const remoteRestAuthLinkFunction = lodash.get(conf, "remoteRestAuthLinkFunction");
+            if (!lodash.isString(remoteRestAuthLinkFunction))
+                return reject(`remoteRestAuthLinkFunction key is either missing or not a string from opts`)
+
+            const authConfigKeysMissing = missingKeysInAppObject(authConfig);
+            if (authConfigKeysMissing.length)
+                return reject(`The following keys are missing from fbConfig: ${authConfigKeysMissing.join(',')}`)
+        }
+
+        const otherApps = lodash.get(conf, "otherApps");
+        if (otherApps) {
+            const badApps = lodash.reduce(otherApps, (acc, v, k) => {
+                const missingKeysInApp = missingKeysInAppObject(v);
+                if (missingKeysInApp.length)
+                    acc.push(k);
+                return acc;
+            }, []);
+
+            if (badApps.length)
+                return reject(`The following apps in otherApps have keys missing: ${badApps.join(',')}`)
+        }
+
+        const userRequirement = lodash.get(conf, "userRequirement") || lodash.get(conf, "authRequirement");
+        if (userRequirement && !lodash.isFunction(userRequirement))
+            return reject(`The requirement function should be a function!`)
+
+        const signInOptions = lodash.get(conf, "signInOptions");
+        if (signInOptions) {
+            if (!lodash.isArray(signInOptions))
+                return reject(`Sign in options must be an array`);
+
+            const badKeys = lodash.reduce(signInOptions, (acc, v) => {
+                if (!providerMap[v])
+                    acc.push(v);
+                return acc;
+            }, [])
+
+            if (badKeys.length)
+                return reject(`Invalid sign options: ${badKeys.join(',')}`)
+        }
+
+        return true;
+    },
+    get(obj, paths, defaultVal) {
+        let val;
+        lodash.some(paths, (p) => {
+            val = lodash.get(obj, p, undefined)
+            return val !== undefined;
+        })
+        return val !== undefined ? val : (defaultVal || null);
+    }
 }
 
 const exportFunctions = {
@@ -594,7 +719,7 @@ const exportFunctions = {
                 }
                 else if (!state.dialogs.d1) {
                     state.dialogs.dismiss();
-                    functions.loginFlow.showEmailAndPasswordDialog();
+                    functions.loginFlow.start();
                 }
             })
 
@@ -602,7 +727,10 @@ const exportFunctions = {
             VuePtr.fbAuthenticationInstalled = true;
         }
 
-        exportFunctions.initFb(opts).catch(() => { })
+        exportFunctions.initFb(opts).catch((err) => {
+            if (err !== 'firebaseAuthenticationPlugin::fbConfig is not an object!')
+                console.error(err);
+        });
     },
     initFb(opts) {
         return new Promise((resolve, reject) => {
@@ -611,15 +739,18 @@ const exportFunctions = {
                 return resolve();
             }
 
+            const validateResult = functions.validateConfigObject(opts);
+            if (typeof validateResult === 'string')
+                return reject(validateResult);
+
             state.opts = opts;
             return functions.reset().then(() => {
                 const config = lodash.get(opts, "fbConfig")
                 const authConfig = lodash.get(opts, "authConfig") || lodash.get(opts, "masterAuthConfig") || config;
-                const authHtml = lodash.get(config, "authRequiredHtml")
                 const otherApps = lodash.get(opts, "otherApps");
-
-                if (typeof authHtml === 'string')
-                    state.authRequiredHtml = authHtml;
+                const signInOptions = lodash.get(opts, "signInOptions");
+                if (signInOptions)
+                    state.signInProviders = signInOptions;
 
                 if (!config)
                     return reject(`No Config in opts. ${JSON.stringify(opts, null, 2)}`);
