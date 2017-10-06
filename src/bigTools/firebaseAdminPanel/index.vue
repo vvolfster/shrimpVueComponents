@@ -1,7 +1,7 @@
 <template>
     <div class="fbAdminPanel">
         <div v-if="fbConfig && fbConfig.requiresAuth && !username" class="fbAdminPanelLogin">
-            <button @click="fbConfigChanged()" class="fbAdminPanelLoginBtn">Login</button>
+            <button @click="configChanged()" class="fbAdminPanelLoginBtn">Login</button>
             <br>
             Your Firebase config requires you log in.
         </div>
@@ -46,7 +46,7 @@
 </template>
 
 <script>
-// import lodash from 'lodash'
+import lodash from 'lodash'
 import fbase from './fbase'
 import Dialog from '../../layout/dialog'
 import tableEditor from "./components/tableEditor"
@@ -61,7 +61,15 @@ function getURLParameter(name) {
 
 export default {
     components: { navigation, tableEditor },
-    props: ["fbConfig", "tableConfig", "tables", "defaultTable"],
+    // props: ["fbConfig", "tableConfig", "tables", "defaultTable"],
+    props: {
+        config: {
+            type: [Object, null],
+            default() {
+                return null;
+            },
+        }
+    },
     data() {
         return {
             fb: {
@@ -92,14 +100,37 @@ export default {
         this.urlParams.table = getURLParameter('table')
         this.urlParams.id = getURLParameter('id')
         // console.log(`params`, this.urlParams.table, this.urlParams.id);
-        this.fbConfigChanged();
+        this.configChanged();
     },
     watch: {
-        fbConfig() {
-            this.fbConfigChanged();
-        }
+        config: "configChanged"
     },
     computed: {
+        fbConfig() {
+            const conf = this.config;
+            if(conf && toString.call(conf.fbConfig) === '[object Object]')
+                return conf.fbConfig;
+            return null;
+        },
+        authConfig() {
+            const conf = this.config;
+            const authConf = !conf ? null : (conf.authConfig || conf.masterAuthConfig)
+            if(toString.call(authConf) === '[object Object]')
+                return authConf;
+            return null;
+        },
+        tableConfig() {
+            const conf = this.config;
+            return conf ? (conf.tableConfig || null) : null;
+        },
+        tables() {
+            const conf = this.config;
+            return conf ? (conf.tables || null) : null;
+        },
+        defaultTable() {
+            const conf = this.config;
+            return conf ? (conf.defaultTable || null) : null;
+        },
         currentTableConfig() {
             if(!this.tableConfig || !this.currentPage)
                 return null;
@@ -110,7 +141,7 @@ export default {
             const fb = this.fb;
             const tables = this.tables;
             if(fb && fb.tables) {
-                if(!tables)
+                if(toString.call(tables) !== '[object Array]')
                     return fb.tables;
 
                 // only return the tables present in the tables property
@@ -125,10 +156,10 @@ export default {
         }
     },
     methods: {
-        fbConfigChanged() {
+        configChanged() {
             const self = this;
             const fb   = this.fb;
-            const fbConfig = this.fbConfig;
+
             if(typeof this.unsubberFn === 'function'){
                 this.unsubberFn();
                 this.unsubberFn = null;
@@ -209,10 +240,13 @@ export default {
             }
 
             return new Promise((resolve) => {
-                if(!fbConfig)
+                if(!self.config)
                     return clearData().then(resolve)
 
-                return fbase.initFb(fbConfig).then(initInstance).then(readUrlParams).catch(clearData)
+                const tableKeys = ['tableConfig', 'tables', 'defaultTable'];
+                const conf = lodash.pickBy(self.config, (v, k) => tableKeys.indexOf(k) === -1)
+                console.log(`passing this to fbase.js`, conf)
+                return fbase.initFb(conf).then(initInstance).then(readUrlParams).catch(clearData)
             })
         },
         handleTableRemoval(name){
@@ -289,7 +323,7 @@ export default {
         },
         login() {
             return new Promise((resolve, reject) => {
-                fbase.signOut().then(this.fbConfigChanged).then(resolve).catch(reject);
+                fbase.signOut().then(this.configChanged).then(resolve).catch(reject);
             })
         }
     }

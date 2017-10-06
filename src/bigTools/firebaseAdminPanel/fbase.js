@@ -22,13 +22,13 @@ const functions = {
     },
     shallowGet(url) {
         return new Promise((resolve, reject) => {
-            const auth =  lodash.get(state.appVars, "auth") || (state.app ? state.app.auth() : null)
-            if(!auth || !auth.currentUser)
-                return axios.get(`${url}.json?shallow=true`).then(res =>  resolve(res.data)).catch(reject);
+            const auth = lodash.get(state.appVars, "auth") || (state.app ? state.app.auth() : null)
+            if (!auth || !auth.currentUser)
+                return axios.get(`${url}.json?shallow=true`).then(res => resolve(res.data)).catch(reject);
 
             return auth.currentUser.getIdToken().then((token) => {
                 // console.log(`received token`, token);
-                return axios.get(`${url}.json?shallow=true&auth=${token}`).then(res =>  resolve(res.data)).catch(reject);
+                return axios.get(`${url}.json?shallow=true&auth=${token}`).then(res => resolve(res.data)).catch(reject);
             }).catch(reject);
         })
     },
@@ -76,6 +76,53 @@ const functions = {
         }
 
         return isStr(getProps(fbConfig, requiredConfigProps))
+    },
+    validateConfigObject_v2(conf) {
+        function isObject(o) {
+            return toString.call(o) === '[object Object]'
+        }
+
+        function reject(msg) {
+            return `firebaseAdminPanel::${msg}`
+        }
+
+        function missingKeysInAppObject(o) {
+            const requiredKeys = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'storageBucket', 'messagingSenderId']
+            const keys = lodash.keys(o);
+            return lodash.reduce(requiredKeys, (acc, r) => {
+                if (keys.indexOf(r) === -1 || !o[r])
+                    acc.push(r);
+                return acc;
+            }, [])
+        }
+
+        if (!isObject(conf))
+            return reject(`opts is not an object`);
+
+        const fbConfig = lodash.get(conf, "fbConfig");
+        if (!isObject(fbConfig))
+            return reject(`fbConfig is not an object!`)
+
+        const fbConfigKeysMissing = missingKeysInAppObject(fbConfig);
+        if (fbConfigKeysMissing.length)
+            return reject(`The following keys are missing from fbConfig: ${fbConfigKeysMissing.join(',')}`)
+
+        const authConfig = lodash.get(conf, "authConfig") || lodash.get(conf, "masterAuthConfig");
+        if (authConfig) {
+            const remoteRestAuthLinkFunction = lodash.get(conf, "remoteRestAuthLinkFunction");
+            if (!lodash.isString(remoteRestAuthLinkFunction))
+                return reject(`remoteRestAuthLinkFunction key is either missing or not a string from opts`)
+
+            const authConfigKeysMissing = missingKeysInAppObject(authConfig);
+            if (authConfigKeysMissing.length)
+                return reject(`The following keys are missing from fbConfig: ${authConfigKeysMissing.join(',')}`)
+        }
+
+        const userRequirement = lodash.get(conf, "requiresAuth") || lodash.get(conf, "authRequired");
+        if (userRequirement !== null && (!lodash.isFunction(userRequirement) && !lodash.isBoolean(userRequirement)))
+            return reject(`requiresAuth/authRequired should be a function or a boolean!`)
+
+        return true;
     },
     getApp(id) {
         return lodash.find(Firebase.apps, v => v.options.projectId === id)

@@ -1,7 +1,4 @@
 import Firebase from 'firebase'
-import FirebaseUI from 'firebaseui'
-import 'firebaseui/dist/firebaseui.css'
-
 import lodash from 'lodash'
 import MouseTrap from 'mousetrap'
 import axios from 'axios'
@@ -9,10 +6,8 @@ import GenericSubscriptionWrapper from '../../misc/genericSubscriptionWrapper'
 import Toast from '../toasts'
 import '../../../cssImporter'
 import gFuncs from '../../misc/functions'
-
-import Dialog from '../../layout/dialog'
+import loginUI from './loginUI'
 import './css.css'
-
 
 const subMgr = new GenericSubscriptionWrapper({ listen: "addEventListener", unlisten: "removeEventListener" });
 const providerMap = {
@@ -50,47 +45,6 @@ const state = {
     fbApp: null,
     fbAppAuth: null,
     fbConfig: null,
-    dialogs: {
-        d1: null,
-        d2: null,
-        dismiss() {
-            if (state.dialogs.d1) {
-                state.dialogs.d1.dismiss(true);
-            }
-
-            if (state.dialogs.d2 && state.dialogs.d2.parentNode){
-                state.dialogs.d2.parentNode.removeChild(state.dialogs.d2);
-            }
-
-            state.dialogs.d1 = null;
-            state.dialogs.d2 = null;
-
-            const el = document.getElementById('auth-topLevel-container');
-            if (el && el.parentNode)
-                el.parentNode.removeChild(el);
-        },
-    },
-    uiConfig: {
-        // signInSuccessUrl: '<url-to-redirect-to-on-success>',
-        tosUrl: '<your-tos-url>',
-        signInFlow: "popup",
-        // signInOptions: [
-        //     // Leave the lines as is for the providers you want to offer your users.
-        //     Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        //     // Firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        //     // Firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-        //     // Firebase.auth.GithubAuthProvider.PROVIDER_ID,
-        //     // Firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        //     // Firebase.auth.PhoneAuthProvider.PROVIDER_ID
-        // ],
-        callbacks: {
-            signInSuccess() {
-                // console.log(`signInSuccess allegedly`)
-                state.dialogs.d2.showBusy();
-                return false;
-            }
-        }
-    },
     dbUser: {
         app: null,
         auth: null
@@ -162,200 +116,43 @@ const functions = {
             }).catch(reject);
         })
     },
-    loginFlow: {
-        start() {
-            const signInProviders = lodash.get(state, "opts.signInOptions") || state.defaults.signInProviders;
-            const federatedIDProviders = lodash.filter(signInProviders, s => s !== 'email')
-            if (signInProviders.indexOf('email') !== -1)
-                return functions.loginFlow.showEmailAndPasswordDialog();
-            else if (federatedIDProviders.length)
-                return functions.loginFlow.showFirebaseAuth();
+    authenticateWithChildFirebase() {
+        const fbAppAuth = state.fbAppAuth;
+        const fbApp = state.fbApp;
+        const projectId = lodash.get(state, "opts.fbConfig.projectId");
+        const remoteRestAuthLinkFn = lodash.get(state, "opts.remoteRestAuthLinkFunction")
 
-            throw new Error(`firebaseAuthentication::No sign in options provided!`)
-        },
-        showEmailAndPasswordDialog() {
-            const fbAppAuth = state.fbAppAuth;
-            const createNewUsers = lodash.get(state, "opts.createNewUsers", true);
-            const authNeeded = !!(lodash.get(state, "opts.authRequired") || lodash.get(state, "opts.requiresAuth"));
-            const signInProviders = lodash.get(state, "opts.signInOptions") || state.defaults.signInProviders;
-            const otherSignInProviders = lodash.filter(signInProviders, s => s !== 'email');
-
-            const buttons = {
-                Submit({ email, password }) {
-                    return new Promise((resolve, reject) => {
-                        // indirect resolve here
-                        state.dialogs.d1Reject = reject;
-                        subMgr.subscribe(document, 'authStateChanged', (e) => {
-                            if (e.detail) {
-                                localStorage.setItem('firebaseAuthPluginUser', email);
-                                localStorage.setItem('firebaseAuthPluginPw', password);
-                                resolve();
-                            }
-                        }, `state.dialogs.d1`);
-
-                        fbAppAuth.auth().signInWithEmailAndPassword(email, password).catch((err) => {
-                            const errCode = lodash.get(err, "code");
-                            if (errCode !== `auth/user-not-found`)
-                                return reject(err.message);
-
-                            if (createNewUsers)
-                                return fbAppAuth.auth().createUserWithEmailAndPassword(email, password).catch(reject);
-
-                            return reject(err.message);
-                        })
-                    })
-                }
-            }
-
-            if (otherSignInProviders.length)
-                buttons["Log In With Auth Providers"] = functions.loginFlow.showFirebaseAuth
-
-            state.dialogs.dismiss();
-
-            state.dialogs.d1 = Dialog.create({
-                title: "LOG IN WITH EMAIL",
-                form: {
-                    email: {
-                        type: String,
-                        required: true,
-                        model: localStorage.getItem('firebaseAuthPluginUser')
-                    },
-                    password: {
-                        type: 'password',
-                        required: true,
-                        model: localStorage.getItem('firebaseAuthPluginPw')
-                    }
-                },
-                noDismiss: authNeeded,
-                buttons,
-                onDismiss() {
-                    if (subMgr.has(`state.dialogs.d1`))
-                        subMgr.unsubscribe({ id: `state.dialogs.d1` });
-
-                    state.dialogs.d1 = null;
-                    state.dialogs.d1Reject = null;
-                }
-            })
-        },
-        showFirebaseAuth() {
-            const authNeeded = !!(lodash.get(state, "opts.authRequired") || lodash.get(state, "opts.requiresAuth"));
-            const signInProviders = lodash.get(state, "opts.signInOptions") || state.defaults.signInProviders;
-            const signInOptions = lodash.reduce(signInProviders, (acc, v) => {
-                if (v === 'email')
-                    return acc;
-
-                acc.push(providerMap[v])
-                return acc;
-            }, [])
-
-            if (!state.ui)
-                state.ui = new FirebaseUI.auth.AuthUI(state.fbAppAuth.auth());
-
-            if (!document.getElementById('firebaseui-auth-container')) {
-                const frag = document.createDocumentFragment();
-                const topLevelNode = document.createElement('div');
-                topLevelNode.className = 'absolute fill column justify-center items-center'
-                topLevelNode.id = "auth-topLevel-container"
-                topLevelNode.style.backgroundColor = 'rgba(0,0,0, 0.5)'
-                topLevelNode.style.zIndex = 99999;
-                topLevelNode.style.top = 0;
-                topLevelNode.style.left = 0;
-                topLevelNode.addEventListener('click', (e) => {
-                    if (e.stopPropagation)
-                        e.stopPropagation();
-
-                    if (!topLevelNode.busy) {
-                        if (authNeeded) {
-                            if (signInProviders.indexOf('email') !== -1) {
-                                functions.loginFlow.showEmailAndPasswordDialog();
-                                topLevelNode.parentNode.removeChild(topLevelNode);
-                            }
-                            // else case, too bad. You can't kill this since authIsNeeded :)
-                        }
-                        else {
-                            topLevelNode.parentNode.removeChild(topLevelNode);
-                        }
-                    }
-                })
-
-                const backgroundNode = document.createElement('div');
-                backgroundNode.className = 'bg-white shadow-2 column justify-center items-center'
-                backgroundNode.style.borderRadius = '2px';
-
-                const busyNode = document.createElement('div');
-                busyNode.className = 'fa fa-circle-o-notch spin text-black'
-                busyNode.style.visibility = 'hidden';
-                busyNode.style.width = '0px';
-                busyNode.style.height = '0px';
-
-                const authUIContainerNode = document.createElement('div');
-                authUIContainerNode.id = 'firebaseui-auth-container';
-                authUIContainerNode.style.paddingTop = "15px";
-
-                backgroundNode.appendChild(authUIContainerNode);
-                backgroundNode.appendChild(busyNode);
-                topLevelNode.appendChild(backgroundNode);
-
-                topLevelNode.showBusy = () => {
-                    topLevelNode.busy = true;
-
-                    if (authUIContainerNode) {
-                        authUIContainerNode.style.visibility = 'hidden';
-                        authUIContainerNode.style.width = '0px';
-                        authUIContainerNode.style.height = '0px';
-                    }
-
-                    busyNode.style.visibility = 'visible';
-                    busyNode.style.width = '50pt';
-                    busyNode.style.height = '50pt';
-                    backgroundNode.style.padding = "20px";
-                }
-
-                state.dialogs.d2 = topLevelNode;
-                frag.appendChild(topLevelNode);
-                document.body.appendChild(frag);
-            }
-
-            state.ui.start('#firebaseui-auth-container', lodash.assign({ signInOptions }, state.uiConfig));
-        },
-        authenticateWithChildFirebase() {
-            const fbAppAuth = state.fbAppAuth;
-            const fbApp = state.fbApp;
-            const projectId = lodash.get(state, "fbConfig.projectId");
-            const remoteRestAuthLinkFn = lodash.get(state, "opts.remoteRestAuthLinkFunction")
-
-            function sendAuthTokenToServer() {
-                return new Promise((resolve, reject) => {
-                    if (!remoteRestAuthLinkFn)
-                        return reject(`no removeRestAuthLinkFn provided in authConfig`);
-
-                    if (!projectId)
-                        return reject(`no projectId provided in fbConfig`);
-
-                    // console.log('getIdToken', fbAppAuth.auth().currentUser.getIdToken, 'currentUser', fbAppAuth.auth().currentUser)
-                    return fbAppAuth.auth().currentUser.getIdToken(true)
-                        .then((token) => {
-                            const sendObj = { token, projectId }
-                            axios.post(remoteRestAuthLinkFn, sendObj, { 'Content-Type': 'application/json' })
-                                .then((res) => {
-                                    const responseToken = lodash.get(res, "data.token") || lodash.get(res, "token");
-                                    if (!responseToken)
-                                        return reject(`Master auth server sent no token back!`);
-
-                                    return resolve(responseToken);
-                                }).catch(reject);
-                        })
-                })
-            }
-
-            function fbAppSignInWithToken(token) {
-                return fbApp.auth().signInWithCustomToken(token);
-            }
-
+        function sendAuthTokenToServer() {
             return new Promise((resolve, reject) => {
-                sendAuthTokenToServer().then(fbAppSignInWithToken).then(resolve).catch(reject);
+                if (!remoteRestAuthLinkFn)
+                    return reject(`no removeRestAuthLinkFn provided in authConfig`);
+
+                if (!projectId)
+                    return reject(`no projectId provided in fbConfig`);
+
+                // console.log('getIdToken', fbAppAuth.auth().currentUser.getIdToken, 'currentUser', fbAppAuth.auth().currentUser)
+                return fbAppAuth.auth().currentUser.getIdToken(true)
+                    .then((token) => {
+                        const sendObj = { token, projectId }
+                        axios.post(remoteRestAuthLinkFn, sendObj, { 'Content-Type': 'application/json' })
+                            .then((res) => {
+                                const responseToken = lodash.get(res, "data.token") || lodash.get(res, "token");
+                                if (!responseToken)
+                                    return reject(`Master auth server sent no token back!`);
+
+                                return resolve(responseToken);
+                            }).catch(reject);
+                    })
             })
         }
+
+        function fbAppSignInWithToken(token) {
+            return fbApp.auth().signInWithCustomToken(token);
+        }
+
+        return new Promise((resolve, reject) => {
+            sendAuthTokenToServer().then(fbAppSignInWithToken).then(resolve).catch(reject);
+        })
     },
     authChange: {
         subscribeToAuthChangeOnMaster({ fbApp, fbAppAuth }) {
@@ -367,11 +164,7 @@ const functions = {
                 function catcher() {
                     fbAppAuth.auth().signOut();
                     fbApp.auth().signOut();
-
-                    if (typeof state.dialogs.d1Reject === 'function') {
-                        state.dialogs.d1Reject();
-                        state.dialogs.d1Reject = null;
-                    }
+                    loginUI.reject(fbAppAuth);
                 }
 
                 if (user) {
@@ -387,7 +180,7 @@ const functions = {
 
             function greet(user) {
                 Toast.positive(`Welcome ${functions.getDisplayName(user)}`)
-                state.dialogs.dismiss();
+                loginUI.dismiss(fbAppAuth);
             }
 
             function finishUp(user) {
@@ -419,12 +212,8 @@ const functions = {
                                     fbApp.auth().signOut();
                                     fbAppAuth.auth().signOut();
 
-                                    if (typeof state.dialogs.d1Reject === 'function') {
-                                        state.dialogs.d1Reject(err);
-                                        state.dialogs.d1Reject = null;
-                                    }
-                                    else
-                                        Toast.negative(err);
+                                    loginUI.reject(fbAppAuth);
+                                    Toast.negative(err);
                                 })
                             }
 
@@ -456,7 +245,7 @@ const functions = {
                         Toast("Logged out");
 
                     if (authNeeded) {
-                        functions.loginFlow.start();
+                        loginUI.start(fbApp, fbAppAuth, state.opts)
                     }
 
                     state.dbUser.app = null;
@@ -563,7 +352,7 @@ const functions = {
 
                     const loginBtn = lodash.get(newNode.querySelectorAll(`[qa='authRequiredBtn']`), '0');
                     if (loginBtn) {
-                        loginBtn.addEventListener('click', functions.loginFlow.start)
+                        loginBtn.addEventListener('click', () => loginUI.start(state.fbApp, state.fbAppAuth, state.opts))
                     }
 
                     el.parentNode.appendChild(frag);
@@ -727,8 +516,8 @@ const exportFunctions = {
                         state.fbApp.auth().signOut();
                 }
                 else if (!state.dialogs.d1) {
-                    state.dialogs.dismiss();
-                    functions.loginFlow.start();
+                    state.dialogs.dismiss(state.fbAppAuth);
+                    loginUI.start(state.fbApp, state.fbAppAuth, state.opts)
                 }
             })
 
@@ -779,9 +568,6 @@ const exportFunctions = {
                 // console.log(`initFb -> hello`)
                 state.fbApp = fbApp;
                 state.fbAppAuth = fbAppAuth;
-                state.fbConfig = config;
-                state.authConfig = authConfig;
-
                 functions.authChange.subscribeToAuthChangeOnMaster({ fbAppAuth, fbApp });
                 functions.authChange.subscribeToAuthChangeOnChild({ fbApp, fbAppAuth })
 
