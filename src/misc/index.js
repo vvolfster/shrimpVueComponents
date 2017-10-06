@@ -3,6 +3,7 @@ import animator from './animator'
 import collapsible from './collapsible'
 import functions from './functions'
 import genericSubscriptionWrapper from './genericSubscriptionWrapper'
+import userActiveStatus from './userActiveStatus'
 
 export default {
     fileDropper,
@@ -10,4 +11,5 @@ export default {
     collapsible,
     functions,
     genericSubscriptionWrapper, // TODO DOCUMENT THIS
+    userActiveStatus
 }

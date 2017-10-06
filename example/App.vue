@@ -1,11 +1,7 @@
 <template>
     <div id="q-app">
         <div class="drawer">
-            <toggleButton class="drawer__btn" v-for="example in examples" :key="example" 
-                @on="myComponent = example" 
-                :text="example"
-                :isPushed="example === myComponent"
-            />
+            <toggleButton class="drawer__btn" v-for="example in examples" :key="example" @on="myComponent = example" :text="example" :isPushed="example === myComponent" />
         </div>
         <div class="viewport">
             <component :is="myComponent"></component>
@@ -15,7 +11,6 @@
 
 <script>
 import toggleButton from "@/button/toggleButton"
-
 import autoform from './examples/autoform/autoform'
 import fbAdminPanel from "./examples/fbAdminPanel/adminPanel"
 import fbAuthentication from "./examples/fbAuthentication/fbAuthentication"
@@ -32,6 +27,7 @@ export default {
     data() {
         return {
             myComponent: null,
+            userIsActive: true,
             examples: ["fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "jsonEditor", "dialogExample", "fileExample", "adder"].sort()
         }
     },
@@ -48,18 +44,19 @@ export default {
         adder,
         jsonEditor
     },
+
 };
 </script>
 
 <style>
 #q-app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  
-  display: flex;
-  flex-flow: row;
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #2c3e50;
+
+    display: flex;
+    flex-flow: row;
 }
 
 .drawer {
@@ -87,12 +84,11 @@ export default {
 }
 
 html {
-    min-width: unset !important;   
+    min-width: unset !important;
 }
 
 body {
     font-family: 'Roboto', sans-serif;
     min-width: unset !important;
 }
-
 </style>
