@@ -182,6 +182,7 @@ export default {
             }
 
             function initInstance({ app, database, auth, messaging, storage, tables }) {
+                // console.log(`init fb resolved`)
                 return new Promise((resolve) => {
                     fb.app = app;
                     fb.database = database;
@@ -245,7 +246,7 @@ export default {
 
                 const tableKeys = ['tableConfig', 'tables', 'defaultTable'];
                 const conf = lodash.pickBy(self.config, (v, k) => tableKeys.indexOf(k) === -1)
-                console.log(`passing this to fbase.js`, conf)
+                // console.log(`passing this to fbase.js`, conf)
                 return fbase.initFb(conf).then(initInstance).then(readUrlParams).catch(clearData)
             })
         },

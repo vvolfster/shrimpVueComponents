@@ -1,14 +1,13 @@
 import Firebase from 'firebase'
 import lodash from 'lodash'
 import MouseTrap from 'mousetrap'
-import axios from 'axios'
 import GenericSubscriptionWrapper from '../../misc/genericSubscriptionWrapper'
-import Toast from '../toasts'
+import LoginFlow from './loginFlow'
 import '../../../cssImporter'
-import gFuncs from '../../misc/functions'
-import loginUI from './loginUI'
 import './css.css'
+import gFuncs from '../../misc/functions'
 
+function getApp(id) { return lodash.find(Firebase.apps, v => v.options.projectId === id) }
 const subMgr = new GenericSubscriptionWrapper({ listen: "addEventListener", unlisten: "removeEventListener" });
 const providerMap = {
     // Leave the lines as is for the providers you want to offer your users.
@@ -74,31 +73,12 @@ const functions = {
             return email;
         return 'unknown'
     },
-    reset() {
+    destroy() {
         return new Promise((resolve, reject) => {
-            // unsub authChange functions
-            if (state.authUnsubFunctions.app) {
-                state.authUnsubFunctions.app();
-                state.authUnsubFunctions.app = null;
-            }
-
-            if (state.authUnsubFunctions.auth) {
-                state.authUnsubFunctions.auth();
-                state.authUnsubFunctions.auth = null;
-            }
-
             // delete app & auth firebase apps
             const delPromises = [];
-            if (state.fbApp !== state.fbAppAuth) {
-                if (state.fbApp)
-                    delPromises.push(state.fbApp.delete())
-
-                if (state.fbAppAuth)
-                    delPromises.push(state.fbAppAuth.delete())
-            }
-            else if (state.fbApp) { // they are both the same in this case, so we can delete one and be done with it.
-                delPromises.push(state.fbApp.delete())
-            }
+            if (state.loginFlow)
+                delPromises.push(state.loginFlow.destroy());
 
             // delete other apps
             lodash.each(state.otherApps, v => delPromises.push(v.delete()))
@@ -116,279 +96,68 @@ const functions = {
             }).catch(reject);
         })
     },
-    authenticateWithChildFirebase() {
-        const fbAppAuth = state.fbAppAuth;
-        const fbApp = state.fbApp;
-        const projectId = lodash.get(state, "opts.fbConfig.projectId");
-        const remoteRestAuthLinkFn = lodash.get(state, "opts.remoteRestAuthLinkFunction")
+    handleChangeOnComponent(user) {
+        // console.log(`handleAuthChanged`, this, this.$el, user);
+        const self = this;
+        self.authUser = user;
+        self.authUserId = lodash.get(user, 'uid') || lodash.get(user, 'id') || lodash.get(user, ".key");
 
-        function sendAuthTokenToServer() {
-            return new Promise((resolve, reject) => {
-                if (!remoteRestAuthLinkFn)
-                    return reject(`no removeRestAuthLinkFn provided in authConfig`);
+        const el = self.$el;
+        if (!el)
+            return;
 
-                if (!projectId)
-                    return reject(`no projectId provided in fbConfig`);
+        const html = functions.get(self, ["authHtml", "authHTML"]) || functions.get(state, ["opts.authRequiredHtml", "opts.authRequiredHTML"]) || state.defaults.authRequiredHtml;
+        const requiresAuth = lodash.get(self, "requiresAuth") || lodash.get(self, "authRequired") || false;
 
-                // console.log('getIdToken', fbAppAuth.auth().currentUser.getIdToken, 'currentUser', fbAppAuth.auth().currentUser)
-                return fbAppAuth.auth().currentUser.getIdToken(true)
-                    .then((token) => {
-                        const sendObj = { token, projectId }
-                        axios.post(remoteRestAuthLinkFn, sendObj, { 'Content-Type': 'application/json' })
-                            .then((res) => {
-                                const responseToken = lodash.get(res, "data.token") || lodash.get(res, "token");
-                                if (!responseToken)
-                                    return reject(`Master auth server sent no token back!`);
+        function findReplacementNode() {
+            const siblings = el.parentNode.childNodes;
+            const linkedNode = lodash.find(siblings, s => s.linkedVueComponent === self);
+            return linkedNode;
+        }
 
-                                return resolve(responseToken);
-                            }).catch(reject);
+        function hideComponent() {
+            if (html && !findReplacementNode()) {
+                const frag = document.createDocumentFragment();
+                const newNode = document.createElement("div");
+
+                newNode.innerHTML = html;
+                newNode.linkedVueComponent = self;
+                newNode.className = 'fill'
+                frag.appendChild(newNode);
+
+                const loginBtn = lodash.get(newNode.querySelectorAll(`[qa='authRequiredBtn']`), '0');
+                if (loginBtn) {
+                    loginBtn.addEventListener('click', () => {
+                        if (state.loginFlow)
+                            state.loginFlow.start()
                     })
-            })
+                }
+
+                el.parentNode.appendChild(frag);
+            }
+
+            el.classList.add('hidden');
         }
 
-        function fbAppSignInWithToken(token) {
-            return fbApp.auth().signInWithCustomToken(token);
+        function showComponent() {
+            el.classList.remove('hidden');
+            const linkedNode = findReplacementNode();
+            if (linkedNode) {
+                // console.log(`removing node`, linkedNode)
+                el.parentNode.removeChild(linkedNode);
+            }
         }
 
-        return new Promise((resolve, reject) => {
-            sendAuthTokenToServer().then(fbAppSignInWithToken).then(resolve).catch(reject);
-        })
-    },
-    authChange: {
-        subscribeToAuthChangeOnMaster({ fbApp, fbAppAuth }) {
-            state.authUnsubFunctions.auth = fbAppAuth.auth().onAuthStateChanged((u) => {
-                const user = fbApp.auth().currentUser || u;
-                if (fbApp === fbAppAuth)
-                    return; // they are both the same.
 
-                function catcher() {
-                    fbAppAuth.auth().signOut();
-                    fbApp.auth().signOut();
-                    loginUI.reject(fbAppAuth);
-                }
-
-                if (user) {
-                    functions.authChange.addUserToAuthDb({ fbAppAuth, user }).then(functions.loginFlow.authenticateWithChildFirebase).catch(catcher);
-                }
-                else {
-                    fbApp.auth().signOut();
-                }
-            });
-        },
-        subscribeToAuthChangeOnChild({ fbApp, fbAppAuth }) {
-            const authNeeded = !!(lodash.get(state, "opts.authRequired") || lodash.get(state, "opts.requiresAuth"))
-
-            function greet(user) {
-                Toast.positive(`Welcome ${functions.getDisplayName(user)}`)
-                loginUI.dismiss(fbAppAuth);
-            }
-
-            function finishUp(user) {
-                state.currentUser = user;
-                if (document)
-                    document.dispatchEvent(new CustomEvent('authStateChanged', { detail: user }));
-            }
-
-            state.authUnsubFunctions.app = fbApp.auth().onAuthStateChanged((u) => {
-                if (u) {
-                    // on reload of pages, sometimes the fbAppAuth logs in after.
-                    // so the userName you get at first is incorrect. It is best to
-                    // wait I guess for fbAppAuth.auth().currentUser
-                    let appAuthUser = fbAppAuth.auth().currentUser;
-                    const flow = () => {
-                        functions.authChange.addUserToChildDb({ fbApp, user: appAuthUser }).then((dbUser) => {
-                            const doRequirementCheckAndContinue = (appAuthDbUser) => {
-                                functions.authChange.meetsAuthRequirement({
-                                    user: dbUser,
-                                    authUser: appAuthDbUser,
-                                    requirementFn: lodash.get(state, "opts.requiresAuth") || lodash.get(state, "opts.authRequired"),
-                                }).then(() => {
-                                    state.dbUser.app = dbUser;
-                                    state.dbUser.auth = appAuthDbUser;
-
-                                    greet(appAuthUser);
-                                    finishUp(appAuthUser);
-                                }).catch((err) => {
-                                    fbApp.auth().signOut();
-                                    fbAppAuth.auth().signOut();
-
-                                    loginUI.reject(fbAppAuth);
-                                    Toast.negative(err);
-                                })
-                            }
-
-                            if (fbApp !== fbAppAuth) {
-                                fbAppAuth.database().ref(`users/${appAuthUser.uid}`).once('value').then(snap => doRequirementCheckAndContinue(snap.val()))
-                            }
-                            else
-                                doRequirementCheckAndContinue();
-                        })
-                    }
-
-                    if (appAuthUser) {
-                        flow();
-                    }
-                    else {
-                        const intId = setInterval(() => {
-                            appAuthUser = fbAppAuth.auth().currentUser;
-                            if (!appAuthUser)
-                                return;
-
-                            clearInterval(intId);
-                            flow();
-                        }, 250);
-                    }
-                }
-                else {
-                    // if there was a user in our state, that means we logged out here.
-                    if (state.currentUser)
-                        Toast("Logged out");
-
-                    if (authNeeded) {
-                        loginUI.start(fbApp, fbAppAuth, state.opts)
-                    }
-
-                    state.dbUser.app = null;
-                    state.dbUser.auth = null;
-                    finishUp(null)
-                }
-            })
-        },
-        addUserToAuthDb({ fbAppAuth, user }) {
-            return new Promise((resolve) => {
-                const userRef = fbAppAuth.database().ref(`users/${user.uid}`)
-                userRef.once('value', (snap) => {
-                    if (snap.exists())
-                        return resolve(snap.val());
-
-                    function find(key) {
-                        if (user[key])
-                            return user[key];
-
-                        const provider = lodash.find(user.providerData, p => p[key])
-                        if (provider)
-                            return provider[key];
-
-                        return null;
-                    }
-
-                    const userRecord = {
-                        dateCreated: new Date().toISOString(),
-                        id: user.uid,
-                        email: find('email'),
-                        photoURL: find('photoURL'),
-                        displayName: find('displayName'),
-                        firstName: find('firstName') || find('first'),
-                        lastName: find('lastName') || find('last')
-                    }
-
-                    if (userRecord.displayName) {
-                        const dArr = userRecord.displayName.split(' ');
-                        if (dArr.length > 1) {
-                            userRecord.firstName = dArr[0];
-                            userRecord.lastName = lodash.last(dArr);
-                        }
-                    }
-
-                    return userRef.set(userRecord).then(() => resolve(userRecord));
-                })
-            })
-        },
-        addUserToChildDb({ fbApp, user }) {
-            return new Promise((resolve, reject) => {
-                const userRef = fbApp.database().ref(`users/${user.uid}`)
-                const refs = {
-                    id: userRef.child('id'),
-                    dateCreated: userRef.child('dateCreated'),
-                }
-
-                const promises = [refs.id.once('value'), refs.dateCreated.once('value')]
-                Promise.all(promises).then((results) => {
-                    const idRes = results[0].val();
-                    const dateCreatedResult = results[1].val();
-
-                    const outPromises = []
-
-                    if (!idRes)
-                        outPromises.push(refs.id.set(user.uid))
-
-                    if (!dateCreatedResult)
-                        outPromises.push(refs.dateCreated.set(new Date().toISOString()))
-
-                    Promise.all(outPromises).then(() => {
-                        userRef.once('value').then(snap => resolve(snap.val()))
-                    }).catch(reject);
-                }).catch(reject);
-            })
-        },
-        handleChangeOnComponent(user) {
-            // console.log(`handleAuthChanged`, this, this.$el, user);
-            const self = this;
-            self.authUser = user;
-            self.authUserId = lodash.get(user, 'uid') || lodash.get(user, 'id') || lodash.get(user, ".key");
-
-            const el = self.$el;
-            if (!el)
-                return;
-
-            const html = functions.get(self, ["authHtml", "authHTML"]) || functions.get(state, ["opts.authRequiredHtml", "opts.authRequiredHTML"]) || state.defaults.authRequiredHtml;
-            const requiresAuth = lodash.get(self, "requiresAuth") || lodash.get(self, "authRequired") || false;
-
-            function findReplacementNode() {
-                const siblings = el.parentNode.childNodes;
-                const linkedNode = lodash.find(siblings, s => s.linkedVueComponent === self);
-                return linkedNode;
-            }
-
-            function hideComponent() {
-                if (html && !findReplacementNode()) {
-                    const frag = document.createDocumentFragment();
-                    const newNode = document.createElement("div");
-
-                    newNode.innerHTML = html;
-                    newNode.linkedVueComponent = self;
-                    newNode.className = 'fill'
-                    frag.appendChild(newNode);
-
-                    const loginBtn = lodash.get(newNode.querySelectorAll(`[qa='authRequiredBtn']`), '0');
-                    if (loginBtn) {
-                        loginBtn.addEventListener('click', () => loginUI.start(state.fbApp, state.fbAppAuth, state.opts))
-                    }
-
-                    el.parentNode.appendChild(frag);
-                }
-
-                el.classList.add('hidden');
-            }
-
-            function showComponent() {
-                el.classList.remove('hidden');
-                const linkedNode = findReplacementNode();
-                if (linkedNode) {
-                    // console.log(`removing node`, linkedNode)
-                    el.parentNode.removeChild(linkedNode);
-                }
-            }
-
-
-            if (!user) {
-                if (requiresAuth)
-                    hideComponent();
-            }
-            else if (requiresAuth && typeof requiresAuth === 'function') {
-                gFuncs.genericResolver(requiresAuth, state.dbUser.app, state.dbUser.auth).then(showComponent).catch(hideComponent);
-            }
-            else {
-                showComponent();
-            }
-        },
-        meetsAuthRequirement({ user, authUser, requirementFn }) {
-            return new Promise((resolve, reject) => {
-                if (typeof requirementFn !== 'function')
-                    return resolve();
-
-                return gFuncs.genericResolver(requirementFn, user, authUser).then(resolve).catch(reject);
-            })
+        if (!user) {
+            if (requiresAuth)
+                hideComponent();
+        }
+        else if (requiresAuth && typeof requiresAuth === 'function') {
+            gFuncs.genericResolver(requiresAuth, state.dbUser.app, state.dbUser.auth).then(showComponent).catch(hideComponent);
+        }
+        else {
+            showComponent();
         }
     },
     validateConfigObject(conf) {
@@ -446,7 +215,7 @@ const functions = {
         }
 
         const userRequirement = lodash.get(conf, "requiresAuth") || lodash.get(conf, "authRequired");
-        if (userRequirement !== null && (!lodash.isFunction(userRequirement) && !lodash.isBoolean(userRequirement)))
+        if (userRequirement !== null && userRequirement !== undefined && (!lodash.isFunction(userRequirement) && !lodash.isBoolean(userRequirement)))
             return reject(`requiresAuth/authRequired should be a function or a boolean!`)
 
         const signInOptions = lodash.get(conf, "signInOptions");
@@ -478,103 +247,78 @@ const functions = {
 
 const exportFunctions = {
     install(VuePtr, opts) {
-        function copyAppsIntoVue() {
-            if (!VuePtr.fbApps)
-                VuePtr.fbApps = {}
+        if(!opts || !lodash.keys(opts).length)
+            return false;
 
-            VuePtr.fbApps.app = state.fbApp;
-            VuePtr.fbApps.auth = state.fbAppAuth;
-            lodash.each(state.otherApps, (v, k) => {
-                VuePtr.fbApps[k] = v;
-            })
-        }
-
-        if (!VuePtr.fbAuthenticationInstalled) {
-            document.addEventListener('fbAuthenticationInitialized', copyAppsIntoVue)
-            document.addEventListener('fbAuthenticationClear', () => { VuePtr.fbApps = {} })
-            VuePtr.mixin({
-                beforeDestroy() {
-                    subMgr.unsubscribe({ id: this });
-                },
-                mounted() {
-                    // we are using the element itself as its id. This makes us not \have to keep track of this thing.
-                    const self = this;
-                    functions.authChange.handleChangeOnComponent.apply(self, [state.currentUser]);
-                    subMgr.subscribe(document, "authStateChanged", e => functions.authChange.handleChangeOnComponent.apply(self, [e.detail]), self);
-                },
-                data() {
-                    return { authUser: null, authUserId: null }
-                },
-            })
-
-            MouseTrap.bind('f7', () => {
-                if (state.currentUser) {
-                    if (state.fbAppAuth)
-                        state.fbAppAuth.auth().signOut();
-
-                    if (state.fbApp)
-                        state.fbApp.auth().signOut();
-                }
-                else if (!state.dialogs.d1) {
-                    state.dialogs.dismiss(state.fbAppAuth);
-                    loginUI.start(state.fbApp, state.fbAppAuth, state.opts)
-                }
-            })
-
-            copyAppsIntoVue();
-            VuePtr.fbAuthenticationInstalled = true;
-        }
-
-        exportFunctions.initFb(opts).catch((err) => {
+        const err = functions.validateConfigObject(opts);
+        const otherApps = lodash.get(opts, "otherApps");
+        if (typeof err === 'string') {
             if (err !== 'firebaseAuthenticationPlugin::fbConfig is not an object!')
-                console.error(err);
-        });
-    },
-    initFb(opts) {
-        return new Promise((resolve, reject) => {
-            if (lodash.isEqual(state.opts, opts)) {
-                // console.log(`initFb -> hello`)
-                return resolve();
-            }
+                console.error(err, opts);
+            return false;
+        }
 
-            const validateResult = functions.validateConfigObject(opts);
-            if (typeof validateResult === 'string')
-                return reject(validateResult);
+        if (VuePtr.fbAuthenticationInstalled){
+            console.warn(`tried to install firebaseAuthention when it is already installed`);
+            return false
+        }
 
-            state.opts = opts;
-            return functions.reset().then(() => {
-                const config = lodash.get(opts, "fbConfig")
-                const authConfig = lodash.get(opts, "authConfig") || lodash.get(opts, "masterAuthConfig") || config;
-                const otherApps = lodash.get(opts, "otherApps");
-                const signInOptions = lodash.get(opts, "signInOptions");
-                if (signInOptions)
-                    state.signInProviders = signInOptions;
+        if (!VuePtr.fbApps)
+            VuePtr.fbApps = {}
 
-                if (!config)
-                    return reject(`No Config in opts. ${JSON.stringify(opts, null, 2)}`);
+        state.opts = opts;
+        state.loginFlow = new LoginFlow(opts, `firebaseAuthentication`);
+        const authChangedEventName = state.loginFlow.authChgEvent;
 
-                const fbApp = Firebase.initializeApp(config);
-                const fbAppAuth = config !== authConfig ? Firebase.initializeApp(authConfig, "auth") : fbApp;
+        state.fbApp = state.loginFlow.state.fbApp;
+        state.fbAppAuth = state.loginFlow.state.fbAppAuth;
+        VuePtr.fbApps.app = state.loginFlow.state.fbApp;
+        VuePtr.fbApps.auth = state.loginFlow.state.fbAppAuth;
+        if (otherApps) {
+            lodash.each(otherApps, (v, k) => {
+                if (!k || !v)
+                    return;
 
-                if (otherApps) {
-                    lodash.each(otherApps, (v, k) => {
-                        if (!k || !v)
-                            return;
+                state.otherApps[k] = getApp(v.projectId) || Firebase.initializeApp(v, k);
+                VuePtr.fbApps[k] = state.otherApps[k];
+            })
+        }
 
-                        state.otherApps[k] = Firebase.initializeApp(v, k);
-                    })
-                }
-
-                // console.log(`initFb -> hello`)
-                state.fbApp = fbApp;
-                state.fbAppAuth = fbAppAuth;
-                functions.authChange.subscribeToAuthChangeOnMaster({ fbAppAuth, fbApp });
-                functions.authChange.subscribeToAuthChangeOnChild({ fbApp, fbAppAuth })
-
-                document.dispatchEvent(new CustomEvent('fbAuthenticationInitialized'));
-                return resolve();
-            }).catch(reject)
+        // now add mixin
+        VuePtr.mixin({
+            beforeDestroy() { subMgr.unsubscribe({ id: this }); },
+            mounted() { // we are using the element itself as its id. This makes us not \have to keep track of this thing.
+                const self = this;
+                functions.handleChangeOnComponent.apply(self, [state.currentUser]);
+                subMgr.subscribe(document, authChangedEventName, e => functions.handleChangeOnComponent.apply(self, [e.detail]), self);
+            },
+            data() {
+                return { authUser: null, authUserId: null }
+            },
         })
+
+        // add login logout shortcut key
+        MouseTrap.bind('f7', () => {
+            const loginFlowUser = lodash.get(state, "loginFlow.state.currentUser.auth");
+            if (loginFlowUser) {
+                if (state.fbAppAuth)
+                    state.fbAppAuth.auth().signOut();
+
+                if (state.fbApp)
+                    state.fbApp.auth().signOut();
+            }
+            else if (!state.loginFlow.isVisible()) {
+                state.loginFlow.dismiss();
+                state.loginFlow.start()
+            }
+        })
+
+        // add listeners
+        document.addEventListener('fbAuthenticationClear', () => { VuePtr.fbApps = {} })
+
+        // mark the plugin as installed
+        VuePtr.fbAuthenticationInstalled = true;
+        return true;
     },
     getState() {
         return state;

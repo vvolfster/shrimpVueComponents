@@ -42,8 +42,8 @@ export default {
                                     setTimeout(resolve, 1000);
                                 })
                             },
-                            herp(id, value) {
-                                console.warn("herp", id, value);
+                            herp(id, value, ref) {
+                                console.warn("herp", ref);
                             },
                         },
                         actionsTableRoot: {
