@@ -44,28 +44,14 @@
                     })
                     self.$on('formCompleted', (formValue) => {
                         // console.log('im gonna resolve with', self.model)
-                        self.$refs.modal.close();
                         resolve(formValue);
+                        self.$refs.modal.close();
                     })
 
                     self.$refs.tabView.goTo(0);
                     self.$refs.modal.open();
                 })
             },
-            // createModel() {
-            //     this.model = lodash.reduce(this.steps, (a, val) => {
-            //         const fields = val.fields || val.form;
-            //         lodash.each(fields, (field, fieldName) => {
-            //             lodash.set(a, fieldName, lodash.get(field, "model", ""))
-            //         })
-            //         return a;
-            //     }, {});
-            // },
-            // handleValue(v) {
-            //     lodash.each(v, (value, key) => {
-            //         lodash.set(this.model, key, value);
-            //     })
-            // },
             finish() {
                 const self = this;
                 const steps = this.steps;
@@ -139,7 +125,9 @@
                     })
                 }
 
-                getAllStepValues().then(() => self.$emit('formCompleted', formVal))
+                getAllStepValues().then(() => {
+                    self.$emit('formCompleted', formVal)
+                })
             }
         },
         computed: {

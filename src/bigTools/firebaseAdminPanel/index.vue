@@ -23,10 +23,10 @@
                 <navigation 
                     ref="navigation"
                     :tables="computedTables"
-                    :pageSize="tableConfig.pageSize || 25" @pageLoaded="currentPage = $event"
+                    :pageSize="!tableConfig ? 25 : (tableConfig.pageSize || 25)" @pageLoaded="currentPage = $event"
                     class="topBar__navigation"
-                    :canAdd="typeof tableConfig.canAdd === 'boolean' ? tableConfig.canAdd : true"
-                    :canRemove="typeof tableConfig.canRemove === 'boolean' ? tableConfig.canRemove : true"
+                    :canAdd="tableConfig && typeof tableConfig.canAdd === 'boolean' ? tableConfig.canAdd : true"
+                    :canRemove="tableConfig && typeof tableConfig.canRemove === 'boolean' ? tableConfig.canRemove : true"
                     @add="handleTableAddition()"
                     @remove="handleTableRemoval($event)"
                 />
