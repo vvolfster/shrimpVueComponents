@@ -139,7 +139,7 @@ const functions = {
         }
 
         function showComponent() {
-            if(el && el.classList)
+            if (el && el.classList)
                 el.classList.remove('hidden');
             findReplacementNode(true);
         }
@@ -242,6 +242,12 @@ const functions = {
             return val !== undefined;
         })
         return val !== undefined ? val : (defaultVal || null);
+    },
+    startLoginFlow() {
+        if (!state.loginFlow.isVisible()) {
+            state.loginFlow.dismiss();
+            state.loginFlow.start()
+        }
     }
 }
 
@@ -299,6 +305,9 @@ const exportFunctions = {
             data() {
                 return { authUser: null, authUserId: null }
             },
+            methods: {
+                startLoginFlow: functions.startLoginFlow
+            }
         })
 
         // add login logout shortcut key
