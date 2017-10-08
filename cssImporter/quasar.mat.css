@@ -3,31 +3,6 @@
  * (c) 2017 Razvan Stoenescu
  * Released under the MIT License.
  */
- @font-face {
-    font-family: 'Roboto';
-    font-weight: 200;
-    src: url("~roboto-fontface/fonts/Roboto/Roboto-Thin.woff") format('woff');
-  }
-  @font-face {
-    font-family: 'Roboto';
-    font-weight: 300;
-    src: url("~roboto-fontface/fonts/Roboto/Roboto-Light.woff") format('woff');
-  }
-  @font-face {
-    font-family: 'Roboto';
-    font-weight: 400;
-    src: url("~roboto-fontface/fonts/Roboto/Roboto-Regular.woff") format('woff');
-  }
-  @font-face {
-    font-family: 'Roboto';
-    font-weight: 500;
-    src: url("~roboto-fontface/fonts/Roboto/Roboto-Medium.woff") format('woff');
-  }
-  @font-face {
-    font-family: 'Roboto';
-    font-weight: 700;
-    src: url("~roboto-fontface/fonts/Roboto/Roboto-Bold.woff") format('woff');
-  }
   *,
   *:before,
   *:after {
@@ -37,6 +12,12 @@
   }
   html,
   body {
+    font-family: 'Roboto', '-apple-system', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smoothing: antialiased;
     height: 100%;
     width: 100%;
   }

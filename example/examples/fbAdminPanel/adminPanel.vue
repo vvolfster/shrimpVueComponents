@@ -12,7 +12,7 @@
 import lodash from 'lodash'
 import fbAdminPanel from '@/bigTools/firebaseAdminPanel'
 import person from './person'
-import fbconf from './fbconf'
+import fbconf from './fbConf'
 
 export default {
     components: { fbAdminPanel, person },
