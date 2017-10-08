@@ -4,32 +4,32 @@
             <div class="row items-center">
                 <div>{{ page ? page.name : "" }}</div>
                 <button 
-                    class="bg-white text-black btn btn--mini"
+                    class="svtbtn bg-white text-black btn--mini"
                     @click="editorOptions.mode = editorOptions.mode === 'tree' ? 'code' : 'tree'"
                 >
                     <i class="fa" :class="`fa-${editorOptions.mode}`"></i>
                 </button>
-                <button class="btn btn--tableWide btn--mini fa fa-plus" @click.stop="setExpansion(true)" />
-                <button class="btn btn--tableWide btn--mini fa fa-minus" @click.stop="setExpansion(false)" />
-                <button class="btn btn--tableWide btn--mini fa fa-file" @click.stop="createNew" v-if="page && page.name"/>
+                <button class="svtbtn btn--mini fa fa-plus" @click.stop="setExpansion(true)" />
+                <button class="svtbtn btn--mini fa fa-minus" @click.stop="setExpansion(false)" />
+                <button class="svtbtn btn--mini fa fa-file" @click.stop="createNew" v-if="page && page.name"/>
                 <div v-if="actions" style="border:solid 1px white; border-width: 0 0 0 1px;">
-                    <button class="btn btn--tableWide" v-for="(action,name) in actions" :key="name" @click="$emit('callAction', { name })">
+                    <button class="svtbtn" v-for="(action,name) in actions" :key="name" @click="$emit('callAction', { name })">
                         {{ name }}
                     </button>
                 </div>
             </div>
-            <button class="bg-white text-black" @click="$emit('switchView', 'table')">Table</button>
+            <button class="svtbtn bg-white text-black" @click="$emit('switchView', 'table')">Table</button>
         </div>
         
         <div v-for="(obj, key, idx) in pageData" :key="key" class="jsonCell">
             <div v-if="editorOptions.mode !== 'tree'" class="header row items-center">{{ key }}</div>
             <json :value="obj" :placeholder="key" :options="editorOptions" :ref="`json_${idx}`" @input="$emit('edit', { id: key, value: $event })" />
             <div class="overlayControls row items-center">
-                <button v-if="hasMenu" @click="$emit('openDetailView', { id: key, entry: obj })" class="fa fa-ellipsis-h bg-green btn btn--mini btn--overlay"/>
-                <button class="yellow btn btn--mini btn--overlay text-black" @click="$emit('clone', { entry: obj } )">
+                <button v-if="hasMenu" @click="$emit('openDetailView', { id: key, entry: obj })" class="svtbtn fa fa-ellipsis-h bg-green text-white btn btn--mini "/>
+                <button class="svtbtn bg-orange btn--mini  text-white" @click="$emit('clone', { entry: obj } )">
                     <i class='fa fa-clone'/>
                 </button>
-                <button v-if="hasDelete" class="btn btn--delete btn--mini btn--overlay fa fa-trash" @click="$emit('delete', { id: key } )"/>
+                <button v-if="hasDelete" class="svtbtn btn--delete btn--mini  fa fa-trash" @click="$emit('delete', { id: key } )"/>
             </div>
         </div>
     </div>
@@ -144,20 +144,13 @@ export default {
     color: white;
 }
 
-.btn--tableWide {
-    border-width: 0 0 0 1px;
-    border: solid lightgray;
-}
-
 .btn--mini {
     min-width: 20px;
     min-height: 20px;
     padding: 0;
 }
 
-.btn--overlay {
-    border: solid 1px black;    
-}
+
 
 .overlayControls {
     position: absolute;

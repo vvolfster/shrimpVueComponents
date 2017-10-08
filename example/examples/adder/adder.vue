@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button @click="start">
+        <button @click="start" class="svtbtn">
             Start
         </button>
         <adder :steps="steps" ref="adder" />

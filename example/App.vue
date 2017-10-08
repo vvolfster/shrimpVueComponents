@@ -1,7 +1,11 @@
 <template>
-    <div id="q-app">
+    <div id="q-app" class="row">
         <div class="drawer">
-            <toggleButton class="drawer__btn" v-for="example in examples" :key="example" @on="myComponent = example" :text="example" :isPushed="example === myComponent" />
+            <div style="overflow-y:auto" class="column items-stretch">
+                <toggleButton class="drawer__btn" v-for="example in examples" :key="example" @on="myComponent = example" :isPushed="example === myComponent">
+                    {{ example }}
+                </toggleButton>
+            </div>
         </div>
         <div class="viewport">
             <component :is="myComponent"></component>
@@ -54,27 +58,20 @@ export default {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #2c3e50;
-
-    display: flex;
-    flex-flow: row;
+    width: 100vw;
 }
 
-.drawer {
-    flex: 0 1 10vw;
-    height: 100vh;
-    border: solid 1px;
-    color: white;
-    background: teal;
 
-    display: flex;
-    flex-flow: column;
-    align-items: center;
+.drawer {
+    /* flex: 1 1 10vw; */
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    margin-right: 5px;
 }
 
 .drawer__btn {
-    width: 90%;
     height: 40px;
-    margin-top: 20px;
 }
 
 .viewport {
@@ -83,12 +80,7 @@ export default {
     overflow-y: auto;
 }
 
-html {
-    min-width: unset !important;
-}
-
 body {
-    font-family: 'Roboto', sans-serif;
-    min-width: unset !important;
+    margin: 0;
 }
 </style>

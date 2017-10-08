@@ -1,24 +1,15 @@
 // EMITS on,off or stateChange
 <template>
-    <div :class="ui.bgClass" @click="pushed = !pushed">
-        <i :class="ui.iconClass"></i>
-        <div class="tbn__text">
-            {{ text }}
-        </div>
-    </div>
+    <button class="svtbtn" :class="pushed ? 'bg-purple text-white' : ''" @click="pushed = !pushed">
+        <slot></slot>
+    </button>
 </template>
 
 <script>
+import '../../../cssImporter'
+
 export default {
     props: {
-        fa: {
-            type: String,
-            default: ""
-        },
-        text: {
-            type: String,
-            default: ""
-        },
         isPushed: {
             type: Boolean,
             default: false,
@@ -31,21 +22,6 @@ export default {
     },
     mounted() {
         this.pushed = this.isPushed;
-    },
-    computed: {
-        ui() {
-            const bgClass = !this.pushed ? `tbtn` : `tbtn tbtn--active`
-            let iconClass = !this.pushed ? `tbtn__icon` : `tbtn__icon tbtn__icon--active`;
-
-            if(this.fa) {
-                iconClass += ` fa fa-${this.fa}`;
-            }
-
-            return {
-                bgClass,
-                iconClass
-            }
-        }
     },
     watch: {
         pushed(v) {
@@ -65,46 +41,11 @@ export default {
 
 <style scoped>
 .tbtn {
-    cursor: pointer;
-    background-color: slateblue;
-    border-radius: 15px;
-    box-shadow: 0 8px #999;
-    -webkit-box-shadow: 0 8px #999;
-    -moz-box-shadow: 0 8px #999;
-    position: relative;
-    bottom: 5px;
-    display: table;
+    min-width: 24px;
+    min-height: 24px;
 }
 
-.tbtn--active {
-    background-color: darkslateblue;
-    box-shadow: 0 5px #666;
-    -webkit-box-shadow: 0 5px #666;
-    -moz-box-shadow: 0 5px #666;
-    transform: translateY(4px);
-}
 
-.tbtn__icon {
-    color: white;
-    font-size: 1.275rem;
-    text-align: center;
-    display: table-cell;
-    vertical-align: middle;
-}
-
-.tbtn__icon--active {
-    -ms-transform: rotate(45deg); /* IE 9 */
-    -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
-    transform: rotate(45deg);
-}
-
-.tbn__text {
-    color: white;
-    font-size: 1.275rem;
-    text-align: center;
-    display: table-cell;
-    vertical-align: middle;
-}
 
 </style>
 

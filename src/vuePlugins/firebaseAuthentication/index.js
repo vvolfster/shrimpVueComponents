@@ -33,7 +33,7 @@ const state = {
             <div class="row items-center">
                 You must be &nbsp<b>logged in</b>&nbsp to view this page.
             </div>
-            <button qa="authRequiredBtn" class="black-border bg-primary text-white rounded margin-top text-no-transform">
+            <button qa="authRequiredBtn" class="svtbtn black-border bg-primary text-white rounded margin-top text-no-transform">
                 Log in
             </button>
         </div>`,

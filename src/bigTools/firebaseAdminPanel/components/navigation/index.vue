@@ -4,18 +4,18 @@
             <combobox ref="combobox" :options="tables" @value="input_table = $event"/>
             <button 
                 v-if="canAdd"
-                class="btn self-center margin-left white black-text text-no-transform"
+                class="svtbtn self-center margin-left bg-white text-black text-no-transform"
                 @click="$emit('add')"
             >
-                <i class="fa fa-plus"/>
+                <i class="svti fa fa-plus"/>
                 Add
             </button>
             <button 
                 v-if="input_table && canRemove"
-                class="btn self-center margin-left red black-text text-no-transform"
+                class="svtbtn self-center margin-left bg-red text-white text-no-transform"
                 @click="$emit('remove', input_table)"
             >
-                <i class="fa fa-trash"/>
+                <i class="svti fa fa-trash"/>
                 Delete
             </button>
         </div>

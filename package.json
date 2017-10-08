@@ -27,7 +27,8 @@
     "roboto-fontface": "^0.8.0",
     "showdown": "^1.7.4",
     "simplemde": "^1.11.2",
-    "velocity-animate": "^1.5.0"
+    "velocity-animate": "^1.5.0",
+    "vue-resize": "^0.4.2"
   },
   "peerDependencies": {
     "vue": "^2.0.0"

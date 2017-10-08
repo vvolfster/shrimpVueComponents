@@ -1,11 +1,11 @@
 <template>
     <div class="combobox">
         <div class="select" ref="select" @click="$refs.popover.toggle()" :style="ui.style">
-            <div>
+            <div class="row items-center justify-between">
                 <div :style="!d_value ? 'color:gray;display:inline-block;' : 'display:inline-block;'">
                     {{ d_value ? d_value : placeholder }}
                 </div>
-                <i class="fa fa-caret-down" v-if="ui.icon"></i>
+                <i class="margin-left fa fa-caret-down" v-if="ui.icon"></i>
             </div>
         </div>
         <div v-if="error !== null" class="error">

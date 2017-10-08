@@ -3,12 +3,12 @@
         <div class="root">
             <div class="title">
                 <div class="title--text">Add</div>
-                <button class="title--button title--button-cancel" @click="close()">✖</button>
+                <button class="svtbtn title--button title--button-cancel" @click="close()">✖</button>
             </div>
             <div class="content" ref="content">
                 <div class="content-background"/>
                 <div class="content-button-area">
-                    <button class="content-button-area-button" v-for="(v,k,index) in addParams" :key="k" @click="callFn(v)">{{ k }}</button>
+                    <button class="svtbtn content-button-area-button" v-for="(v,k,index) in addParams" :key="k" @click="callFn(v)">{{ k }}</button>
                 </div>
             </div>
         </div>

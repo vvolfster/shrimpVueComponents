@@ -1,22 +1,22 @@
 <template>
     <div class="fbAdminPanel">
         <div v-if="fbConfig && fbConfig.requiresAuth && !username" class="fbAdminPanelLogin">
-            <button @click="configChanged()" class="fbAdminPanelLoginBtn">Login</button>
+            <button @click="configChanged()" class="svtbtn fbAdminPanelLoginBtn">Login</button>
             <br>
             Your Firebase config requires you log in.
         </div>
         <div v-else>
             <div class="row items-center nowrap bg-grey-4">
-                <div>
-                    <button class="btn self-center margin-left white black-text text-no-transform" @click="login">
-                        <i class='fa fa-user'/>
+                <div class="row items-center">
+                    <button class="svtbtn self-center margin-left white black-text text-no-transform" @click="login">
+                        <i class='svti fa fa-user'/>
                         {{ username || "Login..." }}
                     </button>
                     <button
-                        class="btn self-center margin-left white black-text text-no-transform"
+                        class="svtbtn self-center margin-left white black-text text-no-transform"
                         @click="$refs && $refs.navigation ? $refs.navigation.tableChanged() : null"
                     >
-                        <i class="fa fa-refresh"/>
+                        <i class="svti fa fa-refresh"/>
                         Refresh
                     </button>
                 </div>

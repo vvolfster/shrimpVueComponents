@@ -15,7 +15,7 @@
                 <div>
                     Results...
                 </div>
-                <button v-for="(result, key) in results" :key="key" @click="chooseResult(result, key)">
+                <button v-for="(result, key) in results" :key="key" @click="chooseResult(result, key)" class="svtbtn">
                     <!-- show the search things -->
                     {{ getDisplayValue(result, key) }}
                 </button>

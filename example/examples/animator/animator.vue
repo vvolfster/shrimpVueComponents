@@ -3,38 +3,38 @@
         <div class="mainRow">
             <div class="zcolumn">
                 <div class="zrow">
-                    <button @click="from='upLeft'" :class="from === 'upLeft' ? 'buttonActive' : ''">TL</button>
-                    <button @click="from='up'" :class="from === 'up' ? 'buttonActive' : ''">T</button>
-                    <button @click="from='upRight'" :class="from === 'upRight' ? 'buttonActive' : ''">TR</button>
+                    <button class="svtbtn" @click="from='upLeft'" :class="from === 'upLeft' ? 'buttonActive' : ''">TL</button>
+                    <button class="svtbtn" @click="from='up'" :class="from === 'up' ? 'buttonActive' : ''">T</button>
+                    <button class="svtbtn" @click="from='upRight'" :class="from === 'upRight' ? 'buttonActive' : ''">TR</button>
                 </div>
                 <div class="zrow">
-                    <button @click="from='left'" :class="from === 'left' ? 'buttonActive' : ''">L</button>
-                    <button @click="from='center'" :class="from === 'center' ? 'buttonActive' : ''">C</button>
-                    <button @click="from='right'" :class="from === 'right' ? 'buttonActive' : ''">R</button>
+                    <button class="svtbtn" @click="from='left'" :class="from === 'left' ? 'buttonActive' : ''">L</button>
+                    <button class="svtbtn" @click="from='center'" :class="from === 'center' ? 'buttonActive' : ''">C</button>
+                    <button class="svtbtn" @click="from='right'" :class="from === 'right' ? 'buttonActive' : ''">R</button>
                 </div>
                 <div class="zrow zrow--right">
-                    <button @click="from='downLeft'" :class="from === 'downLeft' ? 'buttonActive' : ''">BL</button>
-                    <button @click="from='down'" :class="from === 'down' ? 'buttonActive' : ''">B</button>
-                    <button @click="from='downRight'" :class="from === 'downRight' ? 'buttonActive' : ''">BR</button>
+                    <button class="svtbtn" @click="from='downLeft'" :class="from === 'downLeft' ? 'buttonActive' : ''">BL</button>
+                    <button class="svtbtn" @click="from='down'" :class="from === 'down' ? 'buttonActive' : ''">B</button>
+                    <button class="svtbtn" @click="from='downRight'" :class="from === 'downRight' ? 'buttonActive' : ''">BR</button>
                 </div>
-                <button @click="from=null" :class="from === null ? 'buttonActive' : ''"><i class='fa fa-trash'></i></button>
+                <button class="svtbtn" @click="from=null" :class="from === null ? 'buttonActive' : ''"><i class='fa fa-trash'></i></button>
             </div>
 
             <div class="zcolumn zcolumn--buttons">
-                <button @click="animator().setPositionWithinParent({ element: $refs.rect, position: 'center' })">Center</button>
+                <button class="svtbtn" @click="animator().setPositionWithinParent({ element: $refs.rect, position: 'center' })">Center</button>
                 <div class="mainRow mainRow--buttons">
                     <div class="zcolumn zcolumn--buttons">
-                        <button @click="animator().animateOutTop({ element: $refs.rect, startingPosition: from })">Out Top</button>
-                        <button @click="animator().animateOutBottom({ element: $refs.rect, startingPosition: from })">Out Bottom</button>
-                        <button @click="animator().animateOutLeft({ element: $refs.rect, startingPosition: from })">Out Left</button>
-                        <button @click="animator().animateOutRight({ element: $refs.rect, startingPosition: from })">Out Right</button>
+                        <button class="svtbtn" @click="animator().animateOutTop({ element: $refs.rect, startingPosition: from })">Out Top</button>
+                        <button class="svtbtn" @click="animator().animateOutBottom({ element: $refs.rect, startingPosition: from })">Out Bottom</button>
+                        <button class="svtbtn" @click="animator().animateOutLeft({ element: $refs.rect, startingPosition: from })">Out Left</button>
+                        <button class="svtbtn" @click="animator().animateOutRight({ element: $refs.rect, startingPosition: from })">Out Right</button>
                     </div>
                     <div class="zcolumn zcolumn--buttons">
-                        <button @click="animator().animateInTop({ element: $refs.rect, startingPosition: from })">In Top</button>
-                        <button @click="animator().animateInBottom({ element: $refs.rect, startingPosition: from })">In Bottom</button>
-                        <button @click="animator().animateInLeft({ element: $refs.rect, startingPosition: from })">In Left</button>
-                        <button @click="animator().animateInRight({ element: $refs.rect, startingPosition: from })">In Right</button>
-                        <button @click="animator().animateInCenter({ element: $refs.rect, startingPosition: from })">In Center</button>
+                        <button class="svtbtn" @click="animator().animateInTop({ element: $refs.rect, startingPosition: from })">In Top</button>
+                        <button class="svtbtn" @click="animator().animateInBottom({ element: $refs.rect, startingPosition: from })">In Bottom</button>
+                        <button class="svtbtn"  @click="animator().animateInLeft({ element: $refs.rect, startingPosition: from })">In Left</button>
+                        <button class="svtbtn" @click="animator().animateInRight({ element: $refs.rect, startingPosition: from })">In Right</button>
+                        <button class="svtbtn" @click="animator().animateInCenter({ element: $refs.rect, startingPosition: from })">In Center</button>
                     </div>                
                 </div>
             </div>
@@ -75,13 +75,6 @@
 </script>
 
 <style scoped>
-    button {
-        border: solid 1px;
-        border-radius: 2px;
-        margin-top: 20px;
-        width: 10vw;
-    }
-
     .zcolumn {
         display: flex;
         flex-flow: column;

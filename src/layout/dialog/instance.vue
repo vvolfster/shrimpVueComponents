@@ -9,7 +9,7 @@
             :style="styles.autoform"
         />
         <div class='buttonRow' v-if="!busy" :style="styles.buttonRow">
-            <button v-for="(button, name) in buttons" :key="name" @click="pressButton(name)">
+            <button class="svtbtn" v-for="(button, name) in buttons" :key="name" @click="pressButton(name)">
                 {{ name }}
             </button>
         </div>
@@ -206,6 +206,11 @@ export default {
 
 .dialog__description {
     margin-top: 20px;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+    font-family: inherit;
 }
 
 .instanceRoot {

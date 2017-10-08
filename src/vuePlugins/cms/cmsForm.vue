@@ -20,8 +20,8 @@ close - emitted when the user successfully submits or hits close. In Cms.js , th
         <div class="root">
             <div class="title">
                 <div class="title--text">{{ ui.title }}</div>
-                <button class="title--button title--button-cancel" @click="close()">✖</button>
-                <button :class= "canSubmit? 'title--button title--button-accept' : 'title--button title--button-gray'" 
+                <button class="svtbtn title--button title--button-cancel" @click="close()">✖</button>
+                <button :class= "canSubmit? 'svtbtn title--button title--button-accept' : 'svtbtn title--button title--button-gray'" 
                         @click="canSubmit ? submit() : null">✔</button>
             </div>
             <div class="content" ref="content">

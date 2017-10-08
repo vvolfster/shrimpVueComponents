@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="paragraph" :class="error ? 'paragraph--error' : ''" :style="ui.style">
+        <div class="paragraph relative column items-stretch" :class="error ? 'paragraph--error' : ''" :style="ui.style">
             <textarea class="paragraph__input"
                 ref="input"
                 @input="updateValue"  
@@ -133,15 +133,15 @@ export default {
 }
 
 .paragraph__input {
-    border-color: inherit;
-    width: 100%;
+    font: inherit;
     resize: none;
     outline: none;
+    color: inherit;
+    background: inherit;
     border: none;
     text-align: inherit;
     padding: 5px;
-    min-height: inherit;
-    max-height: inherit;
+    /* width: 100%; */
 }
 .paragraph__input:hover { border: none; }
 .paragraph__input:focus { border: none; }

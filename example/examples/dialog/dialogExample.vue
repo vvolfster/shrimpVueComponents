@@ -2,21 +2,25 @@
     <div class="dialogExample">
         Press Esc to Dismiss
 
-        <div>
-            Position
-            <combobox :options="positions" v-model="chosen.position"/>
-        </div>
-        <div>
-            Animation
-            <combobox :options="animations" v-model="chosen.animation"/>
-        </div>
+        <div class="column items-stretch">
+            <div class="row items-stretch justify-between">
+                <div class="column justify-stretch">
+                    <div>Position</div>
+                    <div>Animation</div>
+                </div>
+                <div class="column justify-stretch">
+                    <combobox :options="positions" v-model="chosen.position" />
+                    <combobox :options="animations" v-model="chosen.animation" />
+                </div>
+            </div>
 
-        <button @click="open('simple')">Open Simple</button>
-        <button @click="open('simpleNonClosing')">Open No Dismiss</button>
-        <button @click="open('form')">Open Form</button>
-        <button @click="open('formWithModel')">Open Form With Model</button>
-        <button @click="open('form3s')">Form that takes 3 seconds to resolve</button>
-        <button @click="open('formDeterminate')">Form Determinate</button>
+            <button class="svtbtn" @click="open('simple')">Open Simple</button>
+            <button class="svtbtn" @click="open('simpleNonClosing')">Open No Dismiss</button>
+            <button class="svtbtn" @click="open('form')">Open Form</button>
+            <button class="svtbtn" @click="open('formWithModel')">Open Form With Model</button>
+            <button class="svtbtn" @click="open('form3s')">Form that takes 3 seconds to resolve</button>
+            <button class="svtbtn" @click="open('formDeterminate')">Form Determinate</button>
+        </div>
     </div>
 </template>
 
@@ -51,7 +55,7 @@ export default {
                 title: 'Simple',
                 description: "This is a simple dialog",
                 buttons: {
-                    close() {},
+                    close() { },
                 },
                 noDismiss: true,
             },
@@ -63,7 +67,7 @@ export default {
                         type: String,
                         required: true,
                         validateFn(s) {
-                            if(s.length < 3)
+                            if (s.length < 3)
                                 return "too short"
                             return true;
                         }
@@ -76,7 +80,7 @@ export default {
                         type: Number,
                         required: true,
                         validator(s) {
-                            if(s < 0)
+                            if (s < 0)
                                 return "No benji buttons allowed"
                             return true;
                         }
@@ -102,7 +106,7 @@ export default {
                         required: true,
                         model: "Shahan",
                         validateFn(s) {
-                            if(s.length < 3)
+                            if (s.length < 3)
                                 return "too short"
                             return true;
                         }
@@ -117,7 +121,7 @@ export default {
                         model: 29,
                         required: true,
                         validator(s) {
-                            if(s < 0)
+                            if (s < 0)
                                 return "No benji buttons allowed"
                             return true;
                         }
@@ -139,7 +143,7 @@ export default {
                         required: true,
                         model: "Shahan",
                         validateFn(s) {
-                            if(s.length < 3)
+                            if (s.length < 3)
                                 return "too short"
                             return true;
                         }
@@ -154,7 +158,7 @@ export default {
                         model: 29,
                         required: true,
                         validator(s) {
-                            if(s < 0)
+                            if (s < 0)
                                 return "No benji buttons allowed"
                             return true;
                         }
@@ -178,7 +182,7 @@ export default {
                         required: true,
                         model: "Shahan",
                         validateFn(s) {
-                            if(s.length < 3)
+                            if (s.length < 3)
                                 return "too short"
                             return true;
                         }
@@ -193,7 +197,7 @@ export default {
                         model: 29,
                         required: true,
                         validator(s) {
-                            if(s < 0)
+                            if (s < 0)
                                 return "No benji buttons allowed"
                             return true;
                         }
@@ -215,7 +219,7 @@ export default {
     },
     methods: {
         open(v) {
-            const conf = {  position: this.chosen.position, animation: this.chosen.animation }
+            const conf = { position: this.chosen.position, animation: this.chosen.animation }
             lodash.assign(conf, this[v] || this.simple)
             dialog.create(conf);
         }

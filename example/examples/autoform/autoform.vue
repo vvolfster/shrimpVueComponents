@@ -67,12 +67,18 @@ export default {
                     options: ["Male", "Female", "Other"]
                 },
                 age: {
-                    type: Number,
+                    type: Range,
                     validateFn(v) {
-                        if(v <= 0)
+                        if(v < 0)
                             return "You cannot be that young!!"
 
                         return true;
+                    },
+                    options: {
+                        min: 0,
+                        max: 100,
+                        step: 10,
+                        list: [20, 50, 70]
                     }
                 },
                 powerLevel: {

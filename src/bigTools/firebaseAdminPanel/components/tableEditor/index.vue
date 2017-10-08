@@ -35,7 +35,7 @@
             />
             <div v-else>
                 <div class='margin-bottom'>
-                    <button class="bordered margin-right" v-for="(action,name) in actionsTableRoot" :key="name" @click="callTableRootAction(name)">
+                    <button class="svtbtn bordered margin-right" v-for="(action,name) in actionsTableRoot" :key="name" @click="callTableRootAction(name)">
                         {{ name }}
                     </button>
                 </div>
@@ -50,10 +50,10 @@
                                 {{ header.displayFn(entry, id) }}
                             </div>
                             <div class="componentHeader__actions">
-                                <button class="bordered" @click="openDetailView(id, entry, pageFbRefs[id])" v-if="hasDetailView">
+                                <button class="svtbtn bordered" @click="openDetailView(id, entry, pageFbRefs[id])" v-if="hasDetailView">
                                     <i class='fa fa-ellipsis-h' /></i>
                                 </button>
-                                <button v-if="!tableConfig.noDelete" class="red btn" @click="remove(id)">
+                                <button v-if="!tableConfig.noDelete" class="svtbtn bg-red btn" @click="remove(id)">
                                     <i class='fa fa-trash' /></i>
                                 </button>
                             </div>
@@ -72,7 +72,7 @@
                 <!-- actions -->
                 <div class="magicModal__actions" v-if="typeof actions === 'object' && Object.keys(actions).length">
                     <h5>Actions</h5>
-                    <button v-for="(action, name) in actions" :key="name" @click="performAction(name, selectedItem)" class="bordered margin-bottom">
+                    <button v-for="(action, name) in actions" :key="name" @click="performAction(name, selectedItem)" class="svtbtn bordered margin-bottom">
                         {{ name }}
                     </button>
                 </div>

@@ -4,10 +4,10 @@
             <th :colspan="columns.length ? columns.length + 1 : 1" class="bg-grey text-white">
                 <div class="row justify-between items-center">
                     <div>{{ page ? page.name : "" }}</div>
-                    <button class="bg-white text-black" @click="$emit('switchView', 'json')">JSON</button>
+                    <button class="svtbtn bg-white text-black" @click="$emit('switchView', 'json')">JSON</button>
                 </div>
                 <div v-if="actions">
-                    <button class="btn btn--tableWide" v-for="(action,name) in actions" :key="name" @click="$emit('callAction', { name })">
+                    <button class="svtbtn btn btn--tableWide" v-for="(action,name) in actions" :key="name" @click="$emit('callAction', { name })">
                         {{ name }}
                     </button>
                 </div>
@@ -31,14 +31,14 @@
                     <div v-if="field !== '★'">
                         {{ entry ? entry[field] : '?' }}
                     </div>
-                    <div v-else class="specialActionsColumn">
-                        <button v-if="hasMenu" @click="$emit('openDetailView', { id, entry  })" class="green btn">
+                    <div v-else class="specialActionsColumn row items-center">
+                        <button v-if="hasMenu" @click="$emit('openDetailView', { id, entry  })" class="svtbtn bg-green text-white">
                             <i class='fa fa-ellipsis-h'/>
                         </button>
-                        <button class="yellow btn" @click="$emit('clone', { entry } )">
+                        <button class="svtbtn bg-orange text-white " @click="$emit('clone', { entry } )">
                             <i class='fa fa-clone'/>
                         </button>
-                        <button v-if="hasDelete" class="btn btn--delete" @click="$emit('delete', { id } )">
+                        <button v-if="hasDelete" class="svtbtn  btn--delete" @click="$emit('delete', { id } )">
                             <i class='fa fa-trash'/>
                         </button>
                     </div>
@@ -104,7 +104,7 @@ export default {
 }
 
 button {
-    padding: 0 5px 0 5px;
+    padding: 2px 5px 2px 5px;
 }
 
 td {

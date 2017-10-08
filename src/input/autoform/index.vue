@@ -1,21 +1,14 @@
 <template>
     <div class="autoform">
         <div>{{ title }}</div>
-        <pre>{{ description }}</pre>
+        <pre class="pre">{{ description }}</pre>
         <div class="autoComponents" v-if="fields">
             <div v-for="(field, name) in fields" :key="name" style="position:relative;">
                 <div class="autoform--input">
-                    <component :is="getComponent(field.type || field)" 
-                        :validateFn="field && typeof field.validateFn === 'function' ? field.validateFn : 
-                                                                                       typeof field.validator === 'function' ? field.validator : null"
-                        :value="getFieldValue(name)"
-                        :placeholder="getFieldName(name)"
-                        @value="setValue(name, $event)"
-                        :options="field && field.options ? field.options : null"
-                        :ref="`formField_${name}`"
-                    />
+                    <component :is="getComponent(field.type || field)" :validateFn="field && typeof field.validateFn === 'function' ? field.validateFn : 
+                                                                                           typeof field.validator === 'function' ? field.validator : null" :value="getFieldValue(name)" :placeholder="getFieldName(name)" @value="setValue(name, $event)" :options="field && field.options ? field.options : null" :ref="`formField_${name}`" />
                     <div class='requireOverlay' v-if="fieldIsMissing(name, field)">
-                            <i class='fa fa-asterisk'></i>
+                        <i class='fa fa-asterisk'></i>
                     </div>
                 </div>
             </div>
@@ -36,11 +29,12 @@ import markdown from '../markdown'
 import textLineAutoComplete from '../textLineAutoComplete'
 import textParagraph from '../textParagraph'
 import textPassword from '../textPassword'
+import range from '../range'
 import '../../../cssImporter'
 
-function getDataModel(f){
+function getDataModel(f) {
     const obj = {};
-    if(!f || toString.call(f) !== '[object Object]')
+    if (!f || toString.call(f) !== '[object Object]')
         return obj;
 
     lodash.each(f, (v, k) => {
@@ -66,17 +60,17 @@ export default {
             d_model: null,
         }
     },
-    components: { boolean, combobox, date, file, json, number, textLine, textLineAutoComplete, textParagraph, textPassword, markdown },
+    components: { boolean, combobox, range, date, file, json, number, textLine, textLineAutoComplete, textParagraph, textPassword, markdown },
     methods: {
         getFieldName(name) {
             const field = this.fields[name]
-            if(!field)
+            if (!field)
                 return name;
 
-            if(typeof field.label === 'string')
+            if (typeof field.label === 'string')
                 return field.label;
 
-            if(typeof field.title === 'string')
+            if (typeof field.title === 'string')
                 return field.title;
 
             return name;
@@ -86,7 +80,7 @@ export default {
         },
         getComponent(fieldType) {
             const f = typeof fieldType === 'string' ? fieldType.toLowerCase() : fieldType;
-            switch(f) {
+            switch (f) {
                 case "boolean": return "boolean";
                 case "combobox": return "combobox";
                 case "combo": return "combobox";
@@ -98,6 +92,8 @@ export default {
                 case "password": return "textPassword";
                 case "autocomplete": return "textLineAutoComplete";
                 case "markdown": return "markdown"
+                case "range": return "range"
+                case "slider": return "range"
 
                 case "text": return "textLine";
                 case "textLine": return "textLine";
@@ -113,12 +109,13 @@ export default {
                 case Date: return "date";
                 case File: return "file";
                 case JSON: return 'json';
+                case Range: return "range"
 
                 default: return "textLine";
             }
         },
         setValue(name, value) {
-            if(!this.d_model)
+            if (!this.d_model)
                 return;
 
             lodash.set(this.d_model, name, value);
@@ -131,27 +128,27 @@ export default {
             const self = this;
             return lodash.every(this.fields, (type, name) => {
                 let component = lodash.get(self.$refs, `formField_${name}`)
-                if(lodash.isArray(component))
+                if (lodash.isArray(component))
                     component = component[0];
 
                 const required = lodash.get(type, 'required', false);
                 // console.log('hello', name, component, required);
-                if(!component)
+                if (!component)
                     return true;
 
-                if(component.isInError()){
+                if (component.isInError()) {
                     // console.log(`${name} is in error`)
                     return false;
                 }
 
                 // console.log(name, 'is required:', required);
-                if(required) {
+                if (required) {
                     // console.log(name, required, component.isEmpty());
                     // console.warn(name, typeof component.isEmpty === 'function', component.isEmpty());
-                    if(typeof component.isEmpty === 'function'){
+                    if (typeof component.isEmpty === 'function') {
                         // console.log(`${name} is empty`)
                         // console.log(name, required, component.isEmpty(), "RETURNING FALSE");
-                        if(component.isEmpty())
+                        if (component.isEmpty())
                             return false;
                     }
                     else {
@@ -165,15 +162,15 @@ export default {
             })
         },
         fieldIsMissing(name, type) {
-            if(!type || !type.required)
+            if (!type || !type.required)
                 return false;
 
             let cmp = this.$refs[`formField_${name}`];
-            if(!cmp)
+            if (!cmp)
                 return false;
 
             cmp = cmp[0];
-            if(!cmp)
+            if (!cmp)
                 return false;
 
             return typeof cmp.isEmpty === 'function' ? cmp.isEmpty() : cmp.getValue();
@@ -212,5 +209,11 @@ export default {
     color: red;
 }
 
-
+.pre {
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+    font-family: inherit;
+}
 </style>

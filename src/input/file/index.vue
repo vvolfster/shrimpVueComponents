@@ -13,7 +13,7 @@
                 <div class="fileName">
                     {{ limit > 1 ? `${idx + 1}.` : `` }} {{ file.name }}
                 </div>
-                <button @click="removeFile(idx)"><i class='fa fa-trash'></i></button>
+                <button class='svtbtn' @click="removeFile(idx)"><i class='fa fa-trash'></i></button>
             </div>
         </div>
         <div v-if="error !== null" class="line__error">

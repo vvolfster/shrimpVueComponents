@@ -9,6 +9,7 @@ import textLine from './textLine'
 import textLineAutoComplete from './textLineAutoComplete'
 import textParagraph from './textParagraph'
 import textPassword from './textPassword'
+import range from './range'
 import json from './json'
 
 export default {
@@ -23,5 +24,6 @@ export default {
     textLineAutoComplete,
     textParagraph,
     textPassword,
+    range,
     json
 }
