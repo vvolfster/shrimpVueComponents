@@ -169,7 +169,7 @@ const functions = {
         }
 
         function missingKeysInAppObject(o) {
-            const requiredKeys = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'storageBucket', 'messagingSenderId']
+            const requiredKeys = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'messagingSenderId']
             const keys = lodash.keys(o);
             return lodash.reduce(requiredKeys, (acc, r) => {
                 if (keys.indexOf(r) === -1 || !o[r])

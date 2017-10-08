@@ -253,7 +253,10 @@ function builder(conf, id) {
             }
 
             if (otherSignInProviders.length)
-                buttons["Log In With Auth Providers"] = () => loginFlow.showFirebaseAuth(fbApp, fbAppAuth, opts)
+                buttons["Log In With Auth Providers"] = {
+                    bypassForm: true,
+                    handler() { loginFlow.showFirebaseAuth(fbApp, fbAppAuth, opts) }
+                }
 
             dialogs.dismiss();
             dialogs.d1 = Dialog.create({
@@ -373,9 +376,6 @@ function builder(conf, id) {
         subscribeToAuthChangeOnMaster() {
             authFunctions.unsubAuthFn = fbAppAuth.auth().onAuthStateChanged((u) => {
                 const user = fbApp.auth().currentUser || u;
-                if (fbApp === fbAppAuth)
-                    return; // they are both the same.
-
                 function catcher() {
                     fbAppAuth.auth().signOut();
                     fbApp.auth().signOut();
@@ -383,10 +383,15 @@ function builder(conf, id) {
                 }
 
                 if (user) {
-                    authFunctions.addUserToAuthDb(user).then(authFunctions.authenticateWithChildFirebase).catch(catcher);
+                    if(fbApp === fbAppAuth){
+                        authFunctions.addUserToAuthDb(user)
+                    }
+                    else {
+                        authFunctions.addUserToAuthDb(user).then(authFunctions.authenticateWithChildFirebase).catch(catcher);
+                    }
                 }
-                else {
-                    fbApp.auth().signOut();
+                else if(fbApp !== fbAppAuth){
+                    fbApp.auth().signOut(); // also sign out of child app
                 }
             });
         },

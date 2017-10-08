@@ -33,7 +33,13 @@ The **Dialog.create** method takes a config object as shown above.
 - **onDismiss (function)** - The function to run on dismissal of the dialog. Optional.
 - **noDismiss (boolean)** - Cannot dismiss by clicking the background if true. Optional.
 - **form (object)** - Autoform configurator object. Auto-generates form into the Dialog and passes it along to buttons.
-- **buttons (object)** - The buttons that the dialog presents as options. Children of the buttons key must be functions. The buttons are passed the user inputted **form** as well as a function called **progress** as a second parameter. If the button is performing some determinate async task, it is a good idea to call progress with a value between 0 and 1 to show the user the progress.
+- **buttons (object)** - The buttons that the dialog presents as options. Children of the buttons key must be functions or objects. The button functions are passed the user inputted **form** as well as a function called **progress** as a second parameter. If the button is performing some determinate async task, it is a good idea to call progress with a value between 0 and 1 to show the user the progress.
+    - button as a function (formObject, progressFn)
+    - button as an object
+	    - handler (formObject, progressFn) 
+	    - bypassForm (boolean) - Bypass the form's validation
+
+
 - returns **DialogObject** - Newly created dialog object. 
 	- **dismiss (function)** - Dismisses the dialog programmatically.
 	- **isBusy (function)** - Returns true if the user has clicked a button on the dialog and the async task is not yet finished. False, otherwise.
@@ -87,6 +93,12 @@ Dialog.create({
 				}) /* The error will be shown as a Toast */
 				.catch(() => reject('An account already exists with this email');
 			})
+		},
+		Cancel: {
+			bypassForm: true,
+			handler() {
+				console.log('user cancelled');
+			}
 		}
 	}
 })

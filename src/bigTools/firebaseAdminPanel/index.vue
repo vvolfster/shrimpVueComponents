@@ -1,7 +1,7 @@
 <template>
     <div class="fbAdminPanel">
         <div v-if="fbConfig && fbConfig.requiresAuth && !username" class="fbAdminPanelLogin">
-            <button @click="configChanged()" class="svtbtn fbAdminPanelLoginBtn">Login</button>
+            <button @click="doAuth()" class="svtbtn fbAdminPanelLoginBtn">Login</button>
             <br>
             Your Firebase config requires you log in.
         </div>
@@ -33,6 +33,7 @@
             </div>
             <tableEditor 
                 :tableConfig="currentTableConfig"
+                :hasStorageBucket="hasStorage"
                 :page="currentPage"
                 :navFn="$refs.navigation ? $refs.navigation.toTable : null"
                 class="tableEditor"
@@ -153,9 +154,15 @@ export default {
                 return ret;
             }
             return null;
+        },
+        hasStorage() {
+            return this.fbConfig && this.fbConfig.storageBucket
         }
     },
     methods: {
+        doAuth() {
+            return this.configChanged().then(fbase.doAuth);
+        },
         configChanged() {
             const self = this;
             const fb   = this.fb;

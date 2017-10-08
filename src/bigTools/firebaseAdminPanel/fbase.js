@@ -58,7 +58,7 @@ const functions = {
         }
 
         function missingKeysInAppObject(o) {
-            const requiredKeys = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'storageBucket', 'messagingSenderId']
+            const requiredKeys = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'messagingSenderId']
             const keys = lodash.keys(o);
             return lodash.reduce(requiredKeys, (acc, r) => {
                 if (keys.indexOf(r) === -1 || !o[r])
@@ -101,7 +101,7 @@ const functions = {
     signOut() {
         return new Promise((resolve, reject) => {
             if (!state.appVars)
-                return reject("app is not init")
+                return resolve('app is not init');
 
             const promises = [];
             const app = state.appVars.app;
@@ -167,6 +167,9 @@ const exportObj = {
                             }
                             // console.log(state.appVars);
                             resolve(state.appVars)
+                        }).catch((err) => {
+                            const msg = `Failed to retrieve tables. <br> This is typically db's read rules require auth. <br>Solution: <br>1) change your config for this plugin to require auth<br>2) change your db rules<br> ${err}`
+                            Toast.negative(msg, { duration: 20000, style: { 'text-align': 'left' } })
                         })
                     })
                 }
@@ -253,7 +256,8 @@ const exportObj = {
                 resolve(state.appVars.tables)
             })
         })
-    }
+    },
+    doAuth: functions.doAuth
 }
 
 

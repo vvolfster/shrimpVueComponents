@@ -20,16 +20,17 @@ export default {
         return {
             config: {
                 fbConfig: fbconf.db,
-                authConfig: fbconf.master,
+                // authConfig: fbconf.master,
                 remoteRestAuthLinkFunction: 'https://us-central1-studiiio-9274f.cloudfunctions.net/remoteRestAuthLink',
                 createNewUsers: false, // defaults to true. SignUp if user don't exist
-                authRequired(user) {
-                    return new Promise((resolve, reject) => {
-                        setTimeout(() => {
-                            return user.email !== 'shahan@iii.global' ? reject() : resolve()
-                        }, 1000)
-                    })
-                },
+                authRequired: true,
+                // authRequired(user) {
+                //     return new Promise((resolve, reject) => {
+                //         setTimeout(() => {
+                //             return user.email !== 'shahan@iii.global' ? reject() : resolve()
+                //         }, 1000)
+                //     })
+                // },
                 tableConfig: {
                     pageSize: 25,
                     canAdd: true,

@@ -152,10 +152,13 @@ export default {
         pressButton(name) {
             const self = this;
             const buttons = this.buttons;
-            const fn = buttons[name];
+            const btn = buttons[name];
+            const fn = toString.call(btn) === '[object Object]' ? btn.handler : btn;
+            const bypassForm = btn.bypassForm || btn.bypass;
+
             const form = this.$refs.form;
             const formVal = form ? form.getValue() : null;
-            const formIsValid = form ? form.isValid() : true;
+            const formIsValid = form && !bypassForm ? form.isValid() : true;
             if(typeof fn === 'function'){
                 if(formIsValid){
                     self.busy = true;

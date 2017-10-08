@@ -157,7 +157,7 @@ const functions = {
 
 export default {
     components: { imageStorage, tabView, jsonView, adder, tableView, modal, collapsible },
-    props: ["page", "tableConfig", "navFn"],
+    props: ["page", "tableConfig", "navFn", "hasStorageBucket"],
     computed: {
         actions() {
             return this.tableConfig && this.tableConfig.actions ? this.tableConfig.actions : {}
@@ -172,7 +172,7 @@ export default {
         columns() {
             const self = this;
             const tableConfig = self.tableConfig;
-            const storageKey = tableConfig ? tableConfig.storageKey : false;
+            const storageKey = tableConfig && this.hasStorageBucket ? tableConfig.storageKey : false;
             const columnOrder = tableConfig ? tableConfig.columnOrder : false;
 
             const cols = functions.getColumns(self.pageData, storageKey);
@@ -185,7 +185,7 @@ export default {
             const self = this;
             const hasActions = (self.actions && Object.keys(self.actions).length > 0);
             const hasSlot = self.$slots && self.$slots.length > 0;
-            const hasStorage = self.tableConfig && typeof self.tableConfig.storageKey === 'string' && self.tableConfig.storageKey !== ""
+            const hasStorage = self.hasStorageBucket && self.tableConfig && typeof self.tableConfig.storageKey === 'string' && self.tableConfig.storageKey !== ""
             return hasActions || hasSlot || hasStorage || false;
         },
         hasStorage() {
@@ -364,7 +364,7 @@ export default {
         openDetailView(id, value, fbRef) {
             const self = this;
             const name = this.page.name;
-            const storageKey = lodash.get(this.tableConfig, "storageKey");
+            const storageKey = this.hasStorageBucket ? lodash.get(this.tableConfig, "storageKey") : null;
             const magicModal = lodash.get(self.$refs, "magicModal");
             const slot = lodash.get(self.$refs, "slotContainer.firstChild.firstChild"); // we added a child from index.vue
             const customSlotVue = lodash.get(slot, "__vue__");
