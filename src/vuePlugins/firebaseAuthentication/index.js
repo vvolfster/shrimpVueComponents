@@ -139,7 +139,8 @@ const functions = {
         }
 
         function showComponent() {
-            el.classList.remove('hidden');
+            if(el && el.classList)
+                el.classList.remove('hidden');
             findReplacementNode(true);
         }
 
