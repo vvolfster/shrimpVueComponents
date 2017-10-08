@@ -147,7 +147,7 @@ const DEFAULT = {
         // Leave the lines as is for the providers you want to offer your users.
         google: {
             provider: Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            scopes: ['https://www.googleapis.com/auth/plus.login'],
+            // scopes: ['https://www.googleapis.com/auth/plus.login'],
             customParameters: {
                 // Forces account selection even when one account
                 // is available.
@@ -313,11 +313,12 @@ function builder(conf, id) {
                         if (authNeeded) {
                             if (signInProviders.indexOf('email') !== -1) {
                                 loginFlow.showEmailAndPasswordDialog(fbApp, fbAppAuth, opts);
-                                topLevelNode.parentNode.removeChild(topLevelNode);
+                                if(topLevelNode.parentNode)
+                                    topLevelNode.parentNode.removeChild(topLevelNode);
                             }
                             // else case, too bad. You can't kill this since authIsNeeded :)
                         }
-                        else {
+                        else if(topLevelNode.parentNode){
                             topLevelNode.parentNode.removeChild(topLevelNode);
                         }
                     }

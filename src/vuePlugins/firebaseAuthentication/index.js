@@ -11,15 +11,7 @@ function getApp(id) { return lodash.find(Firebase.apps, v => v.options.projectId
 const subMgr = new GenericSubscriptionWrapper({ listen: "addEventListener", unlisten: "removeEventListener" });
 const providerMap = {
     // Leave the lines as is for the providers you want to offer your users.
-    google: {
-        provider: Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        scopes: ['https://www.googleapis.com/auth/plus.login'],
-        customParameters: {
-            // Forces account selection even when one account
-            // is available.
-            prompt: 'select_account'
-        }
-    },
+    google: Firebase.auth.GoogleAuthProvider.PROVIDER_ID,
     facebook: Firebase.auth.FacebookAuthProvider.PROVIDER_ID,
     twitter: Firebase.auth.TwitterAuthProvider.PROVIDER_ID,
     github: Firebase.auth.GithubAuthProvider.PROVIDER_ID,
