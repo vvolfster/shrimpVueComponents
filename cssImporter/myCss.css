@@ -34,3 +34,36 @@
 
 .relative { position: relative }
 .absolute { position: absolute }
+
+ body {
+    font-family: 'Roboto', '-apple-system', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smoothing: antialiased;
+    height: 100%;
+    width: 100%;
+  }
+
+  .row {
+    display: flex;
+    flex-flow: row;
+  }
+
+  .column {
+      display: flex;
+      flex-flow: column;
+  }
+
+  .items-center { align-items: center;  }
+  .items-start { align-items: flex-start; }
+  .items-end { align-items: flex-end; }
+  .items-between { align-items: space-between; }
+  .items-around { align-items: space-around; }
+  
+  .justify-start{ justify-content: flex-start; }
+  .justify-end { justify-content: flex-end; }
+  .justify-center { justify-content: center; }
+  .justify-between { justify-content: space-between; }
+  .justify-around { justify-content: space-around; }

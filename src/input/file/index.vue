@@ -178,7 +178,8 @@ export default {
 
 <style scoped>
 .line {
-    border: solid 1px;
+    border: solid 1px black;
+    
 }
 
 .check {

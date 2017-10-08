@@ -96,7 +96,7 @@ const functions = {
             }).catch(reject);
         })
     },
-    handleChangeOnComponent(user) {
+    handleChangeOnComponent(user, forceRemoveLinkedNode) {
         // console.log(`handleAuthChanged`, this, this.$el, user);
         const self = this;
         self.authUser = user;
@@ -109,9 +109,15 @@ const functions = {
         const html = functions.get(self, ["authHtml", "authHTML"]) || functions.get(state, ["opts.authRequiredHtml", "opts.authRequiredHTML"]) || state.defaults.authRequiredHtml;
         const requiresAuth = lodash.get(self, "requiresAuth") || lodash.get(self, "authRequired") || false;
 
-        function findReplacementNode() {
-            const siblings = el.parentNode.childNodes;
-            const linkedNode = lodash.find(siblings, s => s.linkedVueComponent === self);
+        function findReplacementNode(remove) {
+            const linkedNode = self.authReqFailedNode;
+            if (remove) {
+                if (linkedNode) {
+                    linkedNode.parentNode.removeChild(linkedNode);
+                    self.authReqFailedNode = null;
+                }
+                return null;
+            }
             return linkedNode;
         }
 
@@ -134,6 +140,7 @@ const functions = {
                 }
 
                 el.parentNode.appendChild(frag);
+                self.authReqFailedNode = newNode;
             }
 
             el.classList.add('hidden');
@@ -141,13 +148,13 @@ const functions = {
 
         function showComponent() {
             el.classList.remove('hidden');
-            const linkedNode = findReplacementNode();
-            if (linkedNode) {
-                // console.log(`removing node`, linkedNode)
-                el.parentNode.removeChild(linkedNode);
-            }
+            findReplacementNode(true);
         }
 
+        if (forceRemoveLinkedNode) {
+            showComponent();
+            return;
+        }
 
         if (!user) {
             if (requiresAuth)
@@ -247,7 +254,7 @@ const functions = {
 
 const exportFunctions = {
     install(VuePtr, opts) {
-        if(!opts || !lodash.keys(opts).length)
+        if (!opts || !lodash.keys(opts).length)
             return false;
 
         const err = functions.validateConfigObject(opts);
@@ -258,7 +265,7 @@ const exportFunctions = {
             return false;
         }
 
-        if (VuePtr.fbAuthenticationInstalled){
+        if (VuePtr.fbAuthenticationInstalled) {
             console.warn(`tried to install firebaseAuthention when it is already installed`);
             return false
         }
@@ -286,7 +293,11 @@ const exportFunctions = {
 
         // now add mixin
         VuePtr.mixin({
-            beforeDestroy() { subMgr.unsubscribe({ id: this }); },
+            beforeDestroy() {
+                const self = this;
+                subMgr.unsubscribe({ id: self });
+                functions.handleChangeOnComponent.apply(self, [state.currentUser, true]);
+            },
             mounted() { // we are using the element itself as its id. This makes us not \have to keep track of this thing.
                 const self = this;
                 functions.handleChangeOnComponent.apply(self, [state.currentUser]);
