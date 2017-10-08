@@ -35,7 +35,6 @@
                     :step="step"
                     :list="`rangeList_${generatedId}`"
                     :class="error ? 'line__input--error' : ''" :style="ui.style" @input="updateValue"
-                    v-resize="updateSize"
                 >
             <datalist ref="list">
                 <option v-for="(v,k) in optionsList" :key="k">
@@ -53,7 +52,6 @@
 
 <script>
 import lodash from 'lodash'
-// import vueResize from 'vue-resize';
 import animator from '../../misc/animator'
 import idGen from './idGen'
 import '../../../cssImporter'
@@ -98,7 +96,6 @@ export default {
         const listId = `rangeList_${this.generatedId}`;
 
         this.$refs.input.id = inputId;
-        this.updateSize();
         this.$refs.list.id = listId;
     },
     methods: {

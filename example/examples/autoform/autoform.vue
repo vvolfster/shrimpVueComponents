@@ -66,6 +66,18 @@ export default {
                     type: "combo",
                     options: ["Male", "Female", "Other"]
                 },
+                hobbies: {
+                    type: Array,
+                    options: {
+                        choices: chance.n(chance.profession, 20)
+                    },
+                    validator(v) {
+                        if(v.indexOf("working") !== -1)
+                            return "WORKING ISNT A HOBBY U FOOL"
+                        return true;
+                    },
+                    model: ["video games"]
+                },
                 age: {
                     type: Range,
                     validateFn(v) {

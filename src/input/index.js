@@ -11,6 +11,7 @@ import textParagraph from './textParagraph'
 import textPassword from './textPassword'
 import range from './range'
 import json from './json'
+import options from './options'
 
 export default {
     autoform,
@@ -25,5 +26,6 @@ export default {
     textParagraph,
     textPassword,
     range,
-    json
+    json,
+    options
 }

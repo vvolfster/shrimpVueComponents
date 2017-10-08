@@ -63,6 +63,7 @@ flex-flow: row;
 .items-end { align-items: flex-end; }
 .items-between { align-items: space-between; }
 .items-around { align-items: space-around; }
+.items-even { align-items: space-evenly; }
 .items-stretch { align-items: stretch; }
 
 .justify-start{ justify-content: flex-start; }
@@ -71,6 +72,7 @@ flex-flow: row;
 .justify-between { justify-content: space-between; }
 .justify-around { justify-content: space-around; }
 .justify-stretch { justify-content: stretch; }
+.justify-even { justify-content: space-evenly; }
 
 .nowrap {
     flex-wrap: nowrap;

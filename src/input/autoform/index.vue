@@ -6,7 +6,7 @@
             <div v-for="(field, name) in fields" :key="name" style="position:relative;">
                 <div class="autoform--input">
                     <component :is="getComponent(field.type || field)" :validateFn="field && typeof field.validateFn === 'function' ? field.validateFn : 
-                                                                                           typeof field.validator === 'function' ? field.validator : null" :value="getFieldValue(name)" :placeholder="getFieldName(name)" @value="setValue(name, $event)" :options="field && field.options ? field.options : null" :ref="`formField_${name}`" />
+                                                                                                   typeof field.validator === 'function' ? field.validator : null" :value="getFieldValue(name)" :placeholder="getFieldName(name)" @value="setValue(name, $event)" :options="field && field.options ? field.options : null" :ref="`formField_${name}`" />
                     <div class='requireOverlay' v-if="fieldIsMissing(name, field)">
                         <i class='fa fa-asterisk'></i>
                     </div>
@@ -30,6 +30,7 @@ import textLineAutoComplete from '../textLineAutoComplete'
 import textParagraph from '../textParagraph'
 import textPassword from '../textPassword'
 import range from '../range'
+import options from '../options'
 import '../../../cssImporter'
 
 function getDataModel(f) {
@@ -60,7 +61,9 @@ export default {
             d_model: null,
         }
     },
-    components: { boolean, combobox, range, date, file, json, number, textLine, textLineAutoComplete, textParagraph, textPassword, markdown },
+    components: {
+        boolean, options, combobox, range, date, file, json, number, textLine, textLineAutoComplete, textParagraph, textPassword, markdown
+    },
     methods: {
         getFieldName(name) {
             const field = this.fields[name]
@@ -94,6 +97,8 @@ export default {
                 case "markdown": return "markdown"
                 case "range": return "range"
                 case "slider": return "range"
+                case "options": return "options"
+                case "choices": return "options"
 
                 case "text": return "textLine";
                 case "textLine": return "textLine";
@@ -104,6 +109,7 @@ export default {
                 case "json": return "json";
 
                 case Boolean: return "boolean";
+                case Array: return "options";
                 case String: return "textLine";
                 case Number: return "number";
                 case Date: return "date";
