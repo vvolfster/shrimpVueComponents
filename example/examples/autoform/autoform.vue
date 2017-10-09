@@ -133,6 +133,9 @@ export default {
                         if(v.indexOf('lincoln') !== -1)
                             return 'Cannot contain the lincoln'
                         return true;
+                    },
+                    options: {
+                        style: "max-height: 300px;"
                     }
                 },
                 "embedded.field": {

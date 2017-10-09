@@ -1,12 +1,7 @@
 <template>
     <div class="markdown">
-        <div :style="ui.style" class="bordered">
-            <textarea class="paragraph__input"
-                ref="input"
-                :placeholder="placeholder"
-                rows="1"
-                v-show="false"
-            />
+        <div class="bordered column markdown">
+            <textarea class="paragraph__input" ref="input" :placeholder="placeholder" rows="1" v-show="false" />
         </div>
         <div v-if="error !== null" class="paragraph--error">
             {{ error }}
@@ -24,6 +19,31 @@ import './simpleMdeStyleOverride.css'
 
 
 const converter = new Showdown.Converter();
+
+function updateStyle() {
+    const style = this.ui ? this.ui.style : null;
+    const one = lodash.first(this.$el.querySelectorAll(`.CodeMirror`));
+    const two = lodash.first(this.$el.querySelectorAll(`.CodeMirror-scroll`));
+
+    if(!style)
+        return;
+
+    if (typeof style === 'string'){
+        if(one)
+            one.style = style;
+        if(two)
+            two.style = style;
+    }
+
+    if (typeof style === 'object') {
+        lodash.each(style, (v, k) => {
+            if(one)
+                lodash.set(one.style, k, v);
+            if(two)
+                lodash.set(two.style, k, v);
+        })
+    }
+}
 
 export default {
     props: {
@@ -50,9 +70,10 @@ export default {
         this.editor = new SimpleMDE({ element: self.$refs.input })
         this.editor.codemirror.on('change', this.updateValue);
         this.editor.value(this.value);
+        updateStyle.apply(this);
     },
     beforeDestroy() {
-        if(this.editor)
+        if (this.editor)
             this.editor.codemirror.off('change', this.updateValue);
     },
     data() {
@@ -75,10 +96,10 @@ export default {
                 color: "inherit",
                 background: "inherit",
             }
-            if(typeof style === 'string')
+            if (typeof style === 'string')
                 return { style }
 
-            if(typeof style === 'object')
+            if (typeof style === 'object')
                 return { style: Object.assign(defStyleObj, style) }
 
             return { style: defStyleObj };
@@ -91,7 +112,7 @@ export default {
         handleToolbarAction(action) {
             // console.log(action);
             const input = this.$refs.input;
-            if(!input)
+            if (!input)
                 return;
 
             let value = input.value;
@@ -109,7 +130,7 @@ export default {
             // console.log(selection, input.value);
             function insert(chr, index) {
                 let idx = typeof index !== 'number' ? selection.start : index;
-                if(idx < 0)
+                if (idx < 0)
                     idx = 0;
 
                 input.value = value.slice(0, idx) + chr + value.slice(idx);
@@ -118,7 +139,7 @@ export default {
 
             function remove(index, len) {
                 let idx = typeof index !== 'number' ? selection.start : index;
-                if(idx < 0)
+                if (idx < 0)
                     idx = 0;
 
                 // console.log(idx, value.slice(0, idx), value.slice(idx + len));
@@ -146,7 +167,7 @@ export default {
                     return matchStart() && matchEnd();
                 }
 
-                if(alreadyWrapped()){
+                if (alreadyWrapped()) {
                     remove(selection.end, chr.length);
                     remove(selection.start - chr.length, chr.length);
                 }
@@ -156,7 +177,7 @@ export default {
                 }
             }
 
-            switch(action) {
+            switch (action) {
                 case 'preview':
                     this.preview = !this.preview;
                     break;
@@ -195,7 +216,7 @@ export default {
                 default: break;
             }
 
-            if(document.activeElement !== input) {
+            if (document.activeElement !== input) {
                 input.focus();
 
                 input.selectionStart = this.selection.start + offset;
@@ -205,20 +226,20 @@ export default {
         },
         updateValue() {
             const v = this.editor.value();
-            if(typeof v !== 'string')
+            if (typeof v !== 'string')
                 return;
 
             const lines = 1 + (v.match(/\n/g) || []).length;
             this.$refs.input.rows = lines;
 
-            if(typeof this.validateFn === 'function') {
+            if (typeof this.validateFn === 'function') {
                 const err = this.validateFn(v);
                 this.error = typeof err === 'string' ? err : null;
             }
             else
                 this.error = null;
 
-            if(this.error)
+            if (this.error)
                 return;
 
             this.$emit('input', this.d_value);
@@ -231,19 +252,28 @@ export default {
     },
     watch: {
         value() {
-            if(!this.editor || this.value === this.editor.value())
+            if (!this.editor || this.value === this.editor.value())
                 return;
 
             this.d_value = this.value;
             this.editor.value(this.value);
+        },
+        ui: {
+            deep: true,
+            handler() {
+                updateStyle.apply(this);
+            }
         }
     }
 }
 </script>
 
 <style scoped>
-.markdown {}
-.bordered { 
+.markdown {
+    overflow: hidden;
+}
+
+.bordered {
     border: solid 1px black;
 }
 
@@ -253,6 +283,7 @@ export default {
     color: red;
     font-size: 12px;
 }
+
 .paragraph__input {
     width: 100%;
     resize: none;
@@ -263,7 +294,16 @@ export default {
     min-height: inherit;
     max-height: inherit;
 }
-.paragraph__input:hover { border: none; }
-.paragraph__input:focus { border: none; }
-.paragraph__input:focus:hover { border:none; }
+
+.paragraph__input:hover {
+    border: none;
+}
+
+.paragraph__input:focus {
+    border: none;
+}
+
+.paragraph__input:focus:hover {
+    border: none;
+}
 </style>
