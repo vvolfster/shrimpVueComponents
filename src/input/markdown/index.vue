@@ -1,6 +1,6 @@
 <template>
     <div class="markdown">
-        <div class="bordered column markdown">
+        <div class="column markdown">
             <textarea class="paragraph__input" ref="input" :placeholder="placeholder" rows="1" v-show="false" />
         </div>
         <div v-if="error !== null" class="paragraph--error">
@@ -272,11 +272,6 @@ export default {
 .markdown {
     overflow: hidden;
 }
-
-.bordered {
-    border: solid 1px black;
-}
-
 
 
 .paragraph--error {

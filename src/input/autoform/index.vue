@@ -5,7 +5,7 @@
         <div class="autoComponents" v-if="fields">
             <div v-for="(field, name) in fields" :key="name" style="position:relative;">
                 <div class="autoform--input">
-                    <component :is="getComponent(field.type || field)" :validateFn="field && typeof field.validateFn === 'function' ? field.validateFn : 
+                    <component :is="field ? getComponent(field.type || field) : null" :validateFn="field && typeof field.validateFn === 'function' ? field.validateFn : 
                                                                                                    typeof field.validator === 'function' ? field.validator : null" :value="getFieldValue(name)" :placeholder="getFieldName(name)" @value="setValue(name, $event)" :options="field && field.options ? field.options : null" :ref="`formField_${name}`" />
                     <div class='requireOverlay' v-if="fieldIsMissing(name, field)">
                         <i class='fa fa-asterisk'></i>
