@@ -290,6 +290,10 @@ const exportFunctions = {
             })
         }
 
+        subMgr.subscribe(document, authChangedEventName, ({ detail }) => {
+            state.currentUser = detail;
+        }, VuePtr)
+
         // now add mixin
         VuePtr.mixin({
             beforeDestroy() {
