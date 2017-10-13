@@ -40,6 +40,9 @@ import combobox from 'shrimp-vue-components/src/input/combobox'
 - **placeholder (String)** - The string to show as the label.
 - **options (Object | Array)** - Optional options object. If it is an array, it will be treated as the choices of the combobox.
 	- style (string | object) - The style of the object.
+    - styleList (string | object) - The style to apply to the list.
+    - styleListItem (string | object) - The style to apply to the list item.
+    - position (string) - top or bottom. The direction to show the list.
 	- options (string[]) - The choices of the combobox
 
 ### Events

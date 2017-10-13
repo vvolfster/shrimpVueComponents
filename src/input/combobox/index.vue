@@ -12,8 +12,14 @@
             {{ error }}
         </div>
         <popover ref="popover" :position="position">
-            <div>
-                <div v-for="option in cOptions" :key="option" :value="option" @click="updateValue(option)" class="option" :class="d_value === option ? 'option--selected' : ''">
+            <div :style="ui.styleList">
+                <div v-for="option in cOptions"
+                    :key="option"
+                    :value="option"
+                    class="option" :class="d_value === option ? 'option--selected' : ''"
+                    :style="ui.styleListItem"
+                    @click="updateValue(option)"
+                >
                     {{ option }}
                 </div>
             </div>
@@ -79,8 +85,13 @@ export default {
             else if(typeof style === 'object')
                 styleObj = Object.assign(styleObj, style)
 
+            const styleList = options && options.styleList ? options.styleList : '';
+            const styleListItem = options && options.styleListItem ? options.styleListItem : '';
+
             return {
                 style: styleObj,
+                styleList,
+                styleListItem,
                 icon
             };
         }
