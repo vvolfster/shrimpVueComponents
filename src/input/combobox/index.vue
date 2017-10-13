@@ -11,7 +11,7 @@
         <div v-if="error !== null" class="error">
             {{ error }}
         </div>
-        <popover ref="popover" position="bottom">
+        <popover ref="popover" :position="position">
             <div>
                 <div v-for="option in cOptions" :key="option" :value="option" @click="updateValue(option)" class="option" :class="d_value === option ? 'option--selected' : ''">
                     {{ option }}
@@ -64,6 +64,10 @@ export default {
                 return opts || [];
             }
             return [];
+        },
+        position() {
+            const options = this.options;
+            return !options || typeof options.position !== 'string' ? 'bottom' : (options.position || 'bottom')
         },
         ui() {
             const options = this.options;
