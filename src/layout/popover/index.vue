@@ -11,7 +11,7 @@ import lodash from 'lodash'
 import shared from '../shared'
 import './popover.css'
 
-function create({ slot, slotParent, root, dismissFn, position }) {
+function create({ slot, slotParent, root, dismissFn, position, isStyled }) {
     const slotEl = slot.$el || slot;
     // console.log(`animate ${animation}`)
 
@@ -30,11 +30,12 @@ function create({ slot, slotParent, root, dismissFn, position }) {
         const frag = document.createDocumentFragment();
         const newNode = document.createElement("div");
         newNode.id = `popover_${shared.popovers.newKey}`;
-        newNode.className = "popoverObject"
+        newNode.className = isStyled ? "popoverContainer__popoverObjectWrapper__popoverObject" : "popoverContainer__popoverObjectWrapper__popoverObject popoverContainer__popoverObjectWrapper__popoverObject--styled"
+
 
         // newNode.style[`pointer-events`] = `none`;
         const relativePosNode = document.createElement('div');
-        relativePosNode.className = "popoverObjectWrapper"
+        relativePosNode.className = "popoverContainer__popoverObjectWrapper"
 
         // put it in the DOM. don't forget to add the slot element
         newNode.appendChild(slotEl);
@@ -112,7 +113,8 @@ function create({ slot, slotParent, root, dismissFn, position }) {
 
 export default {
     props: {
-        position: String
+        position: String,
+        noStyle: { type: Boolean, default: true }
     },
     data() {
         return {
@@ -129,6 +131,7 @@ export default {
             const slotParent = self.$refs.slotContainer;
             const slot = slotParent.childNodes.length ? slotParent.childNodes[0] : null;
             const position = self.position;
+            const isStyled = !self.noStyle
 
             if(!slot)
                 return console.error('no slot provided to the modal to open')
@@ -147,7 +150,8 @@ export default {
                 slot,
                 slotParent,
                 dismissFn,
-                position
+                position,
+                isStyled
             })
 
             this.$emit('opened');

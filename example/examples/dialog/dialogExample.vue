@@ -40,8 +40,17 @@ export default {
     },
     data() {
         return {
-            animations: ['up', 'down', 'left', 'right', 'none'],
-            positions: ['up', 'down', 'left', 'right', 'center'],
+            animations: {
+                options: ['up', 'down', 'left', 'right', 'none'],
+                position: 'top',
+                styleList: 'background: orange; opacity: 0.5;'
+            },
+            positions: {
+                options: ['up', 'down', 'left', 'right', 'center'],
+                position: "top",
+                styleList: "background: black;",
+                styleListItem: "background: black; color: white;"
+            },
             chosen: {
                 animation: "up",
                 position: 'center'

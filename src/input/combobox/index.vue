@@ -11,12 +11,13 @@
         <div v-if="error !== null" class="error">
             {{ error }}
         </div>
-        <popover ref="popover" :position="position">
-            <div :style="ui.styleList">
+        <popover ref="popover" :position="position" :noStyle="false">
+            <div class="popoverz" :style="ui.styleList">
                 <div v-for="option in cOptions"
                     :key="option"
                     :value="option"
                     class="option" :class="d_value === option ? 'option--selected' : ''"
+                    
                     :style="ui.styleListItem"
                     @click="updateValue(option)"
                 >
@@ -139,7 +140,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss">
     .combobox {
         position:relative;
         width: inherit;
@@ -221,6 +222,20 @@ export default {
         color: red;
         font-size: 12px;
     }
+
+    .popoverz {
+        padding: 5px;
+        background: white;
+    }
+
+    // .popoverContainer{
+    //     &__popoverObjectWrapper{
+    //         &__popoverObject{
+    //             background: white;
+    //             padding: 0;
+    //         }
+    //     }
+    // }
 
 
 </style>
