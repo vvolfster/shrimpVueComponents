@@ -1,6 +1,7 @@
 <template>
     <div :style="ui.style">
         <fileDropper v-if="!limit || limit > d_value.length"
+            ref="fileDropper"
             class="fileDropper line"
             @files='updateValue'
             extensions="*/*"
@@ -42,7 +43,16 @@ function getOptions(options) {
     else if(toString.call(filter) === '[object Array]')
         filters = filter;
 
-    return { limit, filters }
+    const duplicates = options.duplicates || false;
+
+    return { limit, filters, duplicates }
+}
+
+function fileInArray(filesArr, file){
+    const keys = lodash.keys(file);
+    return lodash.find(filesArr, (f) => {
+        return lodash.every(keys, key => f[key] === file[key])
+    })
 }
 
 export default {
@@ -76,7 +86,10 @@ export default {
                         }
                     }
 
-                    v.push(file);
+                    if(options.duplicates || !fileInArray(self.d_value, file))
+                        v.push(file);
+                    else
+                        console.warn('Tried to add duplicate file')
                 })
 
                 if(typeof self.validateFn === 'function') {
@@ -110,6 +123,10 @@ export default {
                 // console.log(self.d_value)
                 self.$emit('input', self.d_value);
                 self.$emit('value', self.d_value);
+
+                const fd = self.$refs.fileDropper;
+                if(fd)
+                    fd.clear();
             }
 
             if(f instanceof FileList) {

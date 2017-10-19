@@ -1,11 +1,6 @@
 <template>
     <div style="position:relative;">
-        <form method="post" action="" enctype="multipart/form-data" 
-            v-show="isSupported" 
-            ref="form"
-            :class="!hover ? 'box box--supported' : 'box box--supported box--hover'"
-            @submit="handleSubmit"
-        >
+        <div v-show="isSupported" ref="form" :class="!hover ? 'box box--supported' : 'box box--supported box--hover'">
             <div class="box__input">
                 <input ref="input" class="box__file" type="file" name="files[]" multiple :accept="extensions"/>
                 <label class="box__fileLabel" ref='label'>
@@ -15,10 +10,7 @@
                     </div>
                 </label>
             </div>
-            <div class="box__uploading">Uploading&hellip;</div>
-            <div class="box__success">Done!</div>
-            <div class="box__error">Error! <span></span>.</div>
-        </form>
+        </div>
 
         <div class="box box--unsupported" v-show="!isSupported">
             Your browser does not have the features needed to support drag and drop files.
@@ -140,9 +132,11 @@ export default {
                 self.$emit('files', files);
             }
         },
-        doNothing() {
-            // this is called when we are already uploading something.
-        }
+        clear() {
+            // console.log(this.$refs.input.value);
+            this.$refs.input.value = '';
+        },
+        doNothing() { /* this is called when we are already uploading something. */ }
     }
 }
 </script>
