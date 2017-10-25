@@ -207,7 +207,7 @@ function builder(conf, id) {
 
     const loginFlow = {
         start() {
-            // console.log(`start ${authChgEvent}`, state.isVisible)
+            console.log(`start ${authChgEvent}`, state.isVisible)
             if(state.isVisible){
                 console.warn(`start called when ui was already open`);
                 return false;
@@ -646,6 +646,8 @@ function builder(conf, id) {
                 authFunctions.unsubAuthFn();
                 authFunctions.unsubAuthFn = null;
             }
+
+            dialogs.dismiss();
 
             state.isVisible = false;
             return helpers.destroy(id, fbApp, fbAppAuth).then(resolve).catch(reject);

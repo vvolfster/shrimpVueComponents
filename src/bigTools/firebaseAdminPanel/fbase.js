@@ -48,6 +48,19 @@ const functions = {
             return functions.shallowGet(databaseURL).then(data => resolve(lodash.keys(data))).catch(reject);
         })
     },
+    updateTableNames() {
+        // console.log(`resolving`, state.app.auth().currentUser);
+        return new Promise((resolve, reject) => {
+            const fbConfig = state.fbConfig;
+            if (!fbConfig)
+                return reject(`no fbConfig to updateTable names for`);
+
+            return functions.getTableNames(fbConfig.databaseURL).then((tables) => {
+                state.appVars.tables = tables
+                resolve(state.appVars.tables)
+            })
+        })
+    },
     validateConfigObject(conf) {
         function isObject(o) {
             return toString.call(o) === '[object Object]'
@@ -128,6 +141,7 @@ const functions = {
                 resolve();
             }
 
+            document.addEventListener(authChgEvent, fn);
             const isVisible = state.loginFlow.isVisible();
             return !isVisible ? state.loginFlow.start() : false;
             // return !state.loginFlow.isVisible() ? state.loginFlow.start() : false;
@@ -199,6 +213,10 @@ const exportObj = {
                 state.app = null;
                 state.fbConfig = null;
                 state.appVars = null;
+                if(state.loginFlow)
+                    state.loginFlow.destroy();
+
+                state.loginFlow = null;
                 resolve();
             }).catch(reject);
         })
@@ -245,19 +263,7 @@ const exportObj = {
             return resolve(storage.ref(path));
         })
     },
-    updateTableNames() {
-        // console.log(`resolving`, state.app.auth().currentUser);
-        return new Promise((resolve, reject) => {
-            const fbConfig = state.fbConfig;
-            if (!fbConfig)
-                return reject(`no fbConfig to updateTable names for`);
-
-            return functions.getTableNames(fbConfig.databaseURL).then((tables) => {
-                state.appVars.tables = tables
-                resolve(state.appVars.tables)
-            })
-        })
-    },
+    updateTableNames: functions.updateTableNames,
     doAuth: functions.doAuth
 }
 

@@ -12,7 +12,7 @@
 import lodash from 'lodash'
 import fbAdminPanel from '@/bigTools/firebaseAdminPanel'
 import person from './person'
-import fbconf from './fbConf'
+import fbconf from './fbconf'
 
 export default {
     components: { fbAdminPanel, person },
@@ -102,6 +102,7 @@ export default {
                         storageKey: "storage"
                     }
                 },
+                signInOptions: ["google"]
             }
         }
     }
