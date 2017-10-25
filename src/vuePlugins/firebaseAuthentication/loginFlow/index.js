@@ -202,14 +202,18 @@ function builder(conf, id) {
             dbApp: null,
             dbAuth: null
         },
-        startedFlow: {
-            resolve: null,
-            reject: null
-        }
+        isVisible: false
     }
 
     const loginFlow = {
         start() {
+            // console.log(`start ${authChgEvent}`, state.isVisible)
+            if(state.isVisible){
+                console.warn(`start called when ui was already open`);
+                return false;
+            }
+
+            state.isVisible = true;
             const signInProviders = lodash.get(opts, "signInOptions") || DEFAULT.signInProviders;
             const federatedIDProviders = lodash.filter(signInProviders, s => s !== 'email');
             if (signInProviders.indexOf('email') !== -1)
@@ -217,6 +221,7 @@ function builder(conf, id) {
             else if (federatedIDProviders.length)
                 return loginFlow.showFirebaseAuth({ fbApp, fbAppAuth, opts });
 
+            state.isVisible = false;
             throw new Error(`firebaseAuthentication/loginUI::No sign in options provided!`);
         },
         showEmailAndPasswordDialog() {
@@ -279,6 +284,9 @@ function builder(conf, id) {
                     if (subMgr.has(`state.dialogs.d1`))
                         subMgr.unsubscribe({ id: `state.dialogs.d1` });
 
+                    if (!authNeeded)
+                        state.isVisible = false;
+
                     // console.log(`here1`)
                     dialogs.d1 = null;
                     dialogs.d1Reject = null;
@@ -323,6 +331,8 @@ function builder(conf, id) {
                         }
                         else if(topLevelNode.parentNode){
                             topLevelNode.parentNode.removeChild(topLevelNode);
+                            dialogs.d2 = null;
+                            state.isVisible = false;
                         }
                     }
                 })
@@ -403,6 +413,7 @@ function builder(conf, id) {
                     Toast.positive(`${id}: Welcome ${helpers.getUserDisplayName(user)}`)
 
                 dialogs.dismiss();
+                state.isVisible = false;
             }
 
             function finishUp(user, authUser) {
@@ -636,11 +647,12 @@ function builder(conf, id) {
                 authFunctions.unsubAuthFn = null;
             }
 
+            state.isVisible = false;
             return helpers.destroy(id, fbApp, fbAppAuth).then(resolve).catch(reject);
         })
     }
     self.isVisible = () => {
-        return dialogs.d1 || dialogs.d2
+        return state.isVisible;
     }
 
     state.currentUser.auth = fbAppAuth.auth().currentUser;

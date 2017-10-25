@@ -128,8 +128,9 @@ const functions = {
                 resolve();
             }
 
-            document.addEventListener(authChgEvent, fn)
-            return !state.loginFlow.isVisible() ? state.loginFlow.start() : false;
+            const isVisible = state.loginFlow.isVisible();
+            return !isVisible ? state.loginFlow.start() : false;
+            // return !state.loginFlow.isVisible() ? state.loginFlow.start() : false;
         })
     }
 }

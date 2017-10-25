@@ -21,7 +21,7 @@ export default {
             config: {
                 fbConfig: fbconf.db,
                 // authConfig: fbconf.master,
-                remoteRestAuthLinkFunction: 'https://us-central1-studiiio-9274f.cloudfunctions.net/remoteRestAuthLink',
+                // remoteRestAuthLinkFunction: 'https://<DOMAIN>.cloudfunctions.net/remoteRestAuthLink',
                 createNewUsers: false, // defaults to true. SignUp if user don't exist
                 authRequired: true,
                 // authRequired(user) {
@@ -101,7 +101,7 @@ export default {
                     data: {
                         storageKey: "storage"
                     }
-                }
+                },
             }
         }
     }
