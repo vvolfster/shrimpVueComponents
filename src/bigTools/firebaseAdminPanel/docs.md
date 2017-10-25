@@ -96,6 +96,7 @@ Optional. This object allows us to configure each individual top level key in fi
 	- **pageSize (number)** - Amount of entries to show per page.
     - **canAdd (boolean)** - Allows the user to add tables. Defaults to true.
     - **canRemove (boolean)** - Allows the user to remove tables. Defaults to true.
+    - **layout (string)** - Use a custom layout. You can pass global css classes here. The tables will not have headers.
 
 	- **{ tableName } (object)** - 
 		- **columnOrder (String[])** - Optional. Allows ordering of the columns in the tableView.
@@ -105,6 +106,9 @@ Optional. This object allows us to configure each individual top level key in fi
 			- value: Object, // do not change directly. Will be updated automatically on firebase data change.
 			- fbRef: Object (this is the firebaseRef of entry. Useful if the component wants access to make changes to the entry)
 			- navFn(tableName, id): Function, allows navigation to other tables. Useful if the component wants the ability to navigate the adminPanel to another table and id.
+            - functions: Object, passes remove & detail functions in this object (so that the delegate may call them).
+             - remove() - available if noDelete was not passed in the config.
+             - detail() - available if actions were passed in the config or if storageKey was passed.
 		- **actions (object)** - Optional. Collection of functions that can be performed on each entry in the table. Each function is passed the following (in this order) when the user calls it:
 			1. id: String
 			2. value: Object

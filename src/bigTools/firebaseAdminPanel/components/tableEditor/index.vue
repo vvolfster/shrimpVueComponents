@@ -33,7 +33,7 @@
                 @switchView="view = $event"
                 @clone="push($event.entry)"
             />
-            <div v-else>
+            <div v-else-if="!layout">
                 <div class='margin-bottom'>
                     <button class="svtbtn margin-right" v-for="(action,name) in actionsTableRoot" :key="name" @click="callTableRootAction(name)">
                         {{ name }}
@@ -58,8 +58,34 @@
                                 </button>
                             </div>
                         </div>
-                        <component :is="delegateComponent" :id="id" :value="entry" :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null" :navFn="navFn" slot="content" />
+                        <component 
+                            :is="delegateComponent" 
+                            :id="id"
+                            :value="entry"
+                            :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"
+                            :navFn="navFn" 
+                            :functions="{
+                                remove: tableConfig.noDelete ? null : () => remove(id),
+                                detail: !hasDetailView ? null : () => openDetailView(id, entry, pageFbRefs[id])
+                            }"
+                            slot="content" 
+                        />
                     </collapsible>
+                </div>
+            </div>
+            <div v-else :class="calculatedLayoutClass">
+                <div v-for="(entry, id, index) in pageData" :key="id">
+                    <component 
+                        :is="delegateComponent" 
+                        :id="id"
+                        :value="entry"
+                        :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"
+                        :navFn="navFn" 
+                        :functions="{
+                            remove: tableConfig.noDelete ? null : () => remove(id),
+                            detail: !hasDetailView ? null : () => openDetailView(id, entry, pageFbRefs[id])
+                        }"
+                    />
                 </div>
             </div>
         </div>
@@ -161,6 +187,16 @@ export default {
     computed: {
         actions() {
             return this.tableConfig && this.tableConfig.actions ? this.tableConfig.actions : {}
+        },
+        layout() {
+            return this.tableConfig ? this.tableConfig.layout : null
+        },
+        calculatedLayoutClass() {
+            const l = this.layout;
+            if(!l || typeof l !== 'string')
+                return "row";
+
+            return l;
         },
         actionsTableRoot() {
             if (!this.tableConfig)
