@@ -3,7 +3,7 @@
 // import lodash from 'lodash'
 import Vue from 'vue'
 import lodash from 'lodash'
-import shared from '../shared'
+import zshared from '../shared'
 import instance from './instance'
 import '../modal/modal.css'
 
@@ -12,8 +12,8 @@ function createContainer(attributes) {
     const containerNode = document.createElement("div");
     const wrapperNode = document.createElement("div");
 
-    const containerId = `dialogContainer_${shared.dialogs.newKey}`
-    const instanceId = `dialogObject_${shared.dialogs.newKey}`
+    const containerId = `dialogContainer_${zshared.dialogs.newKey}`
+    const instanceId = `dialogObject_${zshared.dialogs.newKey}`
 
     containerNode.id = containerId;
     containerNode.className = "modalContainer";
@@ -135,7 +135,7 @@ function create(params) {
         components: { instance }
     })
 
-    shared.dialogs.push(dialog);
+    zshared.dialogs.push(dialog);
 
     if(!params.noDismiss)
         container.addEventListener('click', dialog.dismiss);
@@ -149,7 +149,8 @@ const Dialog = {
      * @function dismissAll dismisses all dialogs.
      */
     dismissAll() {
-        shared.dialogs.dismissAll();
+        if(zshared && zshared.dialogs && zshared.dialogs.dismissAll)
+            zshared.dialogs.dismissAll();
         // also delete remove any dangling diaogs that may be left from last reload
         const remainingDialogs = document.querySelectorAll('*[id^="dialogContainer_"]');
         lodash.each(remainingDialogs, dialog => dialog.parentNode.removeChild(dialog))
