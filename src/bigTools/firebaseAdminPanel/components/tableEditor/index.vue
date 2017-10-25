@@ -73,19 +73,26 @@
                     </collapsible>
                 </div>
             </div>
-            <div v-else :class="calculatedLayoutClass">
-                <div v-for="(entry, id, index) in pageData" :key="id">
-                    <component 
-                        :is="delegateComponent" 
-                        :id="id"
-                        :value="entry"
-                        :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"
-                        :navFn="navFn" 
-                        :functions="{
-                            remove: tableConfig.noDelete ? null : () => remove(id),
-                            detail: !hasDetailView ? null : () => openDetailView(id, entry, pageFbRefs[id])
-                        }"
-                    />
+            <div v-else>
+                <div class='margin-bottom row items-center'>
+                    <button class="svtbtn margin-right" v-for="(action,name) in actionsTableRoot" :key="name" @click="callTableRootAction(name)">
+                        {{ name }}
+                    </button>
+                </div>
+                <div :class="calculatedLayoutClass">
+                    <div v-for="(entry, id, index) in pageData" :key="id">
+                        <component 
+                            :is="delegateComponent" 
+                            :id="id"
+                            :value="entry"
+                            :fbRef="pageFbRefs && pageFbRefs[id] ? pageFbRefs[id] : null"
+                            :navFn="navFn" 
+                            :functions="{
+                                remove: tableConfig.noDelete ? null : () => remove(id),
+                                detail: !hasDetailView ? null : () => openDetailView(id, entry, pageFbRefs[id])
+                            }"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
