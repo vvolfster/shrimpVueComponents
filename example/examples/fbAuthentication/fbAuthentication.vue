@@ -7,7 +7,7 @@
 <script>
 import fbAuthPlugin from '@/vuePlugins/firebaseAuthentication'
 import Vue from 'vue'
-import fbconf from '../fbAdminPanel/fbConf'
+import fbconf from '../fbAdminPanel/fbconf'
 
 Vue.use(fbAuthPlugin, {
     fbConfig: fbconf.db,

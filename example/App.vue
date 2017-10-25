@@ -16,6 +16,7 @@
 <script>
 import toggleButton from "@/button/toggleButton"
 import autoform from './examples/autoform/autoform'
+import autoformWithCustomComponents from './examples/autoformWithCustomComponents/autoformCustom'
 import fbAdminPanel from "./examples/fbAdminPanel/adminPanel"
 import fbAuthentication from "./examples/fbAuthentication/fbAuthentication"
 import toast from './examples/toast/toast'
@@ -32,7 +33,7 @@ export default {
         return {
             myComponent: null,
             userIsActive: true,
-            examples: ["fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "jsonEditor", "dialogExample", "fileExample", "adder"].sort()
+            examples: ["fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "autoformWithCustomComponents", "jsonEditor", "dialogExample", "fileExample", "adder"].sort()
         }
     },
     components: {
@@ -44,6 +45,7 @@ export default {
         modal,
         dialogExample,
         autoform,
+        autoformWithCustomComponents,
         fileExample,
         adder,
         jsonEditor

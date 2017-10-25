@@ -2,6 +2,8 @@
 
 Automatically generates forms. Used in Dialog as well as firebaseAdmin's adder component.
 
+**Can now support custom components!!**
+
 #### Usage
 ```html
 <template>
@@ -102,3 +104,64 @@ export default {
 	}
 }
 ```
+
+### Using your own vue components with autoform
+
+There are currently 2 ways to use custom components with autoform. Here are examples illustrating both:
+#### 1. Register it
+```javascript
+import svt from shrimp-vue-components
+import myCmp from './myCmp '
+
+// register the custom component. 
+// After this line, the component will be available every time you create an autoform or a dialog with a form. 
+// Please note, that names will be saved in lowercase!
+svt.input.customComponents.register("myCmp ", myCmp );
+```
+
+#### 2. Include it in the fields prop!
+
+```html
+<autoform :fields="fields"/>
+```
+
+``` javascript
+import svt from shrimp-vue-components
+import myCmp from './myCmp '
+
+const fields = { brandNewCmp: myCmp }
+// or 
+const fields = { 
+	brandNewCmp: {
+		type: myCmp
+	} 
+}
+
+export default {
+	data() {
+		return { fields }
+	}
+}
+```
+
+##### All previous API is supported for custom components so you can do things like:
+```javascript
+
+const fields = {
+	brandNewCmp = {
+		type: myCmp,
+		model: "hello world"
+	}
+}
+```
+
+If your custom component is not valid, you will get warnings or error in the console. The component should include the following:
+
+ - props
+	 - value (string, any)
+	 - placeholder (string)
+ - methods
+	 - updateValue(val) - updates the value of the component with val
+	 - isInError() - returns whether the component's value is considered to be in "error"
+	 - isEmpty() - returns whether the component's value is considered to be "empty"
+	 - getValue() - returns the value of the component

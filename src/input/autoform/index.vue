@@ -6,7 +6,7 @@
             <div v-for="(field, name) in fields" :key="name" style="position:relative;">
                 <div class="autoform--input">
                     <component 
-                        :is="field ? getComponent(field.type || field) : null" 
+                        :is="field ? getComponent(field.type || field, getFieldName(name)) : null" 
                         :options="field && field.options ? field.options : null"
                         :ref="`formField_${name}`" 
                         :value="getFieldValue(name)" 
@@ -38,6 +38,7 @@ import textParagraph from '../textParagraph'
 import textPassword from '../textPassword'
 import range from '../range'
 import options from '../options'
+import customComponents from '../customComponents'
 import '../../../cssImporter'
 
 function getDataModel(f) {
@@ -88,8 +89,12 @@ export default {
         getFieldValue(name) {
             return lodash.get(this.d_model, name, '');
         },
-        getComponent(fieldType) {
+        getComponent(fieldType, fieldName) {
             const f = typeof fieldType === 'string' ? fieldType.toLowerCase() : fieldType;
+            const custom = customComponents.get(f);
+            if(custom)
+                return custom;
+
             switch (f) {
                 case "boolean": return "boolean";
                 case "combobox": return "combobox";
@@ -124,7 +129,13 @@ export default {
                 case JSON: return 'json';
                 case Range: return "range"
 
-                default: return "textLine";
+                default:
+                    if(toString.call(fieldType) === '[object Object]'){
+                        const validatedObj = customComponents.validate(fieldType, `autoform.customComponent::${fieldName} `, true);
+                        if(validatedObj)
+                            return validatedObj;
+                    }
+                    return "textLine";
             }
         },
         setValue(name, value) {

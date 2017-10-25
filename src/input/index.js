@@ -12,6 +12,7 @@ import textPassword from './textPassword'
 import range from './range'
 import json from './json'
 import options from './options'
+import customComponents from './customComponents'
 
 export default {
     autoform,
@@ -27,5 +28,6 @@ export default {
     textPassword,
     range,
     json,
-    options
+    options,
+    customComponents
 }
