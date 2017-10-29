@@ -2,6 +2,10 @@
 
 > Imagishrimp's Vue Component Emporium
 
+```
+npm i -S shrimp-vue-components
+```
+
 ## Table of Contents
 1. bigTools
 	1. [firebaseAdminPanel](./src/bigTools/firebaseAdminPanel/docs.md)
