@@ -5,10 +5,7 @@ This is a powerful tool that allows for great control over a firebase database a
 ``` html
 <template>
 	<div>
-		<firebaseAdminPanel
-			:fbConfig="fbConfig"
-			:tableConfig="tableConfig"
-		/>
+		<firebaseAdminPanel :config="config"/>
 	</div>
 </template>
 ```
@@ -24,7 +21,7 @@ export default {
 	},
 	data() {
 		return {
-			fbConfig, tableConfig
+      config: { fbConfig, tableConfig }
 		}
 	}
 }
@@ -42,45 +39,45 @@ This object has quite a lot of properties and features. Go to your firebase cons
 
 You need all those keys to be present int he fbConfig object. The storageBucket is optional & only needed if you want to upload to storage using this tool.
 
-On top of these properties, the fbConfig object has some extra properties that can be included to customize the tool.
-- **requiresAuth (boolean)** - Optional. Determines whether user must be logged in to use the tool.
+On top of these properties, you can add some extra properties that can be included to customize the tool.
 - **createNewUsers (boolean)** - Optional. Determines whether to create new users if account does not exist.
-- **userRequirement (function)** - Optional. The user object is passed to this function and it must either return truthy or a promise that resolves. Exception is that if the function returns undefined, it is considered okay.
+- **authRequired (function | boolean)** - Optional. The user object is passed to this function and it must either return truthy or a promise that resolves. Exception is that if the function returns undefined, it is considered okay.
 - **masterAuthConfig (object)** - Optional. Allows this tool to use another firebase db as the auth for this db. Has the same keys as above (apiKey, authDomain, databaseURL, projectId, storageBucket, messagingSenderId). **Note: This cannot work without somehow getting an IdToken from the masterAuthDb. To do this, a REST function url must be provided.** 
-- **masterAuthConfig.remoteRestAuthLinkFunction** - This URL must point to a REST function that accepts { projectId, token, email } as request params. It must send back as response:  { token: someToken } or { data: { token: someToken }}.
+- **remoteRestAuthLinkFunction** - This URL must point to a REST function that accepts { projectId, token, email } as request params. It must send back as response:  { token: someToken } or { data: { token: someToken }}.
 
 -----
 
 So all in all, the fbConfig object might look like this:
 ```javascript
-// in fbCongig.js file
-const fbConfig = {
-	apiKey: "AIzaSyC97H_XXXXXXXXXXXXXXXXXXXXXXX",
-    authDomain: "wolf-XXXXXXXXXXXXX",
-    databaseURL: "https://wolf-XXXXXXXXXXXX",
-    projectId: "wolf-XXXXXXXXXXXX",
-    storageBucket: "wolf-XXXXXXXXXXXX",
-    messagingSenderId: "4487XXXXXXXXXXX",
-    requiresAuth: true,
-    createNewUsers: false,
-    authRequirement(user) {
-	    return new Promise((resolve, reject) => {
-		    return user && user.email === 'wolf@howl.com' ? resolve() : reject();
-	    })
-    },
-    masterAuthConfig: {
-    	apiKey: "AIzaSyC97H_XXXXXXXXXXXXXXXXXXXXXXX",
+// in fbConfig.js file
+const config = {
+	  fbConfig: {
+	    apiKey: "AIzaSyC97H_XXXXXXXXXXXXXXXXXXXXXXX",
+	    authDomain: "wolf-XXXXXXXXXXXXX",
+	    databaseURL: "https://wolf-XXXXXXXXXXXX",
+	    projectId: "wolf-XXXXXXXXXXXX",
+	    storageBucket: "wolf-XXXXXXXXXXXX",
+	    messagingSenderId: "4487XXXXXXXXXXX",
+	  },
+  	  masterAuthConfig: { // optional. Use only if you auth thru a different fb
+	  	apiKey: "AIzaSyC97H_XXXXXXXXXXXXXXXXXXXXXXX",
 		authDomain: "master-XXXXXXXXXXXXX",
 		databaseURL: "https://master-XXXXXXXXXXXX",
 		projectId: "master-XXXXXXXXXXXX",
 		storageBucket: "master-XXXXXXXXXXXX",
 		messagingSenderId: "6667XXXXXXXXXXX",
-		
-		// Will be sent { projectId, token, email }. 
-		// Expect to receive as a response as:
-		// { token: someToken } or { data: { token: someToken }}
-		remoteRestAuthLinkFunction: 'https://XXXX.cloudfunctions.net/getToken' 
-    }
+	 },
+	 createNewUsers: false,
+	 authRequired(user) {
+	   return new Promise((resolve, reject) => {
+	    return user && user.email === 'wolf@howl.com' ? resolve() : reject();
+	   })
+	 },
+ 	// Will be sent { projectId, token, email }. 
+	// Expect to receive as a response as:
+	// { token: someToken } or { data: { token: someToken }}
+	remoteRestAuthLinkFunction: 'https://XXXX.cloudfunctions.net/getToken',
+	tableConfig: <tableConfig object goes here. read below> Optional!
 }
 export default fbConfig;
 ```
@@ -129,7 +126,13 @@ const tableConfig = {
 
     /* table specific settings. Name, value pairs */        
 	randomDump: {
-		storageKey: "storage"
+		storageKey: "storage",
+		header: {
+			fn(v, k) { // what to display in the header.
+				return k;
+			},
+			open: true, // the collapsible is open by default.
+		}
 	},
 	users: {
 		storageKey: "images",
@@ -144,6 +147,7 @@ const tableConfig = {
 				return ref.child('age').set(curAge - 1);
 			}
 		},
+		layout: "row items-center" // The global css classes will be used for layout
 		actionsTableRoot: {
 			incrementAgeAllUsers(ref){
 				return new Promise((resolve, reject) => {
