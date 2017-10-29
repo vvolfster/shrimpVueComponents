@@ -1,10 +1,6 @@
 ## firebaseAdminPanel (Vue Component)
 This is a powerful tool that allows for great control over a firebase database and is continually being improved. 
 
-**Caveats at the moment**
-- Only supports emailAndPassword authentication. 
-- Does not support database read rules other than "true" at the moment. 
-
 #### Usage
 ``` html
 <template>
