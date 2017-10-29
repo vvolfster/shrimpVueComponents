@@ -20,14 +20,14 @@ export default {
 		firebaseAdminPanel: svt.bigTools.firebaseAdminPanel
 	},
 	data() {
-		return {
-	      config: { fbConfig, tableConfig }
-		}
+    return {
+      config: { fbConfig, tableConfig }
+    }
 	}
 }
 ```
 
-### fbConfig object
+### fbConfig object (top level property)
 This object has quite a lot of properties and features. Go to your firebase console and get the use on web json. It will look something like this:
 
     apiKey: "AIzaSyC97H_XXXXXXXXXXXXXXXXXXXXXXX",
@@ -39,6 +39,7 @@ This object has quite a lot of properties and features. Go to your firebase cons
 
 You need all those keys to be present int he fbConfig object. The storageBucket is optional & only needed if you want to upload to storage using this tool.
 
+### Other top level properties (optional)
 On top of these properties, you can add some extra properties that can be included to customize the tool.
 - **createNewUsers (boolean)** - Optional. Determines whether to create new users if account does not exist.
 - **authRequired (function | boolean)** - Optional. The user object is passed to this function and it must either return truthy or a promise that resolves. Exception is that if the function returns undefined, it is considered okay.
@@ -82,7 +83,7 @@ const config = {
 export default fbConfig;
 ```
 
-### tableConfig object
+### tableConfig object (top level property. optional)
 Optional. This object allows us to configure each individual top level key in firebase ("table").
 
 - tableConfig
