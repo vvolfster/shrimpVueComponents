@@ -44,6 +44,8 @@ import fileComponent from 'shrimp-vue-components/src/input/file'
 - **options (Object)** - Optional options object. 
 	- style (string | object) - The style of the object.
 	- limit (number) - 0 or less means limitless. Anything greater is the limit of files that can be dropped at once. More files must be removed.
+    - extensions (string | array) - The extensions this file input accepts. Defaults to "*/*". Examples: [".png", ".jpg"] or ".png, .jpg"
+    - autoCorrectImageOrientation (Boolean) - If an image is dropped, autocorrect the orientation based on it's EXIF tags. Defaults to true. **Images will be returned as Blob objects instead of File objects if this is true.**
 
 ### Events
 - **value(File[])** - Emitted when the value changes.

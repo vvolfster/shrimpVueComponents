@@ -3,7 +3,8 @@ A very basic file dropper component. It supports one or more files being dropped
 
 ### Props
 **fn**(Functional | Optional) - If provided, the component will call this function with the selected files instead of emitting the **files** event.
-**extensions** (String) - The extension filter for files. Defaults to "image/*"
+**extensions** (String | Array) - The extensions this accepts. Defaults to "*/image". Examples: ["image/png", ".jpg"] or "image/png, .jpg"
+**autoCorrectImageOrientation** (Boolean) - If an image is dropped, autocorrect the orientation based on it's EXIF tags. Defaults to true. **Images will be returned as Blob objects instead of File objects if this is true.**
 
 
 ### Events

@@ -2,7 +2,7 @@
     <div style="position:relative;">
         <div v-show="isSupported" ref="form" :class="!hover ? 'box box--supported' : 'box box--supported box--hover'">
             <div class="box__input">
-                <input ref="input" class="box__file" type="file" name="files[]" multiple :accept="extensions"/>
+                <input ref="input" class="box__file" type="file" name="files[]" multiple :accept="accepts"/>
                 <label class="box__fileLabel" ref='label'>
                     <div class="box__inputContainer column items-center justify-center">
                         <i class="fa fa-plus box__inputIcon" v-show="!busy"></i>
@@ -20,6 +20,7 @@
 
 <script>
 import lodash from 'lodash'
+import BLI from 'blueimp-load-image'
 import idGen from './idGen'
 import fns from '../functions'
 import '../../../cssImporter'
@@ -39,8 +40,14 @@ export default {
             default: null
         },
         extensions: {
-            type: String,
-            default: "image/*"
+            type: [String, Array],
+            default() {
+                return "image/*"
+            }
+        },
+        autoCorrectImageOrientation: {
+            type: Boolean,
+            default: true
         }
     },
     data() {
@@ -102,19 +109,50 @@ export default {
         input.addEventListener("change", self.handleSubmit);
     },
     methods: {
-        handleDrop(e) {
-            if(this.busy)
-                return;
+        correctOrientation(files) {
+            function filePromise(file) {
+                return new Promise((resolve) => {
+                    if(!file || !file.type.startsWith('image/')){
+                        return resolve(file);
+                    }
 
+                    return BLI(file, (canvas) => {
+                        canvas.toBlob((blob) => {
+                            blob.name = file.name;
+                            blob.lastModified = file.lastModified;
+                            blob.lastModifiedDate = file.lastModifiedDate;
+                            resolve(blob);
+                        })
+                    }, { canvas: true, orientation: true })
+                })
+            }
+
+            return new Promise((resolve) => {
+                const promises = lodash.reduce(files, (acc, file) => {
+                    acc.push(filePromise(file));
+                    return acc;
+                }, [])
+
+                Promise.all(promises).then(resolve);
+            })
+        },
+        handleDrop(e) {
+            // console.log('handleDrop')
+            if(this.busy)
+                return false;
+
+            const self = this;
             const files = lodash.get(e, "originalEvent.dataTransfer.files") || lodash.get(e, "dataTransfer.files");
-            this.emitFiles(files);
+            return self.autoCorrectImageOrientation ? self.correctOrientation(files).then(f => self.emitFiles(f)) : self.emitFiles(files);
         },
         handleSubmit() {
+            // console.log('handleSubmit')
             if(this.busy)
-                return;
+                return false;
 
+            const self = this;
             const files = lodash.get(this, "$refs.input.files");
-            this.emitFiles(files);
+            return self.autoCorrectImageOrientation ? self.correctOrientation(files).then(f => self.emitFiles(f)) : self.emitFiles(files);
         },
         emitFiles(files) {
             const self = this;
@@ -124,6 +162,7 @@ export default {
             if(!files)
                 return;
 
+            // console.log('emitFiles')
             if(typeof fn === 'function') {
                 self.busy = true;
                 fns.genericResolver(fn, files, unbusy).then(unbusy).catch(unbusy);
@@ -137,6 +176,12 @@ export default {
             this.$refs.input.value = '';
         },
         doNothing() { /* this is called when we are already uploading something. */ }
+    },
+    computed: {
+        accepts() {
+            const e = toString.call(this.extensions) === '[object Array]' ? this.extensions : [this.extensions];
+            return e.join(', ');
+        }
     }
 }
 </script>

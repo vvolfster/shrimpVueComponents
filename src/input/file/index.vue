@@ -4,7 +4,8 @@
             ref="fileDropper"
             class="fileDropper line"
             @files='updateValue'
-            extensions="*/*"
+            :extensions="extensions"
+            :autoCorrectImageOrientation="autoCorrectImageOrientation"
         />
         <div v-else class="fileDropper line check">
             <i class="fa fa-check"></i>
@@ -74,8 +75,8 @@ export default {
             function itr(collection) {
                 const v = [];
                 lodash.each(collection, (file) => {
-                    const isFile = file instanceof File;
-                    if(!isFile)
+                    const isAcceptableType = file instanceof File || file instanceof Blob;
+                    if(!isAcceptableType)
                         return;
 
                     if(options.filters && options.filters.length) {
@@ -188,6 +189,20 @@ export default {
         },
         limit(){
             return this.options && typeof this.options.limit === 'number' && this.options.limit > 0 ? this.options.limit : null;
+        },
+        extensions() {
+            try {
+                return this.options.extensions;
+            } catch(e){
+                return "*/*"
+            }
+        },
+        autoCorrectImageOrientation() {
+            try {
+                return this.options.autoCorrectImageOrientation;
+            } catch(e) {
+                return true;
+            }
         }
     },
 }
