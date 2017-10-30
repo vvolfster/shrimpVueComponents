@@ -41,7 +41,7 @@ export default {
             },
             only3img: {
                 limit: 3,
-                filter: ['image/jpg', 'image/jpeg', 'image/png']
+                filter: ['png', 'jpg', 'pdf']
             },
             only3imgWithDupes: {
                 limit: 3,

@@ -24,6 +24,7 @@ import BLI from 'blueimp-load-image'
 import idGen from './idGen'
 import fns from '../functions'
 import '../../../cssImporter'
+import Toast from '../../vuePlugins/toasts'
 
 function supportsDragDrop() {
     const div = document.createElement('div');
@@ -109,6 +110,72 @@ export default {
         input.addEventListener("change", self.handleSubmit);
     },
     methods: {
+        matchesFilters(files) {
+            // console.log('matchesFilters', files);
+            const e = this.extensions;
+            const filters = lodash.isArray(e) ? e : e.trim().split(',');
+            const allAccepted = filters.indexOf('*/*') !== -1 || filters.indexOf('*.*') !== -1;
+            const badFiles = [];
+            const goodFiles = lodash.filter(files, (file) => {
+                // console.log(file);
+                if(allAccepted)
+                    return true;
+
+                const type1 = file.type.toLowerCase();
+                const type2 = lodash.last(file.name.split('.')).toLowerCase();
+                const type3 = `.${type2}`
+                const type4 = lodash.last(file.type.split('/')).toLowerCase();
+                const type5 = `.${type4}`;
+                const type6 = lodash.first(file.type.split('/')).toLowerCase();
+
+                const typesArr = [type1, type2, type3, type4, type5, type6];
+                // console.log(filters);
+
+                const idx = lodash.findIndex(filters, (filter) => {
+                    const f = filter.toLowerCase();
+                    if(typesArr.indexOf(f) !== -1)
+                        return true;
+
+                    const jpgArr = ['image/jpg', '.jpg', 'jpg'];
+                    const jpegArr = ['image/jpeg', '.jpeg', 'jpeg'];
+
+                    if(jpgArr.indexOf(f) !== -1) {
+                        const j1 = typesArr.indexOf(jpegArr[0]);
+                        const j2 = typesArr.indexOf(jpegArr[1]);
+                        const j3 = typesArr.indexOf(jpegArr[2]);
+                        if(j1 !== -1 || j2 !== -1 || j3 !== -1)
+                            return true;
+                    }
+
+                    if(jpegArr.indexOf(f) !== -1) {
+                        const j1 = typesArr.indexOf(jpgArr[0]);
+                        const j2 = typesArr.indexOf(jpgArr[1]);
+                        const j3 = typesArr.indexOf(jpgArr[2]);
+                        if(j1 !== -1 || j2 !== -1 || j3 !== -1)
+                            return true;
+                    }
+
+                    if(f.indexOf('/*') !== -1 && f.startsWith(type6)){
+                        // console.log(`case last`)
+                        return true;
+                    }
+
+                    return false;
+                })
+
+                if(idx === -1){
+                    badFiles.push(file.name);
+                    return false;
+                }
+
+                return true;
+            })
+
+            if(badFiles.length){
+                Toast.negative(`${badFiles.join('<br>')}<br> cannot be added because only ${filters.join(', ')} type(s) are accepted`, { duration: 5000 })
+            }
+            return goodFiles;
+        },
         correctOrientation(files) {
             function filePromise(file) {
                 return new Promise((resolve) => {
@@ -142,7 +209,7 @@ export default {
                 return false;
 
             const self = this;
-            const files = lodash.get(e, "originalEvent.dataTransfer.files") || lodash.get(e, "dataTransfer.files");
+            const files = this.matchesFilters(lodash.get(e, "originalEvent.dataTransfer.files") || lodash.get(e, "dataTransfer.files"));
             return self.autoCorrectImageOrientation ? self.correctOrientation(files).then(f => self.emitFiles(f)) : self.emitFiles(files);
         },
         handleSubmit() {
@@ -151,7 +218,7 @@ export default {
                 return false;
 
             const self = this;
-            const files = lodash.get(this, "$refs.input.files");
+            const files = this.matchesFilters(lodash.get(this, "$refs.input.files"));
             return self.autoCorrectImageOrientation ? self.correctOrientation(files).then(f => self.emitFiles(f)) : self.emitFiles(files);
         },
         emitFiles(files) {
@@ -180,7 +247,9 @@ export default {
     computed: {
         accepts() {
             const e = toString.call(this.extensions) === '[object Array]' ? this.extensions : [this.extensions];
-            return e.join(', ');
+            return lodash.map(e, (x) => {
+                return x.indexOf("/") === -1 && !x.startsWith(".") ? `.${x}` : x;
+            }).join(', ');
         }
     }
 }

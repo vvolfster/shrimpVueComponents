@@ -50,9 +50,11 @@ function getOptions(options) {
 }
 
 function fileInArray(filesArr, file){
-    const keys = lodash.keys(file);
     return lodash.find(filesArr, (f) => {
-        return lodash.every(keys, key => f[key] === file[key])
+        return  f.name === file.name &&
+                f.size === file.size &&
+                f.type === file.type &&
+                f.lastModified === file.lastModified;
     })
 }
 
@@ -78,14 +80,6 @@ export default {
                     const isAcceptableType = file instanceof File || file instanceof Blob;
                     if(!isAcceptableType)
                         return;
-
-                    if(options.filters && options.filters.length) {
-                        const idx = lodash.findIndex(options.filters, filter => filter.toLowerCase() === file.type.toLowerCase())
-                        if(idx === -1){
-                            Toast.negative(`${file.name} cannot be added because only ${JSON.stringify(options.filters)} are accepted`)
-                            return;
-                        }
-                    }
 
                     if(options.duplicates || !fileInArray(self.d_value, file))
                         v.push(file);
@@ -192,7 +186,7 @@ export default {
         },
         extensions() {
             try {
-                return this.options.extensions;
+                return this.options.extensions || this.options.filter || "*/*";
             } catch(e){
                 return "*/*"
             }
