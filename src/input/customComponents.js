@@ -3,6 +3,15 @@ import lodash from 'lodash'
 
 const components = new Map();
 
+function has(obj, key){
+    if(toString.call(obj) === '[object Object]')
+        return !!obj[key];
+    else if(lodash.isArray(obj))
+        return obj.indexOf(key) === -1;
+    else if(obj)
+        return !!obj[key];
+}
+
 export default {
     validate(component, warningPrefix, silent) {
         const warnings = {
@@ -28,11 +37,11 @@ export default {
 
         const obj = lodash.pickBy(component, (v, k) => k !== 'methods');
         const props = obj.props || {};
-        if (!props.value) {
+        if (!has(props, "value")) {
             warnings.props.push(`value`);
         }
 
-        if (!props.placeholder) {
+        if (!has(props, "placeholder")) {
             warnings.props.push(`placeholder`);
         }
 
