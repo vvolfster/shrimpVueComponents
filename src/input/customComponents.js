@@ -10,6 +10,7 @@ function has(obj, key){
         return obj.indexOf(key) === -1;
     else if(obj)
         return !!obj[key];
+    return false;
 }
 
 export default {
