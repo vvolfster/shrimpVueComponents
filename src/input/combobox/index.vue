@@ -12,7 +12,7 @@
             {{ error }}
         </div>
         <popover ref="popover" :position="position" :noStyle="false">
-            <div class="popoverz" :style="ui.styleList">
+            <div class="popoverz shadow-4" :style="ui.styleList">
                 <div v-for="option in cOptions"
                     :key="option"
                     :value="option"

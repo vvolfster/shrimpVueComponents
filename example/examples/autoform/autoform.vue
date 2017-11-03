@@ -12,17 +12,19 @@
         <pre>
             {{ json }}
         </pre>
+        <combobox :options="fields.gender"></combobox>
     </div>
 </template>
 
 <script>
 import autoform from '@/input/autoform'
 import Chance from 'chance'
+import combobox from '@/input/combobox'
 
 const chance = new Chance();
 export default {
     components: {
-        autoform
+        autoform, combobox
     },
     data() {
         return {
