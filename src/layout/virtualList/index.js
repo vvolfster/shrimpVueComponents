@@ -205,7 +205,7 @@ const virtualList = Vue.component('virtualList',  {
 
         return createElement(this.rtag, {
             attrs: {
-                id: 'scrollMeBro',
+                id: `virtualList-${new Date().getTime()}-${Math.random() * 1000}`,
                 // name: 'scrollMeBro',
             },
             'ref': 'container',
