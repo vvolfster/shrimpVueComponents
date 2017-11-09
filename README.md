@@ -29,6 +29,7 @@ npm i -S shrimp-vue-components
 	2. [modal](./src/layout/modal/docs.md)
 	3. [popover](./src/layout/popover/docs.md)
 	4. [tabView](./src/layout/tabView/docs.md)
+	5. [virtualList](./src/layout/virtualList/docs.md)
 5. misc
 	1. [animator](./src/misc/animator/docs.md)
 	2. [collapsible](./src/misc/collapsible/docs.md)
