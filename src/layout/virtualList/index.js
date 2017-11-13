@@ -1,8 +1,24 @@
-/* eslint-disable */
-/* this is my local copy of vue-virtual-scroll-list. It allowed me to make quick changes. This file is no longer used
-& will be deleted if we accept that my changes to vue-virtual-scroll-list are good*/
 import Vue from 'vue'
-// import lodash from 'lodash'
+import lodash from 'lodash'
+
+function getClassObject(str) {
+    return lodash.reduce(str.split(" "), (acc, v) => {
+        acc[v] = true;
+        return acc;
+    }, {});
+}
+
+// function isElementInViewport (el) {
+//     const rect = el.getBoundingClientRect();
+//     return (
+//         rect.top >= 0 &&
+//         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+//         // && rect.left >= 0 &&
+//         // rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+//     );
+// }
+
+function falseFn() { return false; }
 
 const virtualList = Vue.component('virtualList',  {
     props: {
@@ -14,16 +30,15 @@ const virtualList = Vue.component('virtualList',  {
             type: Number,
             required: true
         },
-        rtag: {
-            type: String,
-            default: 'div'
-        },
-        wtag: {
-            type: String,
-            default: 'div'
-        },
+        rtag: { type: String, default: 'div' },
+        rtagStyle: { type: Object, default() { return {} } },
+        rtagClass: { type: String, default: "" },
+        wtag: { type: String, default: 'div' },
+        wtagStyle: { type: Object, default() { return {} } },
+        wtagClass: { type: String, default: "" },
         scrollMapperFn: Function, // will be passed in key & any attributes the div has. Only returned strings will be accepted into the map.
-        onScroll: Function
+        onScroll: Function,
+        permanentFn: Function
     },
 
     // an object helping to calculate
@@ -35,7 +50,7 @@ const virtualList = Vue.component('virtualList',  {
         viewHeight: 0, // container wrapper viewport height
         allPadding: 0, // all padding of not-render-yet doms
         paddingTop: 0, // container wrapper real padding-top
-        scrollPositions: {} //(key, index) pairs generated from scrollMapperFn (if provided).
+        scrollPositions: {} // (key, index) pairs generated from scrollMapperFn (if provided).
     },
 
     methods: {
@@ -65,7 +80,7 @@ const virtualList = Vue.component('virtualList',  {
             if(!this.$refs.container)
                 return;
 
-            var scrollTop = this.$refs.container.scrollTop
+            const scrollTop = this.$refs.container.scrollTop
             this.updateZone(scrollTop)
 
             if (typeof this.onScroll === `function` && e) {
@@ -74,8 +89,8 @@ const virtualList = Vue.component('virtualList',  {
         },
 
         updateZone(offset) {
-            var delta = this.$options.delta
-            var overs = Math.floor(offset / this.size)
+            const delta = this.$options.delta
+            const overs = Math.floor(offset / this.size)
             // console.log(overs, delta.total, this.remain);
 
             if (!offset && delta.total) {
@@ -84,13 +99,12 @@ const virtualList = Vue.component('virtualList',  {
 
             // need moving items at lease one unit height
             // @todo: consider prolong the zone range size
-            var start = overs ? overs : 0
-            var end = overs ? (overs + delta.keeps) : delta.keeps
-            var isOverflow = delta.total - delta.keeps > 0
+            let start = overs || 0
+            let end = overs ? (overs + delta.keeps) : delta.keeps
+            const isOverflow = delta.total - delta.keeps > 0
 
             // avoid overflow range
             if (isOverflow && overs + this.remain >= delta.total) {
-
                 end = delta.total
                 start = delta.total - delta.keeps
                 this.$emit('toBottom')
@@ -111,15 +125,12 @@ const virtualList = Vue.component('virtualList',  {
             // eh somewhat of a hack but this should force the view to refresh.
             const startScroll = this.$refs.container.scrollTop
             setTimeout(() => {
-              if(!this || !this.$refs.container)
-                return;
+                if(!self || !self.$refs.container)
+                    return;
 
-            //   this.$refs.container.scrollTop = startScroll + 1;
-            //   this.$refs.container.scrollTop = startScroll - 1;
-              this.$refs.container.scrollTop = 0;
+                self.$refs.container.scrollTop = startScroll + 1;
+                self.$refs.container.scrollTop = startScroll - 1;
             }, 200)
-
-            // console.log('refresh')
         },
 
         updateScrollPositions(slots) {
@@ -128,10 +139,9 @@ const virtualList = Vue.component('virtualList',  {
                 return;
             }
 
-            const acc = {};
             this.$options.delta.scrollPositions = slots.reduce((acc, { data }, index) => {
                 if(!data)
-                    return;
+                    return acc;
 
                 const key = data.key;
                 const attr = data.attrs;
@@ -146,8 +156,9 @@ const virtualList = Vue.component('virtualList',  {
         },
 
         filter(slotsArr) {
-            var delta = this.$options.delta
+            const delta = this.$options.delta
             const slots = slotsArr || [];
+            const permanentFn = typeof this.permanentFn === 'function' ? this.permanentFn : falseFn;
 
             if(delta.total !== slots.length || slots.length === 0) {
                 delta.start = 0
@@ -160,13 +171,20 @@ const virtualList = Vue.component('virtualList',  {
                 this.updateScrollPositions(slots);
             }
 
-            const results = slots.filter((slot, index) => { return index >= delta.start && index <= delta.end })
+            const results = slots.filter((slot, index) => {
+                try {
+                    return permanentFn(slot, index) || (index >= delta.start && index <= delta.end)
+                } catch(e) {
+                    return index >= delta.start && index <= delta.end
+                }
+            })
 
             // if there's no results, we can safely just go back top!
             if(results.length === 0)
                 delta.start = 0;
 
-            delta.paddingTop = this.size * delta.start;
+            // console.log(delta.start);
+            delta.paddingTop =  this.size * delta.start;
             delta.allPadding = Math.max(0, this.size * (slots.length - delta.keeps));
             delta.total = slots.length
 
@@ -176,9 +194,9 @@ const virtualList = Vue.component('virtualList',  {
 
     beforeMount() {
         // doInit(this.$options.delta, this.size, this.remain);
-        var remains = this.remain;
-        var delta = this.$options.delta;
-        var benchs = Math.round(remains / 2);
+        const remains = this.remain;
+        const delta = this.$options.delta;
+        const benchs = Math.round(remains / 2);
 
         delta.end = remains + benchs;
         delta.keeps = remains + benchs;
@@ -187,9 +205,9 @@ const virtualList = Vue.component('virtualList',  {
 
     watch: {
         size(n) {
-            var remains = this.remain;
-            var delta = this.$options.delta;
-            var benchs = Math.round(remains / 2);
+            const remains = this.remain;
+            const delta = this.$options.delta;
+            const benchs = Math.round(remains / 2);
 
             delta.end = remains + benchs;
             delta.keeps = remains + benchs;
@@ -199,8 +217,8 @@ const virtualList = Vue.component('virtualList',  {
     },
 
     render(createElement) {
-        var showList = this.filter(this.$slots.default)
-        var delta = this.$options.delta
+        const showList = this.filter(this.$slots.default)
+        const delta = this.$options.delta
         // console.log(`render`)
 
         return createElement(this.rtag, {
@@ -208,23 +226,24 @@ const virtualList = Vue.component('virtualList',  {
                 id: `virtualList-${new Date().getTime()}-${Math.random() * 1000}`,
                 // name: 'scrollMeBro',
             },
-            'ref': 'container',
-            'style': {
-                'display': 'block',
+            ref: 'container',
+            style: lodash.assign({}, {
+                display: 'block',
                 'overflow-y': 'auto',
-                'height': delta.viewHeight + 'px'
+                height: `${delta.viewHeight}px`
+            }, this.rtagStyle),
+            class: getClassObject(this.rtagClass),
+            on: {
+                scroll: this.handleScroll
             },
-            'on': {
-                'scroll': this.handleScroll
-            },
-
         }, [
             createElement(this.wtag, {
-                'style': {
-                    'display': 'block',
-                    'padding-top': delta.paddingTop + 'px',
-                    'padding-bottom': delta.allPadding - delta.paddingTop + 'px'
-                }
+                class: getClassObject(this.wtagClass),
+                style: lodash.assign({}, {
+                    display: 'block',
+                    'padding-top': `${delta.paddingTop}px`,
+                    'padding-bottom': `${delta.allPadding - delta.paddingTop}px`
+                }, this.wtagStyle)
             }, showList)
         ])
     }

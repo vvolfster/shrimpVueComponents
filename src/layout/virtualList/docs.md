@@ -76,6 +76,11 @@ import virtualList from 'shrimp-vue-components/src/layout/virtualList'
 	- **key** is the idx or key of an entry
 	- **attr** is the attributes that HTML list element has.
 
+- **wtagClass (String)** - Class to assign to wrapper element
+- **wtagStyle (Object)** - Style object ot assign to wrapper element.
+- **rtagClass (String)** - Class to assign to root element
+- **rtagStyle (Object)** - Style object ot assign to root element.
+- **permamentFn (Function(slot, idx))** - Function determining elements that are always rendered no matter what. Sticky elements like headers would fit this.
 
 ### Events
 - **toTop()** - Emitted when reaching the top of the list.

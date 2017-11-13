@@ -26,6 +26,7 @@ import animator from './examples/animator/animator'
 import fileExample from './examples/file/file'
 import adder from './examples/adder/adder'
 import jsonEditor from './examples/jsonEditor/jsonEditor'
+import virtualList from './examples/virtualList'
 
 export default {
     name: 'app',
@@ -33,7 +34,7 @@ export default {
         return {
             myComponent: null,
             userIsActive: true,
-            examples: ["fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "autoformWithCustomComponents", "jsonEditor", "dialogExample", "fileExample", "adder"].sort()
+            examples: ["fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "autoformWithCustomComponents", "jsonEditor", "dialogExample", "fileExample", "adder", "virtualList"].sort()
         }
     },
     components: {
@@ -48,7 +49,8 @@ export default {
         autoformWithCustomComponents,
         fileExample,
         adder,
-        jsonEditor
+        jsonEditor,
+        virtualList
     },
 
 };
