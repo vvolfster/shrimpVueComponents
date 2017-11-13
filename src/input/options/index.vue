@@ -4,7 +4,7 @@
             <div class="margin-bottom">{{ placeholder }}</div>
             <div class="row wrap justify-even items-even nuggetContainer">
                 <div v-for="(v, k) in computedOptions" :key="k" class="row nugget margin-bottom" @click="updateValue(null, { k, v: !v })">
-                    <i class="svti margin-right fa" :class="!v ? 'fa-square-o' : 'fa-check-square-o'"></i>
+                    <i class="svti margin-right fa" :class="!v ? icon.default : icon.selected"></i>
                     <div>{{ k }}</div>
                 </div>
             </div>
@@ -20,28 +20,46 @@ import lodash from 'lodash'
 import animator from '../../misc/animator'
 import '../../../cssImporter'
 
-function extractValue(v) {
+function extractValue(v, options) {
+    const choices = lodash.get(options, "options") || lodash.get(options, "choices") || [];
+    const multiple = lodash.get(options, "multiple", true);
     if (!v)
         return [];
 
-    if (typeof v !== 'object')
-        return [v];
+    // console.log(v, choices);
+    if (typeof v !== 'object'){
+        if(choices.indexOf(v) !== -1){
+            return multiple ? [v] : v;
+        }
+        return multiple ? [] : "";
+    }
 
     const t = toString.call(v);
     if (t === '[object Object]') {
-        const val = [];
-        Object.keys(v).forEach((key) => {
-            if (v[key])
-                val.push(key);
-        })
-        return val;
+        if(multiple) {
+            return lodash.reduce(v, (acc, val, key) => {
+                if(val && choices.indexOf(key) !== -1)
+                    acc.push(key);
+                return acc;
+            }, []);
+        }
+
+        // singular case
+        return lodash.findKey(v, (val, key) => val && choices.indexOf(key) !== -1) || "";
     }
     else if (t === '[object Array]') {
-        const val = [];
-        v.forEach(vEntry => val.push(vEntry))
-        return val;
+        if(multiple) {
+            return lodash.reduce(v, (acc, val) => {
+                if(choices.indexOf(val) !== -1)
+                    acc.push(val)
+                return acc;
+            }, []);
+        }
+
+        // singular case
+        return lodash.find(v, val => choices.indexOf(val) !== -1) || "";
     }
-    return [];
+    return multiple ? [] : "";
 }
 
 export default {
@@ -70,10 +88,11 @@ export default {
         }
     },
     mounted() {
-        this.d_value = extractValue(this.value);
+        this.d_value = extractValue(this.value, this.options);
     },
     methods: {
         updateValue(value, { k, v }) {
+            // console.log('updateValue', value, k, v);
             const self = this;
             function validation(validateVal) {
                 if (typeof self.validateFn === 'function') {
@@ -86,33 +105,47 @@ export default {
                 return !self.error
             }
 
-            if (k !== undefined && v !== undefined) {
-                const curVal = lodash.cloneDeep(this.d_value);
-                const idx = curVal.indexOf(k);
-                if (v && idx === -1) {
-                    curVal.push(k);
-                    if(validation(curVal)){
-                        this.d_value = curVal;
-                        this.$emit('input', this.d_value);
-                        this.$emit('value', this.d_value);
+            function setAndEmit(val){
+                // console.log('SETANDEMIT', val);
+                self.d_value = val;
+                self.$emit('input', self.d_value);
+                self.$emit('value', self.d_value);
+            }
+
+            const multiple = lodash.get(this, "options.multiple", true);
+            if(multiple) {
+                if (k !== undefined && v !== undefined) {
+                    // console.log(`woot`)
+                    const curVal = lodash.cloneDeep(this.d_value);
+                    const idx = curVal.indexOf(k);
+                    if (v && idx === -1) {
+                        curVal.push(k);
+                        if(validation(curVal)){
+                            setAndEmit(curVal);
+                        }
+                    }
+                    else if (!v && idx !== -1) {
+                        curVal.splice(idx, 1);
+                        if(validation(curVal)){
+                            setAndEmit(curVal);
+                        }
                     }
                 }
-                else if (!v && idx !== -1) {
-                    curVal.splice(idx, 1);
-                    if(validation(curVal)){
-                        this.d_value = curVal;
-                        this.$emit('input', this.d_value);
-                        this.$emit('value', this.d_value);
+                else {
+                    const xv = extractValue(value, this.options);
+                    if (!lodash.isEqual(xv, this.d_value) && validation(xv)) {
+                        setAndEmit(xv);
                     }
                 }
             }
-            else {
-                const xv = extractValue(value);
-                if (!lodash.isEqual(xv, this.d_value) && validation(xv)) {
-                    this.d_value = xv;
-                    this.$emit('input', this.d_value);
-                    this.$emit('value', this.d_value);
-                }
+            // singlular case
+            else if(k !== undefined && v !== undefined) {
+                const out = this.d_value === k ? "" : k;
+                if(!out || validation(out))
+                    setAndEmit(out);
+            }
+            else if (!lodash.isEqual(value, this.d_value) && validation(value)) {
+                setAndEmit(value);
             }
         },
         getValue() { return this.d_value; },
@@ -123,11 +156,20 @@ export default {
     },
     watch: {
         value() {
-            this.d_value = this.value;
+            this.d_value = extractValue(this.value, this.options);
+        },
+        options: {
+            deep: true,
+            handler() {
+                this.d_value = extractValue(this.value, this.options);
+            }
         },
         error(v, ov) {
             if (v && !ov)
                 animator.shake({ element: this.$el });
+        },
+        multiple() {
+            this.updateValue("");
         }
     },
     computed: {
@@ -161,8 +203,25 @@ export default {
             const value = this.d_value;
 
             const obj = {};
-            keys.forEach((k) => { obj[k] = value.indexOf(k) !== -1 })
+            keys.forEach((k) => {
+                if(toString.call(value) === '[object Array]'){
+                    obj[k] = value.indexOf(k) !== -1
+                }
+                else {
+                    obj[k] = value === k
+                }
+            })
             return obj;
+        },
+        multiple() {
+            const o = this.options;
+            return o && typeof o.multiple === 'boolean' ? o.multiple : true;
+        },
+        icon() {
+            if(this.multiple) {
+                return { default: 'fa-square-o', selected: 'fa-check-square-o' }
+            }
+            return { default: 'fa-circle-thin', selected: 'fa-circle' }
         }
     }
 }

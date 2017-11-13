@@ -45,6 +45,7 @@ import options from 'shrimp-vue-components/src/input/options'
 - **options (Object)** - Optional options object. 
 	- style (string | object) - The style of the object.
 	- choices (String[] | Object{}) - In case of object, its keys will be used.
+    - multiple (Boolean) - Defaults to true. If true, can choose multiple checkboxes. If false, can choose only one radiobutton.
 
 
 ### Events

@@ -71,7 +71,7 @@ export default {
                 hobbies: {
                     type: Array,
                     options: {
-                        choices: chance.n(chance.profession, 20)
+                        choices: chance.n(chance.word, 20)
                     },
                     validator(v) {
                         if(v.indexOf("working") !== -1)
@@ -79,6 +79,19 @@ export default {
                         return true;
                     },
                     model: ["video games"]
+                },
+                profession: {
+                    type: Array,
+                    options: {
+                        choices: chance.n(chance.profession, 20),
+                        multiple: false
+                    },
+                    validator(v) {
+                        if(v.indexOf("working") !== -1)
+                            return "WORKING ISNT A PROFESSION U FOOL"
+                        return true;
+                    },
+                    model: ["programmer"]
                 },
                 age: {
                     type: Range,
