@@ -26,9 +26,15 @@ function extractValue(v, options) {
     if (!v)
         return [];
 
+    function isAChoice(ch){
+        if(lodash.isArray(choices))
+            return choices.indexOf(ch) !== -1;
+        return lodash.keys(choices).indexOf(ch) !== -1;
+    }
+
     // console.log(v, choices);
     if (typeof v !== 'object'){
-        if(choices.indexOf(v) !== -1){
+        if(isAChoice(v)){
             return multiple ? [v] : v;
         }
         return multiple ? [] : "";
@@ -38,26 +44,26 @@ function extractValue(v, options) {
     if (t === '[object Object]') {
         if(multiple) {
             return lodash.reduce(v, (acc, val, key) => {
-                if(val && choices.indexOf(key) !== -1)
+                if(val && isAChoice(key) !== -1)
                     acc.push(key);
                 return acc;
             }, []);
         }
 
         // singular case
-        return lodash.findKey(v, (val, key) => val && choices.indexOf(key) !== -1) || "";
+        return lodash.findKey(v, (val, key) => val && isAChoice(key) !== -1) || "";
     }
     else if (t === '[object Array]') {
         if(multiple) {
             return lodash.reduce(v, (acc, val) => {
-                if(choices.indexOf(val) !== -1)
+                if(isAChoice(val) !== -1)
                     acc.push(val)
                 return acc;
             }, []);
         }
 
         // singular case
-        return lodash.find(v, val => choices.indexOf(val) !== -1) || "";
+        return lodash.find(v, val => isAChoice(val) !== -1) || "";
     }
     return multiple ? [] : "";
 }
