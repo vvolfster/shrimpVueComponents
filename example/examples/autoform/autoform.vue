@@ -68,30 +68,41 @@ export default {
                     type: "combo",
                     options: ["Male", "Female", "Other"]
                 },
-                hobbies: {
-                    type: Array,
+                // hobbies: {
+                //     type: Array,
+                //     options: {
+                //         choices: chance.n(chance.word, 20)
+                //     },
+                //     validator(v) {
+                //         if(v.indexOf("working") !== -1)
+                //             return "WORKING ISNT A HOBBY U FOOL"
+                //         return true;
+                //     },
+                //     model: ["video games"]
+                // },
+                // profession: {
+                //     type: Array,
+                //     options: {
+                //         choices: chance.n(chance.profession, 20),
+                //         multiple: false
+                //     },
+                //     validator(v) {
+                //         if(v.indexOf("working") !== -1)
+                //             return "WORKING ISNT A PROFESSION U FOOL"
+                //         return true;
+                //     },
+                //     model: ["programmer"]
+                // },
+                powers: {
+                    type: Object,
                     options: {
-                        choices: chance.n(chance.word, 20)
-                    },
-                    validator(v) {
-                        if(v.indexOf("working") !== -1)
-                            return "WORKING ISNT A HOBBY U FOOL"
-                        return true;
-                    },
-                    model: ["video games"]
-                },
-                profession: {
-                    type: Array,
-                    options: {
-                        choices: chance.n(chance.profession, 20),
+                        choices: {
+                            one: "1",
+                            two: "2",
+                            three: "3"
+                        },
                         multiple: false
-                    },
-                    validator(v) {
-                        if(v.indexOf("working") !== -1)
-                            return "WORKING ISNT A PROFESSION U FOOL"
-                        return true;
-                    },
-                    model: ["programmer"]
+                    }
                 },
                 age: {
                     type: Range,

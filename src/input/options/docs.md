@@ -1,7 +1,6 @@
 ## options (Vue component)
 
 Used in autoform but can be used on its own.
-###### TODO confirm that v-model works as intended.
 
 #### Usage
 ```html
@@ -44,7 +43,9 @@ import options from 'shrimp-vue-components/src/input/options'
 - **placeholder (String)** - The string to show as the label when there is no value.
 - **options (Object)** - Optional options object. 
 	- style (string | object) - The style of the object.
-	- choices (String[] | Object{}) - In case of object, its keys will be used.
+	- choices (String[] | Object{}) - The options to pick from.
+		- String[] - The array's values will be used as selection & displayed.
+		- Object{} - They object's keys will be displayed but the values will be used as selection.
     - multiple (Boolean) - Defaults to true. If true, can choose multiple checkboxes. If false, can choose only one radiobutton.
 
 

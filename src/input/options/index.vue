@@ -3,7 +3,11 @@
         <div class="column" :style="ui.style">
             <div class="margin-bottom">{{ placeholder }}</div>
             <div class="row wrap justify-even items-even nuggetContainer">
-                <div v-for="(v, k) in computedOptions" :key="k" class="row nugget margin-bottom" @click="updateValue(null, { k, v: !v })">
+                <div v-for="(v, k) in computedOptions" 
+                    :key="k" 
+                    class="row nugget margin-bottom" 
+                    @click="toString.call(rawOptions) === '[object Object]' ? updateValue(null, { k: rawOptions[k], v: !v }) : updateValue(null, { k, v: !v })"
+                >
                     <i class="svti margin-right fa" :class="!v ? icon.default : icon.selected"></i>
                     <div>{{ k }}</div>
                 </div>
@@ -29,10 +33,12 @@ function extractValue(v, options) {
     function isAChoice(ch){
         if(lodash.isArray(choices))
             return choices.indexOf(ch) !== -1;
-        return lodash.keys(choices).indexOf(ch) !== -1;
+
+        // it's an object
+        return lodash.values(choices).indexOf(ch) !== -1;
     }
 
-    // console.log(v, choices);
+    // console.log(v, JSON.stringify(choices));
     if (typeof v !== 'object'){
         if(isAChoice(v)){
             return multiple ? [v] : v;
@@ -42,6 +48,7 @@ function extractValue(v, options) {
 
     const t = toString.call(v);
     if (t === '[object Object]') {
+        // console.log('1')
         if(multiple) {
             return lodash.reduce(v, (acc, val, key) => {
                 if(val && isAChoice(key) !== -1)
@@ -54,6 +61,7 @@ function extractValue(v, options) {
         return lodash.findKey(v, (val, key) => val && isAChoice(key) !== -1) || "";
     }
     else if (t === '[object Array]') {
+        // console.log('2')
         if(multiple) {
             return lodash.reduce(v, (acc, val) => {
                 if(isAChoice(val) !== -1)
@@ -65,6 +73,8 @@ function extractValue(v, options) {
         // singular case
         return lodash.find(v, val => isAChoice(val) !== -1) || "";
     }
+
+    // console.log('3')
     return multiple ? [] : "";
 }
 
@@ -121,7 +131,7 @@ export default {
             const multiple = lodash.get(this, "options.multiple", true);
             if(multiple) {
                 if (k !== undefined && v !== undefined) {
-                    // console.log(`woot`)
+                    console.log(k, v);
                     const curVal = lodash.cloneDeep(this.d_value);
                     const idx = curVal.indexOf(k);
                     if (v && idx === -1) {
@@ -194,6 +204,15 @@ export default {
 
             return { style: defStyleObj };
         },
+        rawOptions() {
+            try {
+                const o = this.options;
+                const choices = o.choices || o.options;
+                return choices;
+            } catch(e) {
+                return [];
+            }
+        },
         computedOptions() {
             const o = this.options;
             if (!o)
@@ -204,17 +223,19 @@ export default {
                 return [];
 
             const type = toString.call(choices);
-            const keys = type === '[object Object]' ? Object.keys(choices) : choices;
+            const isObject = type === '[object Object]'
+            const keys = isObject ? Object.keys(choices) : choices;
 
             const value = this.d_value;
 
             const obj = {};
             keys.forEach((k) => {
+                const v = isObject ? choices[k] : k;
                 if(toString.call(value) === '[object Array]'){
-                    obj[k] = value.indexOf(k) !== -1
+                    obj[k] = value.indexOf(v) !== -1
                 }
                 else {
-                    obj[k] = value === k
+                    obj[k] = value === v
                 }
             })
             return obj;

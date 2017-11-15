@@ -122,6 +122,7 @@ export default {
 
                 case Boolean: return "boolean";
                 case Array: return "options";
+                case Object: return "options";
                 case String: return "textLine";
                 case Number: return "number";
                 case Date: return "date";
