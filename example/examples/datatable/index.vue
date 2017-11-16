@@ -116,8 +116,8 @@ export default {
 <style scoped>
 
 .dataTable {
-    width: 90%;
-    height: 90%;
+    width: 95%;
+    height: 95vh;
 }
 
 </style>
