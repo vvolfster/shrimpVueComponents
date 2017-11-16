@@ -2,6 +2,7 @@
 
 > Imagishrimp's Vue Component Emporium
 
+# # Installation
 ```
 npm i -S shrimp-vue-components
 ```
@@ -42,13 +43,13 @@ npm i -S shrimp-vue-components
     3. [firebaseAuthentication](./src/vuePlugins/firebaseAuthentication/docs.md) - Easily configure authentication for your firebase instances.
 
 
-## Build Setup
+## Running examples & demo
 
 ``` bash
 # install dependencies
-npm install
+git clone https://github.com/Imagination-International-Inc/shrimpVueComponents.git
 
-# serve with hot reload at localhost:8000 (to see examples)
+# cd to cloned folder and
 npm run dev
 ```
 
