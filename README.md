@@ -2,7 +2,7 @@
 
 > Imagishrimp's Vue Component Emporium
 
-# # Installation
+## Installation
 ```
 npm i -S shrimp-vue-components
 ```
