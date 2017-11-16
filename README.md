@@ -30,6 +30,7 @@ npm i -S shrimp-vue-components
 	3. [popover](./src/layout/popover/docs.md) - Simple popover.
 	4. [tabView](./src/layout/tabView/docs.md) - Simple tabview that makes use of vue's slots.
 	5. [virtualList](./src/layout/virtualList/docs.md) - Forked from [vue-virtual-scroll-list](https://github.com/tangbc/vue-virtual-scroll-list). Used to increase performance of giant lists. Only renders a select portion.
+    6. [dataTable](./src/layout/dataTable/docs.md) - Forked & improved from [vue-materialize-datatable](https://github.com/MicroDroid/vue-materialize-datatable). Uses virtualList behind the scenes to provide a very performant experience while going through big data.
 5. misc
 	1. [animator](./src/misc/animator/docs.md) - Simple tool to animate absolutely positioned elements.
 	2. [collapsible](./src/misc/collapsible/docs.md) - Allows for collapsing & expanding content by clicking on a custom header.
