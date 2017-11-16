@@ -3,43 +3,24 @@
 		<div class="table-header" style="flex: 0 0 64px;">
 			<span class="table-title">{{title}}</span>
 			<div class="actions">
-				<a v-for="(button, idx) in customButtons"
-                   :key="idx"
-                   href="javascript:undefined"
-				   class="waves-effect btn-flat nopadding"
-				   v-if="button.hide ? !button.hide : true"
-				   @click="button.onclick(selection)"
+				<button 
+                   v-for="(button, key) in customButtons" :key="key"
+                   v-if="(typeof button.handler === 'function' || typeof button === 'function') && !button.hide"
+				   class="svtbtn"
+				   @click="typeof button === 'function' ? button(selection) : button.handler(selection)"
                 >
-				   <i :class="button.class || 'fa'" :style="button.style || ''">{{ button.icon || '' }}</i>
-				</a>
-
-				<a  href="javascript:undefined"
-				    class="waves-effect btn-flat nopadding"
-					v-if="printable"
-					@click="print"
-                >
-					<i class="fa fa-print"/>
-				</a>
-				<a href="javascript:undefined"
-					class="waves-effect btn-flat nopadding"
-					v-if="exportable"
-					@click="exportExcel"
-                >
-					<i class="fa fa-file-excel-o"/>
-				</a>
-				<a href="javascript:undefined"
-					class="waves-effect btn-flat nopadding"
-					v-if="searchable"
-					@click="search">
-					<i class="fa fa-search"/>
-				</a>
+				   <i :class="button.class || 'fa'" :style="button.style || ''">{{ button.icon || key }}</i>
+				</button>
+				<button class="svtbtn" v-if="printable" @click="print"><i class="fa fa-print"/></button>
+				<button class="svtbtn" v-if="exportable" @click="exportExcel"><i class="fa fa-file-excel-o"/></button>
+				<button class="svtbtn" v-if="searchable" @click="search"><i class="fa fa-search"/></button>
 			</div>
 		</div>
 		<div v-if="searching" style="flex:0 0 64px;">
 			<div class="search-input-container">
 				<label>
 					<input 
-                        class="search-input"
+                        class="search-input svtbtn"
                         placeholder="Search data"
                         style="width: 100%; border: solid 1px gray !important; padding:5px;"
                         v-model="searchInput"
@@ -74,8 +55,8 @@
                 'border-collapse': 'unset',
                 position: 'relative',
             }"
-            v-show="paginated && paginated.length"
-            style="flex: 1 1 auto;"
+            v-if="processedRows.length > 0"
+            style="flex: 1 1 auto;border-width:1px 0 0 0;border-color:lightgray;border-style:solid;"
         >
             <tr>
                 <th class="bg-grey-9 text-white"
@@ -89,15 +70,18 @@
                     :key="index"
                     @click="sort(index)"
                     class="bg-grey-9 text-white"
-                    :class="(sortable ? 'sorting ' : '')
-                        + (sortColumn === index ?
-                            (sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
-                            : '')
-                        + (column.numeric ? ' numeric' : '')"
-                    
                     :width="columnWidths[index] || 'auto'"
+                    @mouseover="hoverColumn = index"
+                    @mouseleave="hoverColumn = -1"
                 >
-                    {{ typeof column === 'string' ? column : column.label || column.field }}
+                    <div class="row items-center no-wrap" :class="sortColumn === index ? 'text-blue-2' : ''">
+                        <div>{{ typeof column === 'string' ? column : column.label || (typeof column.field === 'string' ? column.field : '') }}&nbsp</div>
+                        <i 
+                            v-if="sortable" 
+                            class="fa" 
+                            :class="sortColumn === index ? (sortType === 'desc' ? 'fa-arrow-down' : 'fa-arrow-up') : hoverColumn === index ? 'fa-arrow-up text-grey' : ''"
+                        />
+                    </div>
                 </th>
                 <th v-if="hasSlots.head || hasSlots.body" class="bg-grey-9 text-white">
                     <div v-if="hasSlots.head">
@@ -122,24 +106,21 @@
                 <td 
                     v-for="(column, colIdx) in columns"
                     :key="colIdx"
-                    :class=" { numeric : column.numeric }"
-                    
                     :width="columnWidths[colIdx] || 'auto'"
                 >
                     <div v-if="!column.html"> {{ collect(row, column.field) }} </div>
                     <div v-if="column.html" v-html="collect(row, column.field)"></div>						
                 </td>
                 <td v-if="hasSlots.body">
-                    <slot name="body" :row="row" :selection="selection" :index="index"></slot>
+                    <slot name="body" :value="row" :selection="selection" :index="index"></slot>
                 </td>
             </tr>
         </virtualList>
+        <div v-if="processedRows.length <= 0" class="row items-center justify-center" style="flex: 1 1 64px;">
+            <div>No records...</div>
+        </div>
 
-        <div 
-            v-if="paginate"
-            class="table-footer" 
-            style="flex: 0 0 64px;"
-        >
+        <div v-if="paginate" class="table-footer"  style="flex: 0 0 64px;">
 			<div class="datatable-length">
 				<label>
 					<span>Rows per page:</span>
@@ -160,8 +141,8 @@
 					-{{Math.min(processedRows.length, currentPerPage * currentPage)}} of {{processedRows.length}}
 			</div>
             <div class="material-pagination">
-                <i class="fa fa-2x fa-chevron-left margin-right" @click.prevent="previousPage" tabindex="0"/>
-                <i class="fa fa-2x fa-chevron-right margin-left" @click.prevent="nextPage" tabindex="0"/>
+                <button class="svtbtn"><i class="fa fa-2x fa-chevron-left margin-right" @click.prevent="previousPage" tabindex="0"/></button>
+                <button class="svtbtn"><i class="fa fa-2x fa-chevron-right margin-left" @click.prevent="nextPage" tabindex="0"/></button>
             </div>
     	</div>
 	</div>
@@ -171,6 +152,7 @@
 import lodash from 'lodash'
 import virtualList from '../virtualList'
 import svcInput from '../../input'
+import '../../../cssImporter'
 
 function Selection() {
     const arr = [];
@@ -234,7 +216,8 @@ export default {
             searching: false,
             searchInput: '',
             selection: Selection(),
-            activeFilters: []
+            activeFilters: [],
+            hoverColumn: -1
         }
     },
     methods: {
@@ -278,7 +261,6 @@ export default {
                 return
             }
 
-            this.$emit('row-click', row)
             this.$emit('click', { row, selection: this.selection, el: e.target })
         },
         exportExcel() {
@@ -315,7 +297,7 @@ export default {
             for (let i = 0; i < this.columns.length; i += 1) {
                 const column = this.columns[i];
                 table += '<th>';
-                table += column.label;
+                table += typeof column === 'string' ? column : (column.label || (typeof column.field === 'string' ? column.field : ''));
                 table += '</th>';
             }
             table += '</tr>';
@@ -412,17 +394,18 @@ export default {
                 return true;
             });
 
-            if (this.sortable !== false){
+            if (this.sortable){
                 computedRows = computedRows.sort((X, Y) => {
-                    if (this.columns[this.sortColumn] === null || this.columns[this.sortColumn] === undefined)
+                    const column = this.columns[this.sortColumn];
+                    if (!column)
                         return 0;
 
                     const cook = (input) => {
                         let c = input;
-                        c = this.collect(c, this.columns[this.sortColumn].field);
+                        c = this.collect(c, column.field);
                         if (typeof c === 'string') {
                             c = c.toLowerCase();
-                            if (this.columns[this.sortColumn].numeric){
+                            if (column.sort === 'numeric' || column.sort === Number){
                                 c = Number(c);
                                 if(isNaN(c))
                                     c = 0;
@@ -431,6 +414,16 @@ export default {
                         return c;
                     }
 
+                    // functional
+                    if(typeof column.sort === 'function' && [String, Number].indexOf(column.sort) === -1) {
+                        const c1 = this.collect(X, column.field);
+                        const c2 = this.collect(Y, column.field);
+                        // console.log(c1, c2);
+                        const v = column.sort(c1, c2);
+                        return v * (this.sortType === 'desc' ? -1 : 1);
+                    }
+
+                    // Standard sort
                     const x = cook(X);
                     const y = cook(Y);
 
@@ -487,7 +480,7 @@ export default {
         },
         hasSlots() {
             return {
-                body: (this.$slots && this.$slots.body) || (this.$scopedSlots && this.$scopedSlots.body),
+                body: this.$scopedSlots && this.$scopedSlots.body,
                 head: this.$slots && this.$slots.head
             }
         },
@@ -593,6 +586,9 @@ clickable { cursor: pointer; }
   align-items: center;
   font-size: 12px !important;
   color: rgba(0, 0, 0, 0.54);
+  border-width: 1px 0 0 0;
+  border-color: lightgray;
+  border-style:solid;
 }
 
 .table-footer .datatable-length {
@@ -741,40 +737,6 @@ clickable { cursor: pointer; }
 }
 
 .table th:hover { overflow: visible; text-overflow: initial; }
-.table th.sorting-asc,
-.table th.sorting-desc {
-  color: rgba(0, 0, 0, 0.87);
-}
-
-.table th.sorting:after,
-.table th.sorting-asc:after {
-  font-family: "Material Icons";
-  font-weight: normal;
-  font-style: normal;
-  font-size: 16px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: capitalize;
-  display: inline-block;
-  word-wrap: normal;
-  -webkit-font-feature-settings: "liga";
-  -webkit-font-smoothing: antialiased;
-  content: "arrow_back";
-  -webkit-transform: rotate(90deg);
-  display: none;
-  vertical-align: middle;
-}
-.table th.sorting:hover:after,
-.table th.sorting-asc:after,
-.table th.sorting-desc:after {
-  display: inline-block;
-}
-.table th.sorting-desc:after {
-  content: "arrow_forward";
-}
-
-
-
 .table th, .table td {
     padding: 0 10px 0 10px;
     border-radius: 0;
@@ -817,5 +779,6 @@ clickable { cursor: pointer; }
 
 .table th:last-child { width: 99%; margin-right: 10px; }
 .table td:last-child { width: 99%; margin-right: 10px; }
+
 
 </style>
