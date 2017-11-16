@@ -2,6 +2,9 @@
 
 Easy visualization of large data sets. Very performant. Forked from [vue-materialize-datatable](https://github.com/MicroDroid/vue-materialize-datatable). Has a lot of extra features & performance optimizations.
 
+### Note
+**Please assign a height to the dataTable. This will make the scrolling on the page a lot cleaner. This is because the rendering of the rows is optimized & only needed elements exist at any given time.**
+
 #### Usage
 ```html
 <template>

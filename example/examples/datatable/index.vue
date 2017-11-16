@@ -11,9 +11,10 @@
             :perPage="[20,50,100,200,400]"
             :defaultPerPage="-1"
             class="dataTable"
+            @selection="handleSelection"
         >
             <div slot="body" slot-scope="entry">
-                <button class="svtbtn bg-red text-white">Delete {{ entry.value.first }}</button>
+                <button class="svtbtn bg-red text-white" @click.stop="deleteEntry(entry.value, entry.index)">Delete {{ entry.value.first }}</button>
             </div>
 
         </dataTable>
@@ -42,6 +43,7 @@ export default {
         const self = this;
         return {
             tableData: null,
+            selection: [],
             table: {
                 title: "People",
                 columns: [
@@ -109,6 +111,17 @@ export default {
     },
     mounted() {
         this.tableData = chance.n(person, 1000);
+    },
+    methods: {
+        deleteEntry(row, index) {
+            const deleted = this.tableData.splice(index, 1);
+            try {
+                console.log("Deleted", deleted[0].first);
+            }catch(e) { /**/ }
+        },
+        handleSelection(selection) {
+            console.log("handleSelection", selection, selection.indices());
+        }
     }
 }
 </script>

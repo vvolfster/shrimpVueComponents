@@ -112,7 +112,7 @@
                     <div v-if="column.html" v-html="collect(row, column.field)"></div>						
                 </td>
                 <td v-if="hasSlots.body">
-                    <slot name="body" :value="row" :selection="selection" :index="index"></slot>
+                    <slot name="body" :value="row" :selection="selection" :index="getRealIndex(row)"></slot>
                 </td>
             </tr>
         </virtualList>
@@ -120,30 +120,44 @@
             <div>No records...</div>
         </div>
 
-        <div v-if="paginate" class="table-footer"  style="flex: 0 0 64px;">
-			<div class="datatable-length">
-				<label>
-					<span>Rows per page:</span>
-					<select class="browser-default" @change="onTableLength">
-						<option 
-                            v-for="(option, idx) in perPageOptions"
-                            :key="idx"
-                            :value="option"
-                            :selected="option == currentPerPage"
-                        >
-					    {{ option === -1 ? 'All' : option }}
-					  </option>
-					</select>
-				</label>
-			</div>
-			<div class="datatable-info">
-				{{(currentPage - 1) * currentPerPage ? (currentPage - 1) * currentPerPage : 1}}
-					-{{Math.min(processedRows.length, currentPerPage * currentPage)}} of {{processedRows.length}}
-			</div>
-            <div class="material-pagination">
-                <button class="svtbtn"><i class="fa fa-2x fa-chevron-left margin-right" @click.prevent="previousPage" tabindex="0"/></button>
-                <button class="svtbtn"><i class="fa fa-2x fa-chevron-right margin-left" @click.prevent="nextPage" tabindex="0"/></button>
+        <div v-if="paginate" class="table-footer row items-center justify-between"  style="flex: 0 0 64px;">
+            <div class="row items-center no-wrap">
+                <div v-if="selection && selection.length" class="row items-center">
+                    <span>Selection:&nbsp</span>
+                    <div>{{ selection.length }} Row(s)</div>
+                </div>
             </div>
+            <div class="row items-center">
+                <div class="datatable-length">
+                    <label>
+                        <span>Rows per page:</span>
+                        <select class="browser-default" @change="onTableLength">
+                            <option 
+                                v-for="(option, idx) in perPageOptions"
+                                :key="idx"
+                                :value="option"
+                                :selected="option == currentPerPage"
+                            >
+                            {{ option === -1 ? 'All' : option }}
+                        </option>
+                        </select>
+                    </label>
+                </div>
+                <div class="datatable-info" v-if="currentPerPage != -1">
+                    {{(currentPage - 1) * currentPerPage ? (currentPage - 1) * currentPerPage : 1}}
+                        -{{Math.min(processedRows.length, currentPerPage * currentPage)}} of {{processedRows.length}}
+                </div>
+                <div v-else class="datatable-info">
+                    {{processedRows.length}} of {{processedRows.length}}
+                </div>
+
+                <div class="material-pagination" v-if="currentPerPage != -1">
+                    <button class="svtbtn" @click.stop="previousPage"><i class="fa fa-2x fa-chevron-left margin-right"/></button>
+                    <button class="svtbtn" @click.stop="nextPage"><i class="fa fa-2x fa-chevron-right margin-left"/></button>
+                </div>
+            </div>
+
+			
     	</div>
 	</div>
 </template>
@@ -154,33 +168,58 @@ import virtualList from '../virtualList'
 import svcInput from '../../input'
 import '../../../cssImporter'
 
-function Selection() {
+function Selection({ getRealIndexFn }) {
     const arr = [];
-    arr.has = (row) => {
-        return arr.indexOf(row) !== -1;
-    }
-    arr.delete = (row) => {
-        const idx = arr.indexOf(row);
-        if(idx !== -1){
-            arr.splice(idx, 1);
-            return true;
+    Object.defineProperty(arr, "has", {
+        value(row) {
+            return arr.indexOf(row) !== -1;
+        },
+        enumerable: false
+    })
+    Object.defineProperty(arr, "delete", {
+        enumerable: false,
+        value(row) {
+            const idx = arr.indexOf(row);
+            if(idx !== -1){
+                arr.splice(idx, 1);
+                return true;
+            }
+            return false;
         }
-        return false;
-    }
-    arr.set = (row) => {
-        const idx = arr.indexOf(row);
-        if(idx === -1) {
-            arr.push(row);
-            return true;
+    })
+    Object.defineProperty(arr, "set", {
+        enumerable: false,
+        value(row) {
+            const idx = arr.indexOf(row);
+            if(idx === -1) {
+                arr.push(row);
+                return true;
+            }
+            return false;
         }
-        return false;
-    }
-    arr.clear = () => {
-        const len = arr.length;
-        for(let i = len - 1; i >= 0; i -= 1){
-            arr.splice(i, 1);
+    })
+    Object.defineProperty(arr, "clear", {
+        enumerable: false,
+        value(){
+            const len = arr.length;
+            for(let i = len - 1; i >= 0; i -= 1){
+                arr.splice(i, 1);
+            }
         }
-    }
+    })
+    Object.defineProperty(arr, "indices", {
+        enumerable: false,
+        value() {
+            const value = [];
+            if(typeof getRealIndexFn !== 'function')
+                return value;
+
+            for(const row of arr) {
+                value.push(getRealIndexFn(row))
+            }
+            return value;
+        }
+    })
 
     return arr;
 }
@@ -215,7 +254,7 @@ export default {
             sortType: 'asc',
             searching: false,
             searchInput: '',
-            selection: Selection(),
+            selection: Selection({ getRealIndexFn: this.getRealIndex }),
             activeFilters: [],
             hoverColumn: -1
         }
@@ -363,6 +402,11 @@ export default {
         },
         deselectAll(){
             this.selection.clear();
+        },
+
+        getRealIndex(row) {
+            // console.log(row, row.first, this.rows.length);
+            return this.rows ? this.rows.indexOf(row) : -1;
         }
     },
     computed: {
@@ -512,6 +556,9 @@ export default {
         },
         selection() {
             this.$emit('selection', this.selection);
+        },
+        activeFilters() {
+            this.selection.clear();
         }
     }
 }
@@ -576,14 +623,6 @@ clickable { cursor: pointer; }
   height: 56px;
   padding-left: 24px;
   padding-right: 14px;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-flex-direction: row;
-  flex-direction: row;
-  -webkit-justify-content: flex-end;
-  justify-content: flex-end;
-  -webkit-align-items: center;
-  align-items: center;
   font-size: 12px !important;
   color: rgba(0, 0, 0, 0.54);
   border-width: 1px 0 0 0;

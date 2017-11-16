@@ -131,7 +131,7 @@ export default {
             const multiple = lodash.get(this, "options.multiple", true);
             if(multiple) {
                 if (k !== undefined && v !== undefined) {
-                    console.log(k, v);
+                    // console.log(k, v);
                     const curVal = lodash.cloneDeep(this.d_value);
                     const idx = curVal.indexOf(k);
                     if (v && idx === -1) {
