@@ -549,15 +549,18 @@ export default {
             if(v.indexOf(this.currentPerPage) !== -1)
                 return;
 
+            this.currentPage = 1;
             this.currentPerPage = v.indexOf(defaultPerPage) !== -1 ? defaultPerPage : v[1] || v[0];
         },
         rows() {
+            this.currentPage = 1;
             this.selection.clear();
         },
         selection() {
             this.$emit('selection', this.selection);
         },
         activeFilters() {
+            this.currentPage = 1;
             this.selection.clear();
         }
     }
