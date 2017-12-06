@@ -9,7 +9,7 @@
             :paginate="table.pagination"
             filterMode="OR"
             :perPage="[20,50,100,200,400]"
-            :defaultPerPage="-1"
+            :defaultPerPage="50"
             class="dataTable"
             @selection="handleSelection"
         >

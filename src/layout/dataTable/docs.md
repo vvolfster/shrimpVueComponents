@@ -92,13 +92,14 @@ export default {
 			  - 1 if a > b 
       - html (Boolean) - Defaults to false. Escapes output if false.
 
-**- perPage (Array)** - Per page options. Defaults to  [10, 20, 30, 40, 50]
+**- perPage (Array)** - Per page options. Defaults to  [10, 20, 30, 40, 50]. Include -1 or "all" to have an all option.
 **- defaultPerPage(Number)** - Defaults to first perPage option. Set to -1 to show all.
 
 **- filters (Object)** - Key Function pair.
 
 - FilterFunction(row) - Must return truthy value to pass the filter.
 
+**- enumerable (Boolean)** - Defaults to true. Can the table rows show their indices? Hides the button to toggle that feature.
 **- searchable (Boolean)** - Defaults to true. Can the table be searched?
 **- clickable (Boolean)** - Defaults to true. Are rows clickable?
 **- sortable (Boolean)** - Defaults to true. Can the table be sorted?

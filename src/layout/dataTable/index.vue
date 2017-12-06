@@ -11,6 +11,7 @@
                 >
 				   <i :class="button.class || 'fa'" :style="button.style || ''">{{ button.icon || key }}</i>
 				</button>
+                <button class="svtbtn" v-if="enumerable" @click.stop="showIndices = !showIndices"><i class="fa" :class="showIndices ? 'fa-list-ul' : 'fa-list-ol'"/></button>
 				<button class="svtbtn" v-if="printable" @click="print"><i class="fa fa-print"/></button>
 				<button class="svtbtn" v-if="exportable" @click="exportExcel"><i class="fa fa-file-excel-o"/></button>
 				<button class="svtbtn" v-if="searchable" @click="search"><i class="fa fa-search"/></button>
@@ -101,7 +102,10 @@
                 :class="(index % 2 === 1 ? 'bg-grey-2' : '') + (clickable ? ' clickable' : '')"
             >
                 <td @click.stop="select(row)" style="width:40px;">
-                    <i class="fa text-black" :class="selection.has(row) ? 'fa-check-square-o' : 'fa-square-o'"/>
+                    <div v-if="showIndices" class="column items-center justify-center nonSelectable cursorPointer" :class="selection.has(row) ? 'bg-primary text-white' : ''" style="border:solid 1px lightgray;border-radius:2px;padding:2px;">
+                        {{ ((currentPage - 1) * currentPerPage) + index + 1 }}
+                    </div>
+                    <i v-else class="fa text-black" :class="selection.has(row) ? 'fa-check-square-o' : 'fa-square-o'"/>
                 </td>
                 <td 
                     v-for="(column, colIdx) in columns"
@@ -241,6 +245,7 @@ export default {
             default: false
         },
         paginate: { default: true },
+        enumerable: { default: true },
         exportable: { default: true },
         printable: { default: true },
         filters: { default: null },
@@ -254,6 +259,7 @@ export default {
             sortType: 'asc',
             searching: false,
             searchInput: '',
+            showIndices: false,
             selection: Selection({ getRealIndexFn: this.getRealIndex }),
             activeFilters: [],
             hoverColumn: -1
@@ -411,8 +417,17 @@ export default {
     },
     computed: {
         perPageOptions() {
-            const options = (this.perPage || [10, 20, 30, 40, 50]).concat([-1]).map(v => parseInt(v, 10)).sort((a, b) => a - b);
-            return options;
+            const p = lodash.clone(this.perPage) || [10, 20, 30, 40, 50];
+            const allIndex = p.indexOf('all');
+            const minus1Index = p.indexOf(-1);
+            if(allIndex !== -1) {
+                if(minus1Index)
+                    p.splice(allIndex, 1);
+                else
+                    p[allIndex] = -1;
+            }
+
+            return p.map(v => parseInt(v, 10)).sort((a, b) => a - b);
         },
         processedRows() {
             const filters = this.activeFilters;
@@ -541,6 +556,34 @@ export default {
             return arr;
         }
     },
+    mounted() {
+        // console.log("perPageOptions", v, this.currentPerPage, v.indexOf(this.currentPerPage));
+        // console.log(v);
+        const self = this;
+        function getPerPage() {
+            const p = lodash.clone(self.perPage) || [10, 20, 30, 40, 50];
+            const allIndex = p.indexOf('all');
+            const minus1Index = p.indexOf(-1);
+            if(allIndex !== -1) {
+                if(minus1Index)
+                    p.splice(allIndex, 1);
+                else
+                    p[allIndex] = -1;
+            }
+
+            return p.map(v => parseInt(v, 10)).sort((a, b) => a - b);
+        }
+
+        this.selection.clear();
+        const defaultPerPage = this.defaultPerPage;
+        const perPage = getPerPage();
+        if(perPage.indexOf(this.currentPerPage) !== -1)
+            return;
+
+        this.currentPage = 1;
+        const nonAllPP = perPage[0] === -1 && perPage.length > 1 ? perPage[1] : perPage[0];
+        this.currentPerPage = perPage.indexOf(defaultPerPage) !== -1 ? defaultPerPage : nonAllPP;
+    },
     watch: {
         perPageOptions(v) {
             // console.log("perPageOptions", v, this.currentPerPage, v.indexOf(this.currentPerPage));
@@ -550,7 +593,8 @@ export default {
                 return;
 
             this.currentPage = 1;
-            this.currentPerPage = v.indexOf(defaultPerPage) !== -1 ? defaultPerPage : v[1] || v[0];
+            const nonAllPP = v[0] === -1 && v.length > 1 ? v[1] : v[0];
+            this.currentPerPage = v.indexOf(defaultPerPage) !== -1 ? defaultPerPage : nonAllPP;
         },
         rows() {
             this.currentPage = 1;
