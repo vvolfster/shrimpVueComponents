@@ -294,6 +294,7 @@ const exportFunctions = {
             state.currentUser = detail;
         }, VuePtr)
 
+
         // now add mixin
         VuePtr.mixin({
             beforeDestroy() {
@@ -335,6 +336,16 @@ const exportFunctions = {
 
         // mark the plugin as installed
         VuePtr.fbAuthenticationInstalled = true;
+        VuePtr.fbAuthenticationEventName = authChangedEventName;
+
+        // dispatch the name of the authChg event
+        document.dispatchEvent('fbAuthenticationInstalled', {
+            detail: {
+                opts,
+                authChangedEventName
+            }
+        })
+
         return true;
     },
     getState() {

@@ -166,5 +166,15 @@ export default {
 }
 ```
 
+## events
+This plugin has a mixin that puts authUser/authId in each Vue component but also fires events thru the document
+when auth changes.
+
+First you must get the unique event name before you can listen to it. There's 2 ways to get this.
+
+1. fbAuthenticationInstalled - This occurs when the fbAuthentication plugin is installed. In the event's detail property you will find
+the options that were used to install this plugin as well as the unique event name for the auth plugin.
+
+2. Vue.fbAuthenticationEventName - This is just the event name. It will be available after the plugin has been installed.
 
 	 
