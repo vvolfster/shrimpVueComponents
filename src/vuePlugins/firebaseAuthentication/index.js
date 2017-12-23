@@ -339,12 +339,10 @@ const exportFunctions = {
         VuePtr.fbAuthenticationEventName = authChangedEventName;
 
         // dispatch the name of the authChg event
-        document.dispatchEvent('fbAuthenticationInstalled', {
-            detail: {
-                opts,
-                authChangedEventName
-            }
+        const customEvent = new CustomEvent('fbAuthenticationInstalled', {
+            detail: { opts, authChangedEventName }
         })
+        document.dispatchEvent(customEvent);
 
         return true;
     },
