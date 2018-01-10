@@ -160,11 +160,11 @@ export default {
             })
         }
     },
-    watch: {
-        pageData(pd) {
-            console.log('pd changed to', pd);
-        }
-    }
+    // watch: {
+    //     pageData(pd) {
+    //         console.log('pd changed to', pd);
+    //     }
+    // }
 }
 </script>
 
