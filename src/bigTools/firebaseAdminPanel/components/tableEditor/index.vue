@@ -3,7 +3,7 @@
 
         <div v-if="page">
             <!-- if a custom delegate component is provided, we will just use a list of that component instead of the default table view -->
-            <tableView v-if="!delegateComponent && view === 'table'"
+            <!-- <tableView v-if="!delegateComponent && view === 'table'"
                 style="margin:auto;"
                 :columns="columns"
                 :page="page"
@@ -17,8 +17,9 @@
                 @edit="edit($event.id, $event.field, $event.value)"
                 @switchView="view = $event"
                 @clone="push($event.entry)"
-            />
-            <jsonView v-else-if="!delegateComponent && view === 'json'"
+                @cloneAs="cloneAs($event.entry)"
+            /> -->
+            <jsonView v-if="!delegateComponent && view === 'json'"
                 style="margin:auto;"
                 :columns="columns"
                 :page="page"
@@ -30,8 +31,9 @@
                 @openDetailView="openDetailView($event.id, $event.entry, pageFbRefs[$event.id])"
                 @delete="remove($event.id)" 
                 @edit="set($event.id, $event.value)"
-                @switchView="view = $event"
+                
                 @clone="push($event.entry)"
+                @cloneAs="cloneAs($event.entry)"
             />
             <div v-else-if="!layout">
                 <div class='margin-bottom'>
@@ -137,7 +139,7 @@ import lodash from 'lodash'
 import fbase from '../../fbase'
 import imageStorage from '../imageStorage'
 import tabView from '../../../../layout/tabView'
-import tableView from './tableView'
+// import tableView from './tableView'. This has been discontinuted! The JSON view is superior in every respect.
 import jsonView from './jsonView'
 import adder from './adder'
 import modal from '../../../../layout/modal'
@@ -189,7 +191,7 @@ const functions = {
 }
 
 export default {
-    components: { imageStorage, tabView, jsonView, adder, tableView, modal, collapsible },
+    components: { imageStorage, tabView, jsonView, adder, modal, collapsible, /* tableView */},
     props: ["page", "tableConfig", "navFn", "hasStorageBucket"],
     computed: {
         actions() {
@@ -527,6 +529,7 @@ export default {
         },
         set(id, value) {
             const self = this;
+            // console.log('Set called', id, value);
             return new Promise((resolve, reject) => {
                 const name = lodash.get(self, "page.name");
                 if (!name)
@@ -552,6 +555,49 @@ export default {
                         Toast.positive(`Successfully created new entry in ${name}. Refresh if it doesn't appear`);
                         resolve();
                     }).catch(reject);
+                }).catch(reject);
+            })
+        },
+        cloneAs(value) {
+            const self = this;
+            return new Promise((resolve, reject) => {
+                const name = lodash.get(self, "page.name");
+                if (!name)
+                    return reject("no page.name when cloning")
+
+                return fbase.getTableRef(self.page.name).then((ref) => {
+                    Dialog.create({
+                        title: "Clone To...",
+                        form: {
+                            key: {
+                                type: String,
+                                required: true,
+                            }
+                        },
+                        buttons: {
+                            Submit({ key }) {
+                                return new Promise((resolve, reject) => {
+                                    ref.child(key).once('value').then((snap) => {
+                                        function doTheSet() {
+                                            ref.child(key).set(value).then(resolve).catch(reject);
+                                        }
+
+                                        if(!snap.val())
+                                            doTheSet();
+                                        else {
+                                            Dialog.create({
+                                                title: "Overwrite?",
+                                                buttons: {
+                                                    Yes: doTheSet,
+                                                    No() {}
+                                                }
+                                            })
+                                        }
+                                    })
+                                }).then(resolve).catch(reject);
+                            }
+                        }
+                    })
                 }).catch(reject);
             })
         },

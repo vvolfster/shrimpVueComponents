@@ -70,7 +70,7 @@ function setStyle(style) {
 const helpers = {
     conditions: {
         isObject(o) {
-            return o ? o.toString.call('[object Object]') : false;
+            return o && typeof o.toString === 'function' ? toString.call(o) === '[object Object]' : false;
         },
     },
     get(options, path, defaultVal, condition) {
@@ -98,7 +98,7 @@ export default {
             default: null
         },
         value: {
-            type: [String, Object, Array, null],
+            type: [String, Object, Array, Number, Date, null],
             default() {
                 return null;
             }
@@ -132,7 +132,7 @@ export default {
         self.d_mode = getMode(options);
         self.uidRand = +new Date();
 
-        self.d_value = helpers.conditions.isObject(self.value) || lodash.isArray(self.value) ? self.value : null;
+        self.d_value = self.value //  helpers.conditions.isObject(self.value) || lodash.isArray(self.value) ? self.value : null;
         self.editor = new JsonEditor(self.$refs.jsoneditor, {
             mode: self.d_mode,
             modes: helpers.get(options, "modes", ['tree', 'form', 'view', 'code'], lodash.isArray),
@@ -148,10 +148,12 @@ export default {
                 // this thing always gets triggured even if nothing is passed to the editor??
                 try {
                     const v = self.editor.get();
-                    Object.defineProperty(v, uidFieldName, {
-                        enumerable: false,
-                        value: `${self.uidRand}_${++self.uidGen}`
-                    })
+                    if(typeof v === 'object'){
+                        Object.defineProperty(v, uidFieldName, {
+                            enumerable: false,
+                            value: `${self.uidRand}_${++self.uidGen}`
+                        })
+                    }
 
                     // self.updateValue()
                     if (typeof self.validateFn === 'function') {
@@ -175,7 +177,9 @@ export default {
                     if(fn)
                         fn(v)
                 }
-                catch(e) { /* do nothing. JSON parse error */ }
+                catch(e) {
+                    /* console.error(e); */
+                }
             },
             name: lodash.get(options, "name") || lodash.get(self, 'placeholder'),
             onError: helpers.get(options, "onError", false, lodash.isFunction),
@@ -198,39 +202,56 @@ export default {
     methods: {
         updateValue(v, force) {
             // console.log(`called updateValue with`, v);
-            if(!lodash.isObject(v)){
-                return;
-            }
+            const self = this;
 
-            if (typeof this.validateFn === 'function') {
-                const err = this.validateFn(v);
-                this.error = typeof err === 'string' ? err : null;
-            }
-            else
-                this.error = null;
-
-            if (this.error){
-                return;
-            }
-
-            this.d_value = v;
-            if(this.editor){
-                if(!force) {
-                    if(!lodash.get(this.options, "deepCheckOnUpdate")){
-                        // console.log(v[uidFieldName], `${this.uidRand}_${this.uidGen}`)
-                        if(v[uidFieldName] === `${this.uidRand}_${this.uidGen}`)
-                            return;
-                    }
-                    else {
-                        try {
-                            if(lodash.isEqual(this.editor.get(), v))
-                                return
-                        } catch(e) { /* do nothing */ }
-                    }
+            function failedValidation() {
+                if (typeof self.validateFn === 'function') {
+                    const err = this.validateFn(v);
+                    self.error = typeof err === 'string' ? err : null;
                 }
-                this.mutex = true;
-                this.editor.set(v);
-                this.mutex = false;
+                else {
+                    self.error = null;
+                }
+                return self.error;
+            }
+
+
+            // If it's a js object. We should use the generated field for it that timestamps the changes. Otherwise, its ok. we can overwrite it!
+            if(lodash.isObject(v)) {
+                if (failedValidation()){
+                    return;
+                }
+
+                this.d_value = v;
+                if(this.editor){
+                    if(!force) {
+                        if(!lodash.get(this.options, "deepCheckOnUpdate")){
+                            // console.log(v[uidFieldName], `${this.uidRand}_${this.uidGen}`)
+                            if(v[uidFieldName] === `${this.uidRand}_${this.uidGen}`)
+                                return;
+                        }
+                        else {
+                            try {
+                                if(lodash.isEqual(this.editor.get(), v))
+                                    return
+                            } catch(e) { /* do nothing */ }
+                        }
+                    }
+                    this.mutex = true;
+                    this.editor.set(v);
+                    this.mutex = false;
+                }
+            }
+            else {
+                if(failedValidation())
+                    return;
+
+                if(this.editor) {
+                    this.d_value = v;
+                    this.mutex = true;
+                    this.editor.set(v);
+                    this.mutex = false;
+                }
             }
         },
         getValue() {

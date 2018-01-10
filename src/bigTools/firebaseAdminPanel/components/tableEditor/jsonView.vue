@@ -18,7 +18,7 @@
                     </button>
                 </div>
             </div>
-            <button class="svtbtn bg-white text-black" @click="$emit('switchView', 'table')">Table</button>
+            <!-- <button class="svtbtn bg-white text-black" @click="$emit('switchView', 'table')">Table</button> THis has been discontinued! -->
         </div>
         
         <div v-for="(obj, key, idx) in pageData" :key="key" class="jsonCell">
@@ -26,7 +26,10 @@
             <json :value="obj" :placeholder="key" :options="editorOptions" :ref="`json_${idx}`" @input="$emit('edit', { id: key, value: $event })" />
             <div class="overlayControls row items-center">
                 <button v-if="hasMenu" @click="$emit('openDetailView', { id: key, entry: obj })" class="svtbtn fa fa-ellipsis-h bg-green text-white btn btn--mini "/>
-                <button class="svtbtn bg-orange btn--mini  text-white" @click="$emit('clone', { entry: obj } )">
+                <button class="svtbtn bg-green btn--mini  text-white" @click="$emit('cloneAs', { entry: obj } )" title="Clone As. You define where this needs to be copied!">
+                    <i class='fa fa-clone'/>
+                </button>
+                <button class="svtbtn bg-orange btn--mini  text-white" @click="$emit('clone', { entry: obj } )" title="clone">
                     <i class='fa fa-clone'/>
                 </button>
                 <button v-if="hasDelete" class="svtbtn btn--delete btn--mini  fa fa-trash" @click="$emit('delete', { id: key } )"/>
@@ -99,33 +102,67 @@ export default {
         createNew() {
             const self = this;
             const name = lodash.get(self, "page.name");
-            Dialog.create({
-                title: `Create New ${name}`,
-                form: {
-                    value: {
-                        type: JSON,
-                        options: {
-                            style: "min-width: 40vw;",
-                            mode: "code"
-                        }
+            const form = {
+                value: {
+                    type: JSON,
+                    options: {
+                        style: "min-width: 40vw;",
+                        mode: "code"
                     }
                 },
+                key: {
+                    type: String,
+                    label: "Key (optional)"
+                }
+            }
+
+            Dialog.create({
+                title: `Create New ${name}`,
+                form,
                 buttons: {
-                    Submit({ value }){
+                    Submit({ key, value }){
                         return new Promise((resolve, reject) => {
                             if(!name)
                                 return reject(`no name for table: ${name}`);
 
                             return fbase.getTableRef(name).then((ref) => {
-                                ref.push(value).then(() => {
+                                function success() {
                                     Toast.positive(`Successfully created new entry in ${name}. Refresh if it doesn't appear`);
                                     resolve();
-                                }).catch(reject);
+                                }
+
+                                if(key) {
+                                    ref.child(key).once('value').then((snap) => {
+                                        function doTheSet() {
+                                            ref.child(key).set(value).then(success).catch(reject);
+                                        }
+
+                                        if(!snap.val())
+                                            doTheSet()
+                                        else {
+                                            Dialog.create({
+                                                title: "Overwrite?",
+                                                buttons: {
+                                                    Yes: doTheSet,
+                                                    No() {}
+                                                }
+                                            })
+                                        }
+                                    })
+                                }
+                                else {
+                                    ref.push(value).then(success).catch(reject);
+                                }
                             }).catch(reject)
                         })
                     }
                 }
             })
+        }
+    },
+    watch: {
+        pageData(pd) {
+            console.log('pd changed to', pd);
         }
     }
 }
