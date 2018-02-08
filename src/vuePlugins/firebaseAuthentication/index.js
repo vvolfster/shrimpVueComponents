@@ -93,10 +93,8 @@ const functions = {
         const self = this;
         self.authUser = user;
         self.authUserId = lodash.get(user, 'uid') || lodash.get(user, 'id') || lodash.get(user, ".key");
-        self.dbUser = {
-            app: lodash.get(state, "loginFlow.state.currentUser.dbApp"),
-            auth: lodash.get(state, "loginFlow.state.currentUser.dbAuth")
-        }
+        self.dbUser.app = lodash.get(state, "loginFlow.state.currentUser.dbApp");
+        self.dbUser.auth = lodash.get(state, "loginFlow.state.currentUser.dbAuth");
 
         const el = self.$el;
         if (!el)
@@ -341,7 +339,14 @@ const exportFunctions = {
                 subMgr.subscribe(document, authChangedEventName, e => functions.handleChangeOnComponent.apply(self, [e.detail]), self);
             },
             data() {
-                return { authUser: null, authUserId: null }
+                return {
+                    authUser: null,
+                    authUserId: null,
+                    dbUser: {
+                        app: null,
+                        auth: null
+                    }
+                }
             },
             methods: {
                 startLoginFlow: functions.startLoginFlow,
