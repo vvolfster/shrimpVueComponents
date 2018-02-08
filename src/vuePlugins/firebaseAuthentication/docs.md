@@ -37,7 +37,8 @@ After the plugin is installed, Vue will have the following properties & methods.
  - **fbAuthenticationMethods** - Object containing the following methods:
 	 - startLoginFlow() - Starts the login flow
 	 - signOut() - Signs the user out.
-- **fbAuthenticationUser** - Object containing the following properties:
+     - getState() - Gets the current state
+- **fbAuthenticationUser** - Object containing the following properties. Please note, that these are not reactive!!
 	- authId - Id of the authUser
 	- authUser - The authUser object
 	- dbUser - Object containing respective db records of the user (app and auth). If no remoteLinking is done, these will be identical.
@@ -48,10 +49,13 @@ After the plugin is installed, Vue will have the following properties & methods.
 
 
 ### Effect on Components (Mixin)
-Every component will have these in its **data:**
+Every component will have these in its **data**. Please note, that these are not reactive!!
 
  - **authUserId** - Id of the authUser
  - **authUser** - The authUser object
+ - dbUser - Object containing respective db records of the user (app and auth). If no remoteLinking is done, these will be identical.
+		- app - The db user record in the app firebase.
+		- auth - The db user record in the auth firebase.
 
 Every component will have these in its **methods:**
  - **startLoginFlow()** - Will bring up the login flow.

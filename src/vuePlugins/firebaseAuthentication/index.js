@@ -93,6 +93,10 @@ const functions = {
         const self = this;
         self.authUser = user;
         self.authUserId = lodash.get(user, 'uid') || lodash.get(user, 'id') || lodash.get(user, ".key");
+        self.dbUser = {
+            app: lodash.get(state, "loginFlow.state.currentUser.dbApp"),
+            auth: lodash.get(state, "loginFlow.state.currentUser.dbAuth")
+        }
 
         const el = self.$el;
         if (!el)
@@ -300,7 +304,8 @@ const exportFunctions = {
         // 1.2.17 - So that we can call this without needing a component! Currently the only way to do so.
         VuePtr.fbAuthenticationMethods = {
             startLoginFlow: functions.startLoginFlow,
-            signOut: functions.signOut
+            signOut: functions.signOut,
+            getState: () => lodash.cloneDeep(state) // so the user cannot directly muck about with this.
         }
 
         VuePtr.fbAuthenticationUser = {
@@ -311,6 +316,9 @@ const exportFunctions = {
 
         subMgr.subscribe(document, authChangedEventName, ({ detail }) => {
             state.currentUser = detail;
+            state.dbUser.app = lodash.get(state, "loginFlow.state.currentUser.dbApp");
+            state.dbUser.auth = lodash.get(state, "loginFlow.state.currentUser.dbAuth");
+
             VuePtr.fbAuthenticationUser.authId = lodash.get(detail, 'uid') || lodash.get(detail, 'id') || lodash.get(detail, ".key");
             VuePtr.fbAuthenticationUser.authUser = detail;
             VuePtr.fbAuthenticationUser.dbUser =  {
