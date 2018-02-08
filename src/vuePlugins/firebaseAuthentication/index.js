@@ -297,8 +297,26 @@ const exportFunctions = {
             })
         }
 
+        // 1.2.17 - So that we can call this without needing a component! Currently the only way to do so.
+        VuePtr.fbAuthenticationMethods = {
+            startLoginFlow: functions.startLoginFlow,
+            signOut: functions.signOut
+        }
+
+        VuePtr.fbAuthenticationUser = {
+            authId: null,
+            authUser: null,
+            dbUser: null,
+        }
+
         subMgr.subscribe(document, authChangedEventName, ({ detail }) => {
             state.currentUser = detail;
+            VuePtr.fbAuthenticationUser.authId = lodash.get(detail, 'uid') || lodash.get(detail, 'id') || lodash.get(detail, ".key");
+            VuePtr.fbAuthenticationUser.authUser = detail;
+            VuePtr.fbAuthenticationUser.dbUser =  {
+                app: state.dbUser.app,
+                auth: state.dbUser.auth
+            }
         }, VuePtr)
 
 
@@ -342,31 +360,8 @@ const exportFunctions = {
         VuePtr.fbAuthenticationInstalled = true;
         VuePtr.fbAuthenticationEventName = authChangedEventName;
 
-        // 1.2.17 - So that we can call this without needing a component! Currently the only way to do so.
-        VuePtr.fbAuthenticationMethods = {
-            startLoginFlow: functions.startLoginFlow,
-            signOut: functions.signOut
-        }
-
-        VuePtr.fbAuthenticationUser = {
-            authId: null,
-            authUser: null,
-            dbUser: null,
-        }
-
-        subMgr.subscribe(document, authChangedEventName, (user) => {
-            VuePtr.fbAuthenticationUser.authId = lodash.get(user, 'uid') || lodash.get(user, 'id') || lodash.get(user, ".key");
-            VuePtr.fbAuthenticationUser.authUser = user;
-            VuePtr.fbAuthenticationUser.dbUser =  {
-                app: state.dbUser.app,
-                auth: state.dbUser.auth
-            }
-        });
-
         // dispatch the name of the authChg event
-        const customEvent = new CustomEvent('fbAuthenticationInstalled', {
-            detail: { opts, authChangedEventName }
-        })
+        const customEvent = new CustomEvent('fbAuthenticationInstalled', { detail: { opts, authChangedEventName } })
         document.dispatchEvent(customEvent);
 
         return true;
