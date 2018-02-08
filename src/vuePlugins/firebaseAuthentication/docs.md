@@ -1,3 +1,4 @@
+
 ## firebaseAuthentication (Vue Plugin)
 This is a powerful tool that allows the user to easily configure firebase authentication & manage firebase instances all in place. It is recommended that you install this plugin **before Vuex**. After installation, you can access the initiated firebase Apps through **Vue.fbApps.{appName}** (app & auth are always provided).
 
@@ -30,11 +31,31 @@ import firebaseAuthentication from 'shrimp-vue-components/src/vuePlugins/firebas
 Vue.use(firebaseAuthentication, configObj);
 ```
 
+### Effect on Vue
+After the plugin is installed, Vue will have the following properties & methods.
+ - **fbApps** - The firebase Apps that the auth uses (app & auth).
+ - **fbAuthenticationMethods** - Object containing the following methods:
+	 - startLoginFlow() - Starts the login flow
+	 - signOut() - Signs the user out.
+- **fbAuthenticationUser** - Object containing the following properties:
+	- authId - Id of the authUser
+	- authUser - The authUser object
+	- dbUser - Object containing respective db records of the user (app and auth). If no remoteLinking is done, these will be identical.
+		- app - The db user record in the app firebase.
+		- auth - The db user record in the auth firebase.
+ - **fbAuthenticationEventName** - This is just the event name that will be emitted on auth change. It will be available after the plugin has been installed. This is created so HTML document listeners can react to auth changes easily. This is also emitted on the event ***fbAuthenticationInstalled***
+
+
+
 ### Effect on Components (Mixin)
 Every component will have these in its **data:**
 
  - **authUserId** - Id of the authUser
  - **authUser** - The authUser object
+
+Every component will have these in its **methods:**
+ - **startLoginFlow()** - Will bring up the login flow.
+ - **signOut()** - Signs out the user.
 
 If the component has **requiresAuth** as a truthy value in its **data** or **properties**, the component will be hidden until there is an authenticated user (and you will see a login button by default instead).
 
@@ -167,13 +188,11 @@ export default {
 ```
 
 ## events
-This plugin has a mixin that puts authUser/authId in each Vue component but also fires events thru the document
-when auth changes.
+This plugin has a mixin that puts authUser/authId in each Vue component but also fires events thru the document when auth changes.
 
 First you must get the unique event name before you can listen to it. There's 2 ways to get this.
 
-1. fbAuthenticationInstalled - This occurs when the fbAuthentication plugin is installed. In the event's detail property you will find
-the options that were used to install this plugin as well as the unique event name for the auth plugin.
+1. fbAuthenticationInstalled - This occurs when the fbAuthentication plugin is installed. In the event's detail property you will find the options that were used to install this plugin as well as the unique event name for the auth plugin.
 
 2. Vue.fbAuthenticationEventName - This is just the event name. It will be available after the plugin has been installed.
 

@@ -248,6 +248,13 @@ const functions = {
             state.loginFlow.dismiss();
             state.loginFlow.start()
         }
+    },
+    signOut() {
+        if (state.fbAppAuth)
+            state.fbAppAuth.auth().signOut();
+
+        if (state.fbApp)
+            state.fbApp.auth().signOut();
     }
 }
 
@@ -311,7 +318,8 @@ const exportFunctions = {
                 return { authUser: null, authUserId: null }
             },
             methods: {
-                startLoginFlow: functions.startLoginFlow
+                startLoginFlow: functions.startLoginFlow,
+                signOut: functions.signOut
             }
         })
 
@@ -319,11 +327,7 @@ const exportFunctions = {
         MouseTrap.bind('f7', () => {
             const loginFlowUser = lodash.get(state, "loginFlow.state.currentUser.auth");
             if (loginFlowUser) {
-                if (state.fbAppAuth)
-                    state.fbAppAuth.auth().signOut();
-
-                if (state.fbApp)
-                    state.fbApp.auth().signOut();
+                functions.signOut();
             }
             else if (!state.loginFlow.isVisible()) {
                 state.loginFlow.dismiss();
@@ -337,6 +341,27 @@ const exportFunctions = {
         // mark the plugin as installed
         VuePtr.fbAuthenticationInstalled = true;
         VuePtr.fbAuthenticationEventName = authChangedEventName;
+
+        // 1.2.17 - So that we can call this without needing a component! Currently the only way to do so.
+        VuePtr.fbAuthenticationMethods = {
+            startLoginFlow: functions.startLoginFlow,
+            signOut: functions.signOut
+        }
+
+        VuePtr.fbAuthenticationUser = {
+            authId: null,
+            authUser: null,
+            dbUser: null,
+        }
+
+        subMgr.subscribe(document, authChangedEventName, (user) => {
+            VuePtr.fbAuthenticationUser.authId = lodash.get(user, 'uid') || lodash.get(user, 'id') || lodash.get(user, ".key");
+            VuePtr.fbAuthenticationUser.authUser = user;
+            VuePtr.fbAuthenticationUser.dbUser =  {
+                app: state.dbUser.app,
+                auth: state.dbUser.auth
+            }
+        });
 
         // dispatch the name of the authChg event
         const customEvent = new CustomEvent('fbAuthenticationInstalled', {
