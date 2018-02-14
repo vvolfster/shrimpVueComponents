@@ -2,8 +2,8 @@
     <div class="autoform">
         <div>{{ title }}</div>
         <pre class="pre">{{ description }}</pre>
-        <div class="autoComponents" v-if="fields">
-            <div v-for="(field, name) in fields" :key="name" style="position:relative;">
+        <div class="autoComponents" v-if="computedFields">
+            <div v-for="(field, name) in computedFields" :key="name" style="position:relative;">
                 <div class="autoform--input">
                     <component 
                         :is="field ? getComponent(field.type || field, getFieldName(name)) : null" 
@@ -62,17 +62,40 @@ export default {
         },
     },
     mounted() {
-        this.d_model = getDataModel(this.fields);
+        this.computeFields();
+        this.d_model = getDataModel(this.computedFields);
     },
     data() {
         return {
             d_model: null,
+            computedFields: null
         }
     },
     components: {
         boolean, options, combobox, range, date, file, json, number, textLine, textLineAutoComplete, textParagraph, textPassword, markdown
     },
     methods: {
+        computeFields() {
+            const fields = this.fields;
+            const model = this.d_model;
+            if(typeof fields !== "object"){
+                this.computedFields = this.fields;
+            }
+            else {
+                this.computedFields = lodash.pickBy(fields, (f) => {
+                    if(typeof f.when !== 'function')
+                        return true;
+
+                    try {
+                        const val = f.when(model);
+                        return val;
+                    } catch(e) {
+                        return false;
+                    }
+                })
+            }
+            return this.computedFields;
+        },
         getFieldName(name) {
             const field = this.fields[name]
             if (!field)
@@ -145,6 +168,7 @@ export default {
 
             lodash.set(this.d_model, name, value);
             this.$emit('value', this.d_model);
+            this.computeFields();
         },
         getValue() {
             return this.d_model;
@@ -203,12 +227,15 @@ export default {
     },
     watch: {
         model() {
-            this.d_model = getDataModel(this.fields);
+            this.d_model = getDataModel(this.computedFields);
         },
         fields() {
-            this.d_model = getDataModel(this.fields);
+            this.computeFields();
+        },
+        computedFields() {
+            this.d_model = getDataModel(this.computedFields);
         }
-    }
+    },
 }
 </script>
 

@@ -1,3 +1,4 @@
+
 ## autoform (Vue component)
 
 Automatically generates forms. Used in Dialog as well as firebaseAdmin's adder component.
@@ -80,6 +81,11 @@ export default {
 				married: Boolean,
 				gender: {
 					type: combobox,
+					when(v) {
+						// v is the current form value!
+						// This is only shown when the function returns true!
+						return v.married
+					},
 					options: {
 						options: ['male', 'female', 'other']
 					}

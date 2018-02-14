@@ -69,45 +69,37 @@ export default {
                     options: ["Male", "Female", "Other"]
                 },
                 file: File,
-                // hobbies: {
-                //     type: Array,
-                //     options: {
-                //         choices: chance.n(chance.word, 20)
-                //     },
-                //     validator(v) {
-                //         if(v.indexOf("working") !== -1)
-                //             return "WORKING ISNT A HOBBY U FOOL"
-                //         return true;
-                //     },
-                //     model: ["video games"]
-                // },
-                // profession: {
-                //     type: Array,
-                //     options: {
-                //         choices: chance.n(chance.profession, 20),
-                //         multiple: false
-                //     },
-                //     validator(v) {
-                //         if(v.indexOf("working") !== -1)
-                //             return "WORKING ISNT A PROFESSION U FOOL"
-                //         return true;
-                //     },
-                //     model: ["programmer"]
-                // },
                 powers: {
                     type: Object,
                     options: {
                         choices: {
                             one: "1",
                             two: "2",
-                            three: "3"
+                            three: "3",
+                            tooPowerful: "tooPowerful"
                         },
                         multiple: false
                     }
                 },
+                powerLevel: {
+                    type: Number,
+                    required: true,
+                    options: {
+                        allowInfinity: true,
+                    },
+                    when(v) {
+                        return v.powers === 'tooPowerful'
+                    },
+                    validateFn(v) {
+                        if(v <= 0)
+                            return "You cannot be that young!!"
+
+                        return true;
+                    }
+                },
                 age: {
                     type: Range,
-                    validateFn(v) {
+                    validator(v) {
                         if(v < 0)
                             return "You cannot be that young!!"
 
@@ -118,19 +110,6 @@ export default {
                         max: 100,
                         step: 10,
                         list: [20, 50, 70]
-                    }
-                },
-                powerLevel: {
-                    type: Number,
-                    required: true,
-                    options: {
-                        allowInfinity: true,
-                    },
-                    validateFn(v) {
-                        if(v <= 0)
-                            return "You cannot be that young!!"
-
-                        return true;
                     }
                 },
                 aboutMe: {
@@ -169,6 +148,13 @@ export default {
                     type: String,
                     model: "This is an embedded field"
                 }
+            },
+            simpleFields: {
+                first: String,
+                last: String,
+                age: Number,
+                dob: Date,
+                gender: ['male', 'female']
             },
             json: ''
         }

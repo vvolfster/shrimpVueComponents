@@ -1,3 +1,4 @@
+
 ## Dialog (.js)
 
 This allows you to create Dialogs programmatically. Saves a ton of time. You don't need to worry about the UI, just the dialog object.
@@ -129,5 +130,6 @@ The form object, as illustrated by the examples is of the following type:
     10. "textPassword" or "password"
 
 **validator** can always be provided to form keys as a function. If it returns a string, it is in error.
+**when** optional function that is passed the current value of the form. Truthy values will include the field.
 **placeholder** can also always be provided to form keys as a string. This is shown as grey text when the input field is empty.
 **options** can also always be provided to form keys, though what is in options is not common among the different valid types of form inputs. The only option they all share in common is **style**. For more about options and valid types, please take a look at autoform and the input components it uses. The Dialog object uses autoform itself.
