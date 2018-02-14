@@ -2,7 +2,9 @@
     <div class="datetimeRoot" :style="ui.style">
         <input ref="flatPicker" 
             class="datetime flatpickr flatpickr-input" 
-            :placeholder="placeholder" @click="openDatePicker" 
+            :placeholder="placeholder" 
+            @keydown="openIfNotTabKey"
+            @click="openDatePicker" 
             style="border-bottom-style:solid;"
             @input="updateValue"
             readonly='readonly'
@@ -69,6 +71,15 @@ export default {
         }
     },
     methods: {
+        openIfNotTabKey(keyEvent) {
+            if(keyEvent.keyCode === 7 || keyEvent.code === "Tab" || keyEvent.key === "Tab")
+                return;
+
+            if(keyEvent.preventDefault)
+                keyEvent.preventDefault();
+
+            this.openDatePicker();
+        },
         openDatePicker() {
             if(!this.instance) {
                 this.initFlatPickr();

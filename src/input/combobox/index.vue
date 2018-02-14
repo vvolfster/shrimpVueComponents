@@ -37,6 +37,7 @@
                 @keydown.down="setCurrentIndex(1, $event)"
                 @keyup.enter="updateValue(cOptions[currentIndex])"
                 @keyup.space="updateValue(cOptions[currentIndex])"
+                @keyup="popoverKeyHandler"
             >
                 <div v-for="(option, idx) in cOptions"
                     :key="option"
@@ -126,6 +127,15 @@ export default {
         }
     },
     methods: {
+        popoverKeyHandler(e) {
+            if(e.keyCode === 27){
+                try {
+                    this.$refs.popover.close();
+                } catch(err) {
+                    console.error(err);
+                }
+            }
+        },
         preventDefault(e) {
             if(e && e.preventDefault)
                 e.preventDefault();

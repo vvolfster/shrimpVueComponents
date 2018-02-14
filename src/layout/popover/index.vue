@@ -2,7 +2,8 @@
     <div class="popoverRoot">
         <div ref="slotContainer" style="display:none;">
             <slot 
-                :tabindex="!focusable ? '-1' : instance !== null ? '0' : '-1'">
+                :tabindex="!focusable ? '-1' : instance !== null ? '0' : '-1'"
+            >
             </slot>
         </div>
     </div>
@@ -153,14 +154,25 @@ export default {
 
             self.$emit('opened');
             self.$emit('open');
-            if(self.focusable)
-                slot.focus();
-
+            self.$nextTick(() => {
+                const s = slot.$el || slot;
+                if(self.focusable){
+                    s.tabIndex = 0;
+                    s.focus();
+                }
+            })
             return this.instance;
         },
         close() {
-            if(this.instance)
-                this.instance.dismiss();
+            const self = this;
+            if(self.instance)
+                self.instance.dismiss();
+
+            const slotParent = self.$refs.slotContainer;
+            const slot = slotParent.childNodes.length ? slotParent.childNodes[0] : null;
+            const s = slot.$el || slot;
+            s.tabIndex = -1;
+            s.blur();
         },
         isOpen() {
             return this.instance !== null
