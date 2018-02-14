@@ -43,7 +43,7 @@ export default {
             animations: {
                 options: ['up', 'down', 'left', 'right', 'none'],
                 position: 'top',
-                styleList: 'background: orange; opacity: 0.5;'
+                styleList: 'background: orange;'
             },
             positions: {
                 options: ['up', 'down', 'left', 'right', 'center'],

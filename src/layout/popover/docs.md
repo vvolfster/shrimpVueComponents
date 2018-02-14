@@ -36,12 +36,12 @@ import popover from 'shrimp-vue-components/src/layout/popover'
 ```
 
 ### Props
-**- position (String)** - The position the modal is displayed. One of ["up", "down", "left", "right", "center"]. Default center.
-
+**- position (String)** - The position the popover is displayed. One of ["up", "down", "left", "right", "upRight", "upLeft", "downLeft", "downRight", "leftUp", "leftDown", "rightUp", "rightDown"]. Can also use "topStart", "topEnd".
+** 
 
 ### Events
-**- close** - Emitted when the modal is closed.
-**- open** - Emitted when the modal is opened.
+**- close** - Emitted when the popover is closed.
+**- open** - Emitted when the popover is opened.
 
 ### Methods
 - **open(config)** - Opens the popover

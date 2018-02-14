@@ -6,7 +6,11 @@
                 <div v-for="(v, k) in computedOptions" 
                     :key="k" 
                     class="row nugget margin-bottom" 
+                    tabindex="0"
+                    @keydown.space="preventDefault"
                     @click="toString.call(rawOptions) === '[object Object]' ? updateValue(null, { k: rawOptions[k], v: !v }) : updateValue(null, { k, v: !v })"
+                    @keyup.enter="toString.call(rawOptions) === '[object Object]' ? updateValue(null, { k: rawOptions[k], v: !v }) : updateValue(null, { k, v: !v })"
+                    @keyup.space="toString.call(rawOptions) === '[object Object]' ? updateValue(null, { k: rawOptions[k], v: !v }) : updateValue(null, { k, v: !v })"
                 >
                     <i class="svti margin-right fa" :class="!v ? icon.default : icon.selected"></i>
                     <div>{{ k }}</div>
@@ -107,6 +111,10 @@ export default {
         this.d_value = extractValue(this.value, this.options);
     },
     methods: {
+        preventDefault(e){
+            if(e && e.preventDefault)
+                e.preventDefault();
+        },
         updateValue(value, { k, v }) {
             // console.log('updateValue', value, k, v);
             const self = this;

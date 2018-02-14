@@ -28,6 +28,7 @@ import adder from './examples/adder/adder'
 import jsonEditor from './examples/jsonEditor/jsonEditor'
 import virtualList from './examples/virtualList'
 import datatable from './examples/datatable'
+import combobox from './examples/combobox'
 
 export default {
     name: 'app',
@@ -35,10 +36,11 @@ export default {
         return {
             myComponent: null,
             userIsActive: true,
-            examples: ["fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "autoformWithCustomComponents", "jsonEditor", "dialogExample", "fileExample", "adder", "virtualList", "datatable"].sort()
+            examples: ["combobox", "fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "autoformWithCustomComponents", "jsonEditor", "dialogExample", "fileExample", "adder", "virtualList", "datatable"].sort()
         }
     },
     components: {
+        combobox,
         toggleButton,
         fbAdminPanel,
         fbAuthentication,

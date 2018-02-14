@@ -1,7 +1,9 @@
 <template>
     <div class="popoverRoot">
         <div ref="slotContainer" style="display:none;">
-            <slot></slot>
+            <slot 
+                :tabindex="!focusable ? '-1' : instance !== null ? '0' : '-1'">
+            </slot>
         </div>
     </div>
 </template>
@@ -12,107 +14,9 @@ import Popper from 'popper.js'
 import shared from '../shared'
 import './popover.css'
 
-// function create({ slot, slotParent, root, dismissFn, position, isStyled }) {
-//     const slotEl = slot.$el || slot;
-//     // console.log(`animate ${animation}`)
-
-//     function createContainer() {
-//         const frag = document.createDocumentFragment();
-//         const newNode = document.createElement("div");
-//         newNode.id = `popoverContainer_${shared.popovers.newKey}`;
-//         newNode.className = "popoverContainer"
-
-//         frag.appendChild(newNode);
-//         document.body.appendChild(frag);
-//         return newNode;
-//     }
-
-//     function createObject(container) {
-//         const frag = document.createDocumentFragment();
-//         const newNode = document.createElement("div");
-//         newNode.id = `popover_${shared.popovers.newKey}`;
-//         newNode.className = isStyled ? "popoverContainer__popoverObjectWrapper__popoverObject" : "popoverContainer__popoverObjectWrapper__popoverObject popoverContainer__popoverObjectWrapper__popoverObject--styled"
-
-
-//         // newNode.style[`pointer-events`] = `none`;
-//         const relativePosNode = document.createElement('div');
-//         relativePosNode.className = "popoverContainer__popoverObjectWrapper"
-
-//         // put it in the DOM. don't forget to add the slot element
-//         newNode.appendChild(slotEl);
-//         relativePosNode.appendChild(newNode);
-//         frag.appendChild(relativePosNode);
-//         container.appendChild(frag);
-//         return newNode;
-//     }
-
-//     function createLogic(container, popover) {
-//         container.isDismissed = false;
-//         container.dissmissFns = []
-//         container.onDismiss = (fn) => {
-//             if(typeof fn === 'function')
-//                 container.dissmissFns.push(fn);
-//         }
-//         container.dismiss = () => {
-//             container.isDismissed = true;
-//             lodash.each(container.dissmissFns, (fn) => {
-//                 if(typeof fn === 'function')
-//                     fn();
-//             })
-
-//             slotParent.appendChild(slotEl);
-
-//             // delete the modal!
-//             container.parentNode.removeChild(container);
-//         }
-
-//         // container.style.cursor = 'none';
-//         container.addEventListener('click', (e) => {
-//             e.preventDefault();
-//             if(!container.isDismissed)
-//                 container.dismiss();
-//         })
-
-//         popover.addEventListener('click', (e) => {
-//             // e.preventDefault();
-//             e.stopPropagation();
-//         })
-//     }
-
-//     const container = createContainer();
-//     const popover = createObject(container);
-//     createLogic(container, popover);
-//     container.onDismiss(dismissFn);
-//     shared.popovers.push(container);
-
-//     const rootRect = root.getBoundingClientRect();
-//     const popoverRect = popover.getBoundingClientRect();
-//     const bodyRect = document.body.getBoundingClientRect();
-
-//     // figure out if we need to resize the combobox
-//     if(position === 'top') {
-//         const diff = (rootRect.top - popoverRect.height);
-//         if(diff < 0) {
-//             popover.style.height = `${rootRect.top}px`;
-//             popover.style.top = `${rootRect.top - popover.style.height}px`;
-//         }
-//         else {
-//             popover.style.top = `${rootRect.top - popoverRect.height}px`;
-//         }
-//     }
-//     else {
-//         const diff = (rootRect.bottom + popoverRect.height) - bodyRect.bottom
-//         if(diff > 0)
-//             popover.style.height = `${bodyRect.bottom - rootRect.bottom}px`;
-
-//         popover.style.top = `${rootRect.bottom}px`;
-//     }
-
-//     popover.style.left = `${rootRect.left}px`;
-//     return container;
-// }
-
 function createPopper({ slot, slotParent, dismissFn, position, root }) {
+    // console.log('createPopper @', position, root)
+
     const slotEl = slot.$el || slot;
     // console.log(`animate ${animation}`)
 
@@ -152,11 +56,7 @@ function createPopper({ slot, slotParent, dismissFn, position, root }) {
             popperJs.destroy();
         }
 
-        popover.addEventListener('click', (e) => {
-            // e.preventDefault();
-            e.stopPropagation();
-        })
-
+        popover.addEventListener('click', e => e.stopPropagation())
         setTimeout(() => {
             const c = () => {
                 if(!popover.isDismissed)
@@ -169,8 +69,33 @@ function createPopper({ slot, slotParent, dismissFn, position, root }) {
     }
 
     const popoverObject = createObject();
+    const placementMap  = {
+        bottom: 'bottom',
+        bottomRight: 'bottom-end',
+        bottomLeft: 'bottom-start',
+        top: 'top',
+        topRight: 'top-end',
+        topLeft: 'top-start',
+        right: 'right',
+        rightTop: 'right-start',
+        rightBottom: 'right-end',
+        left: 'left',
+        leftTop: 'left-start',
+        leftBottom: 'left-end',
+        down: 'bottom',
+        downRight: 'bottom-end',
+        downLeft: 'bottom-start',
+        up: 'top',
+        upRight: 'top-end',
+        upLeft: 'top-start',
+        rightUp: 'right-start',
+        rightDown: 'right-end',
+        leftUp: 'left-start',
+        leftDown: 'left-end',
+    }
+
     const popperJs = new Popper(root, popoverObject, {
-        placement: `${position}-start`,
+        placement: placementMap[position] || position || "",
         hide: {
             enabled: true
         }
@@ -185,7 +110,8 @@ function createPopper({ slot, slotParent, dismissFn, position, root }) {
 export default {
     props: {
         position: String,
-        noStyle: { type: Boolean, default: true }
+        noStyle: { type: Boolean, default: true },
+        focusable: { type: Boolean, default: true }
     },
     data() {
         return {
@@ -225,8 +151,11 @@ export default {
                 isStyled
             })
 
-            this.$emit('opened');
+            self.$emit('opened');
             self.$emit('open');
+            if(self.focusable)
+                slot.focus();
+
             return this.instance;
         },
         close() {
