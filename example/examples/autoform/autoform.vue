@@ -68,6 +68,7 @@ export default {
                     type: "combo",
                     options: ["Male", "Female", "Other"]
                 },
+                file: File,
                 // hobbies: {
                 //     type: Array,
                 //     options: {

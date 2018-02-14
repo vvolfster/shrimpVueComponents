@@ -1,11 +1,20 @@
 <template>
     <div style="position:relative;">
-        <div v-show="isSupported" ref="form" :class="!hover ? 'box box--supported' : 'box box--supported box--hover'">
+        <div v-show="isSupported" ref="form" 
+            :class="hover ? 'box box--supported box--hover' : focused ? 'box box--supported box--focused' : 'box box--supported'"
+            @focus="focused = true"
+            @blur="focused = false"
+        >
             <div class="box__input">
-                <input ref="input" class="box__file" type="file" name="files[]" multiple :accept="accepts"/>
+                <input ref="input" 
+                    class="box__file" 
+                    type="file"
+                    name="files[]"
+                    multiple :accept="accepts"
+                />
                 <label class="box__fileLabel" ref='label'>
                     <div class="box__inputContainer column items-center justify-center">
-                        <i class="fa fa-plus box__inputIcon" v-show="!busy"></i>
+                        <i class="fa fa-plus box__inputIcon" :class="focused ? 'aquamarine' : ''" v-show="!busy"></i>
                         <i class="fa fa-circle-o-notch box__inputIcon box__inputIcon--spinning" v-show="busy" @click.stop.prevent="doNothing"></i>
                     </div>
                 </label>
@@ -25,6 +34,7 @@ import idGen from './idGen'
 import fns from '../functions'
 import '../../../cssImporter'
 import Toast from '../../vuePlugins/toasts'
+
 
 function supportsDragDrop() {
     const div = document.createElement('div');
@@ -54,6 +64,7 @@ export default {
     data() {
         const dataObj = {
             generatedId: null,
+            focused: false,
             isSupported: supportsDragDrop(),
             hover: false,
             busy: false,
@@ -72,7 +83,7 @@ export default {
             events: {
                 all: ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'],
                 startHover: ['dragover', 'dragenter'],
-                endHover: ['dragleave', 'dragend', 'drop']
+                endHover: ['dragleave', 'dragend', 'drop'],
             }
         }
         return dataObj;
@@ -105,9 +116,14 @@ export default {
         events.all.forEach(eName => form.addEventListener(eName, listeners.preventDefault))
         events.startHover.forEach(eName => form.addEventListener(eName, listeners.hoverOn))
         events.endHover.forEach(eName => form.addEventListener(eName, listeners.hoverOff))
-        form.addEventListener('drop', self.handleDrop);
 
+        form.addEventListener('drop', self.handleDrop);
         input.addEventListener("change", self.handleSubmit);
+
+        input.addEventListener('focus', () => { self.focused = true });
+        input.addEventListener('blur', () => { self.focused = false });
+        form.addEventListener('focus', () => { self.focused = true });
+        form.addEventListener('blur', () => { self.focused = false });
     },
     methods: {
         matchesFilters(files) {
@@ -274,6 +290,13 @@ export default {
   outline-offset: -10px;
   border-radius: inherit;
   cursor: pointer;
+}
+.box--focused {
+    outline: 2px dashed aquamarine;
+}
+
+.aquamarine {
+    color: aquamarine;
 }
 
 .box--hover {

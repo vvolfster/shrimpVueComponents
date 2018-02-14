@@ -4,38 +4,17 @@
             <div class="margin-right self-stretch column justify-center">
                 {{ placeholder }}
             </div>
-            <!-- <div class="relative self-grow-shrink items-center">
-                <div class="absolute fill row items-center pointereventsnone" ref="tickList">
-                    <div class="relative fillH" style="width:calc(100% - 16px)">
-                        <button v-for="(v,k) in optionsList" :key="k" 
-                            class="tickbtn absolute pointereventsauto"
-                            :style="`left:calc(${ (v/max) * 100}%)`"
-                            @click.stop="updateValue(v)"
-                        />
-                    </div>
-                </div>
-                <input 
-                    class="line__input fill"
-                    ref="input"
-                    type="range"
-                    :min="min"
-                    :max="max"
-                    :step="step"
-                    :list="`rangeList_${generatedId}`"
-                    :class="error ? 'line__input--error' : ''" :style="ui.style" @input="updateValue"
-                    v-resize="updateSize"
-                >
-            </div> -->
             <input 
-                    class="svtrange"
-                    ref="input"
-                    type="range"
-                    :min="min"
-                    :max="max"
-                    :step="step"
-                    :list="`rangeList_${generatedId}`"
-                    :class="error ? 'line__input--error' : ''" :style="ui.style" @input="updateValue"
-                >
+                class="svtrange"
+                ref="input"
+                type="range"
+                :min="min"
+                :max="max"
+                :step="step"
+                :list="`rangeList_${generatedId}`"
+                :class="error ? 'line__input--error' : ''" :style="ui.style" @input="updateValue"
+                tabindex="0"
+            >
             <datalist ref="list">
                 <option v-for="(v,k) in optionsList" :key="k">
                     {{ v }}
@@ -332,7 +311,7 @@ input[type=range].svtrange {
 }
 
 input[type=range].svtrange:focus {
-    outline: none;
+    
 }
 
 input[type=range].svtrange::-webkit-slider-runnable-track {

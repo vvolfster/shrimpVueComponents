@@ -1,6 +1,12 @@
 <template>
     <div class="boolean">
-        <div class="boolean__input" :style="ui.style">
+        <div class="boolean__input" 
+            :style="ui.style"
+            tabindex="0"
+            @keydown.space="$event.preventDefault()"
+            @keyup.enter="updateValue(d_value ? false : true)"
+            @keyup.space="updateValue(d_value ? false : true)"
+        >
             <div>{{ placeholder }}</div>
             <i class="fa boolean__icon" :class="d_value ? 'fa-toggle-on' : 'fa-toggle-off'" @click="updateValue(d_value ? false : true)"/>
         </div>
