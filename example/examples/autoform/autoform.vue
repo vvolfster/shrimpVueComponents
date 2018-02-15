@@ -103,6 +103,11 @@ export default {
                     options(v) {
                         const options = !v.kids ? ["0"] : ["1", "2", "3"]
                         return { options, multiple: false }
+                    },
+                    validateFn(v, formValue) {
+                        if(formValue.age < 10 && v !== "0")
+                            return "You are too young to have kids!"
+                        return true;
                     }
                 },
                 age: {

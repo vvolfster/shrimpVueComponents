@@ -12,7 +12,7 @@
                         :value="getFieldValue(name)" 
                         :placeholder="getFieldName(name)"
                         @value="setValue(name, $event)" 
-                        :validateFn="field && (typeof field.validateFn === 'function' || typeof field.validator === 'function') ? (field.validateFn || field.validator) : null"
+                        :validateFn="validateFns[name] || null"
                     />
                     <div class='requireOverlay' v-if="fieldIsMissing(name, field)">
                         <i class='fa fa-asterisk'></i>
@@ -63,12 +63,14 @@ export default {
     },
     mounted() {
         this.computeFields();
+        this.computeValidateFns();
         this.d_model = getDataModel(this.computedFields);
     },
     data() {
         return {
             d_model: null,
-            computedFields: null
+            computedFields: null,
+            validateFns: {}
         }
     },
     components: {
@@ -95,6 +97,21 @@ export default {
                 })
             }
             return this.computedFields;
+        },
+        computeValidateFns() {
+            const self = this;
+            function getFn(field, key) {
+                const fn = field[key];
+                if(typeof fn === 'function'){
+                    return v => fn(v, self.d_model)
+                }
+                return false;
+            }
+
+            self.validateFns = lodash.reduce(self.computedFields, (acc, field, name) => {
+                acc[name] = getFn(field, 'validateFn') || getFn(field, 'validator') || null;
+                return acc;
+            }, {})
         },
         getOptions(field) {
             const self = this;
@@ -248,13 +265,11 @@ export default {
     watch: {
         fields() {
             this.computeFields();
+            this.computeValidateFns();
         },
         model() {
             this.d_model = getDataModel(this.computedFields);
         },
-        // computedFields() {
-        //     this.d_model = getDataModel(this.computedFields);
-        // }
     },
 }
 </script>
