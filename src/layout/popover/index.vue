@@ -125,10 +125,6 @@ export default {
         this.close();
     },
     methods: {
-        doNothing(e) {
-            if(e.stopPropagation)
-                e.stopPropagation();
-        },
         open() {
             const self = this;
             const root = self.$el;
