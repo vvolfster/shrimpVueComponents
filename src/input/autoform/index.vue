@@ -265,11 +265,13 @@ export default {
     watch: {
         fields() {
             this.computeFields();
-            this.computeValidateFns();
         },
         model() {
             this.d_model = getDataModel(this.computedFields);
         },
+        computedFields() {
+            this.computeValidateFns();
+        }
     },
 }
 </script>
