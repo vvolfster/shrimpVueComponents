@@ -46,7 +46,7 @@
                     :class="idx === currentIndex ? 'option--hover' : d_value === option ? 'option--selected' : ''"
                     @mouseenter="currentIndex = idx"
                     :style="ui.styleListItem"
-                    @click="updateValue(option)"
+                    @click.stop="updateValue(option)"
                 >
                     {{ option }}
                 </div>

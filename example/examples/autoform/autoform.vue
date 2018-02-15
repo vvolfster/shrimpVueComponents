@@ -97,6 +97,14 @@ export default {
                         return true;
                     }
                 },
+                kids: Boolean,
+                numKids: {
+                    type: Object,
+                    options(v) {
+                        const options = !v.kids ? ["0"] : ["1", "2", "3"]
+                        return { options, multiple: false }
+                    }
+                },
                 age: {
                     type: Range,
                     validator(v) {

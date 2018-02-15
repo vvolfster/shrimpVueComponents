@@ -7,7 +7,7 @@
                 <div class="autoform--input">
                     <component 
                         :is="field ? getComponent(field.type || field, getFieldName(name)) : null" 
-                        :options="field && field.options ? field.options : null"
+                        :options="getOptions(field)"
                         :ref="`formField_${name}`" 
                         :value="getFieldValue(name)" 
                         :placeholder="getFieldName(name)"
@@ -96,18 +96,36 @@ export default {
             }
             return this.computedFields;
         },
+        getOptions(field) {
+            const self = this;
+            const fieldOptions = field && field.options ? field.options : null;
+            try {
+                if(typeof fieldOptions === 'function'){
+                    return fieldOptions(self.d_model)
+                }
+                return fieldOptions || null;
+            }
+            catch(e) {
+                console.error(e);
+                return null;
+            }
+        },
         getFieldName(name) {
-            const field = this.fields[name]
+            const self = this;
+            const field = self.computedFields ? self.computedFields[name] : null;
             if (!field)
                 return name;
 
-            if (typeof field.label === 'string')
-                return field.label;
+            function getLabel(key) {
+                const title = field[key];
+                if(typeof title === 'string' || typeof title === 'number')
+                    return title.toString()
+                else if(typeof title === 'function')
+                    return title(self.d_model, self.getFieldValue(name));
+                return false;
+            }
 
-            if (typeof field.title === 'string')
-                return field.title;
-
-            return name;
+            return getLabel('label') || getLabel('title') || name;
         },
         getFieldValue(name) {
             return lodash.get(this.d_model, name, '');
@@ -168,14 +186,16 @@ export default {
 
             lodash.set(this.d_model, name, value);
             this.$emit('value', this.d_model);
-            this.computeFields();
+            this.computeFields();   // recompute fields!
+            // console.log('SUP', JSON.stringify(this.d_model, null, 2));
         },
         getValue() {
             return this.d_model;
         },
         isValid() {
             const self = this;
-            return lodash.every(this.fields, (type, name) => {
+            const computedFields = this.computedFields || null;
+            return lodash.every(computedFields, (type, name) => {
                 let component = lodash.get(self.$refs, `formField_${name}`)
                 if (lodash.isArray(component))
                     component = component[0];
@@ -226,15 +246,15 @@ export default {
         }
     },
     watch: {
-        model() {
-            this.d_model = getDataModel(this.computedFields);
-        },
         fields() {
             this.computeFields();
         },
-        computedFields() {
+        model() {
             this.d_model = getDataModel(this.computedFields);
-        }
+        },
+        // computedFields() {
+        //     this.d_model = getDataModel(this.computedFields);
+        // }
     },
 }
 </script>

@@ -44,7 +44,3 @@
     -webkit-border-radius: 7px;
     background-color: rgba(0, 0, 0, 0.5);
 }
-
-.popoverz {
-    z-index: 9999;
-}

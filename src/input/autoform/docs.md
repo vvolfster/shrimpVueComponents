@@ -1,4 +1,5 @@
 
+
 ## autoform (Vue component)
 
 Automatically generates forms. Used in Dialog as well as firebaseAdmin's adder component.
@@ -62,6 +63,42 @@ import autoform 'shrimp-vue-components/src/input/autoform'
 - **getValue()** - Returns the value of the entire form as an **object**.
 - **setValue(name, value)** - Sets the field denoted by **name** to **value**
 - **isValid()** - Returns whether the entire form is valid or not.
+
+### More info about the fields object
+The fields object is what populates the autoform and is highly customizable. The structure
+of the fields object is as follows. 
+```
+fields: {
+    myFieldName1: {
+	    type: <one of available components, default or custom installed>,
+	    validateFn: <function that is passed the value of this object>
+	    when: <function that is passed the entire form>
+	    title: <string> or <function that is passed the entire form, value of this field>
+	    options: <object> or <function that is passed the entire form, value of this field>
+    },
+    myFieldName2: {
+	    type: <one of available components, default or custom installed>,
+	    validateFn: <function that is passed the value of this object>
+	    when: <function that is passed the entire form>
+	    title: <string> or <function that is passed the entire form, value of this field>
+	    options: <object> or <function that is passed the entire form, value of this field>
+    }
+    ...
+}
+```
+So the end output of the form will be of the like so:
+```
+{
+    myFieldName1: <some value>,
+    myFieldName2: <some value>
+}
+```
+
+**Field Object**
+	1. title | label (**string | function(formData, thisFieldValue)**) : The text to display when value is empty & the label.
+	2. options (**object | function(formData)**) : Options are specific to each component, so read more about them in the docs here. But it can either be a static object or a function that returns the object. *This allows for very dynamic forms that change based on user inputs!*
+	3. validateFn | validator (**function(thisFieldValue)**): Return string error message if value is in error. Otherwise, return true.
+	4. when (**function(formData)**) : Return truthy value to include this field in the autoform. *This allows for very dynamic forms that change based on user inputs!*
 
 
 

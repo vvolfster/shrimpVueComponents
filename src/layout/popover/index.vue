@@ -24,6 +24,7 @@ function createPopper({ slot, slotParent, dismissFn, position, root }) {
     function createObject() {
         const newNode = document.createElement("div");
         newNode.id = `popover_${shared.popovers.newKey}`;
+        newNode.style.zIndex = 2147483647;
 
         // newNode.style[`pointer-events`] = `none`;
         const relativePosNode = document.createElement('div');
@@ -57,7 +58,8 @@ function createPopper({ slot, slotParent, dismissFn, position, root }) {
             popperJs.destroy();
         }
 
-        popover.addEventListener('click', e => e.stopPropagation())
+        popover.addEventListener('click', e => e.stopPropagation());
+        popover.addEventListener('mouseover', e => e.stopPropagation());
         setTimeout(() => {
             const c = () => {
                 if(!popover.isDismissed)
@@ -123,6 +125,10 @@ export default {
         this.close();
     },
     methods: {
+        doNothing(e) {
+            if(e.stopPropagation)
+                e.stopPropagation();
+        },
         open() {
             const self = this;
             const root = self.$el;
