@@ -15,6 +15,8 @@
             </div>
 
             <button class="svtbtn" @click="open('simple')">Open Simple</button>
+            <button class="svtbtn" @click="open('formWithLabelLayout')">formWithLabelLayout</button>
+            
             <button class="svtbtn" @click="open('simpleNonClosing')">Open No Dismiss</button>
             <button class="svtbtn" @click="open('form')">Open Form</button>
             <button class="svtbtn" @click="open('formWithModel')">Open Form With Model</button>
@@ -71,6 +73,45 @@ export default {
             form: {
                 title: 'Form',
                 description: "This dialog contains a form",
+                form: {
+                    first: {
+                        type: String,
+                        required: true,
+                        validateFn(s) {
+                            if (s.length < 3)
+                                return "too short"
+                            return true;
+                        }
+                    },
+                    last: {
+                        type: String,
+                        required: true,
+                    },
+                    age: {
+                        type: Number,
+                        required: true,
+                        validator(s) {
+                            if (s < 0)
+                                return "No benji buttons allowed"
+                            return true;
+                        }
+                    },
+                    html: {
+                        type: "markdown",
+                        model: `<tr> 	<td style="color: #153643; font-family: Arial, sans-serif; font-size: 24px;text-align:center"> 		<b>It's go time!</b> 	</td> </tr> <tr> 	<td style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;text-align:center"> 		Dear { user }, 		<br> 		Your Imagination International class is now live. Please login to access the class. Your class can be found in your Account, under “My Classes”.  		The class will be open from { date_start } through { date_end }.   		  		<br><br><br>   		<center> 		<a href="{ url }" style="background-color: #44c7f4;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;border-radius:5px" target="_blank">My Classes</a> 		</center>  		<br><br><br>  		If you have any questions, please contact us at classes@iii.global.  		<br><br><br>  		If this is incorrect, please ignore this message. 	</td> </tr>`
+                    }
+                },
+                buttons: {
+                    cancel: true,
+                    submit(formVal) {
+                        Toast.positive(`${formVal.first} ${formVal.last} ${formVal.age}`)
+                    }
+                }
+            },
+            formWithLabelLayout: {
+                title: 'Form',
+                description: "This dialog contains a form",
+                labelLayout: true,
                 form: {
                     first: {
                         type: String,

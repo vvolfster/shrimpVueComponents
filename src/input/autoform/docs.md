@@ -53,6 +53,7 @@ import autoform 'shrimp-vue-components/src/input/autoform'
 - **title (String)** - The title of the autoform.
 - **description(String)** - The description of the autoform.
 - **fields(Object)** - The object that has all the fields of the form. See example.
+- **labelLayout(Boolean)** - Defaults to false. Will make the autoform be a 2 column layout with labels on the left and controls on the right.
 
 ### Events
 - **value(object)** - Emitted when the user changes a field in the form. The value of the form is emitted. 

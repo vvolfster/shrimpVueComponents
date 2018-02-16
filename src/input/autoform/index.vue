@@ -2,24 +2,27 @@
     <div class="autoform">
         <div>{{ title }}</div>
         <pre class="pre">{{ description }}</pre>
-        <div class="autoComponents" v-if="computedFields">
-            <div v-for="(field, name) in computedFields" :key="name" style="position:relative;">
-                <div class="autoform--input">
+        <table class="autoComponents" v-if="computedFields" cellpadding="10" style="margin-bottom:20px;">
+            <tr v-for="(field, name) in computedFields" :key="name" class="relative">
+                <td v-if="labelLayout" style="text-transform:capitalize;">
+                    {{ getFieldName(name) }}
+                </td>
+                <td class="autoform--input">
                     <component 
                         :is="field ? getComponent(field.type || field, getFieldName(name)) : null" 
                         :options="getOptions(field)"
                         :ref="`formField_${name}`" 
                         :value="getFieldValue(name)" 
-                        :placeholder="getFieldName(name)"
+                        :placeholder="!labelLayout ? getFieldName(name) : ''"
                         @value="setValue(name, $event)" 
                         :validateFn="validateFns[name] || null"
                     />
                     <div class='requireOverlay' v-if="fieldIsMissing(name, field)">
                         <i class='fa fa-asterisk'></i>
                     </div>
-                </div>
-            </div>
-        </div>
+                </td>
+            </tr>
+        </table>
     </div>
 </template>
 
@@ -59,6 +62,10 @@ export default {
         fields: {
             type: [Object, null, undefined],
             default: null
+        },
+        labelLayout: {
+            type: Boolean,
+            default: false,
         },
     },
     mounted() {
@@ -283,6 +290,7 @@ export default {
 
 .autoComponents {
     padding-top: 10px;
+    width: 100%;
 }
 
 .autoform--input {

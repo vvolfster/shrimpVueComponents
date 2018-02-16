@@ -1,9 +1,11 @@
 <template>
     <div>
+        <button @click="labelLayout = !labelLayout">Switch Layout</button>
         <autoform
             :title="title"
             :description="description"
             :fields="fields"
+            :labelLayout="labelLayout"
             @value="updateJSON"
         />
         <br>
@@ -12,7 +14,6 @@
         <pre>
             {{ json }}
         </pre>
-        <combobox :options="fields.gender"></combobox>
     </div>
 </template>
 
@@ -30,6 +31,7 @@ export default {
         return {
             title: chance.first(),
             description: chance.paragraph(),
+            labelLayout: false,
             fields: {
                 first: {
                     type: String,

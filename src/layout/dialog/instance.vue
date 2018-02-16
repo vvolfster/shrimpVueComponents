@@ -5,6 +5,7 @@
         <autoform v-if="ui.form"
             ref="form"
             :fields="ui.form"
+            :labelLayout="ui.labelLayout"
             @value="formVal = $event"
             :style="styles.autoform"
         />
@@ -87,15 +88,17 @@ export default {
 
         const fn = lodash.get(animator, `${fnNames[position]}`)
         if(typeof fn === 'function' && animation && animation !== 'none') {
-            fn({
-                element: modal,
-                elementParent: container,
-                startingPosition: startingPos[animation],
-                duration: animationDuration
-            });
+            this.$nextTick(() => {
+                fn({
+                    element: modal,
+                    elementParent: container,
+                    startingPosition: startingPos[animation],
+                    duration: animationDuration
+                });
+            })
         }
         else {
-            animator.setPositionWithinParent({ element: modal, position });
+            this.$nextTick(() => animator.setPositionWithinParent({ element: modal, position }))
         }
     },
     computed: {
@@ -104,11 +107,13 @@ export default {
             const title = params && params.title ? params.title : ''
             const description = params && params.description ? params.description : ''
             const style = params && params.style ? params.style : ''
-            const form = params && params.form ? params.form : null
+            const form = params && params.form ? params.form : null;
+            const labelLayout = params && params.labelLayout ? params.labelLayout : false;
             return {
                 title,
                 description,
                 style,
+                labelLayout,
                 form
             }
         },
