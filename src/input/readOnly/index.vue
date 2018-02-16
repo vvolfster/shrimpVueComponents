@@ -24,7 +24,7 @@ export default {
             default: null
         },
         value: {
-            type: [String, Boolean],
+            type: [String, Boolean, Number, null, undefined],
             default: ''
         },
         placeholder: {
