@@ -120,7 +120,7 @@ export default {
 
                     try {
                         const fieldObj = field(model);
-                        if(shouldBeIncluded(fieldObj))
+                        if(fieldObj && shouldBeIncluded(fieldObj))
                             acc[name] = fieldObj;
                     } catch(e) {
                         console.error("Error on", name, field);

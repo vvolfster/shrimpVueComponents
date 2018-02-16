@@ -69,8 +69,7 @@ import autoform 'shrimp-vue-components/src/input/autoform'
 The fields object is what populates the autoform and is highly customizable. The structure
 of the fields object is as follows. 
 
-** NOTE: If you want to be super fancy, you can also make the field a function that returns the same
-structure. The function will be passed the current value of the form! **
+** NOTE: If you want to be super fancy, you can also make the field a function that returns an object with the fields object structure mentioned above. The function will be passed the current value of the form! If the function returns a non truthy value, the field will be skipped!**
 
 ```
 fields: {
