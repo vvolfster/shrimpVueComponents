@@ -12,6 +12,7 @@ import textPassword from './textPassword'
 import range from './range'
 import json from './json'
 import options from './options'
+import readOnly from './readOnly'
 import customComponents from './customComponents'
 
 export default {
@@ -27,6 +28,7 @@ export default {
     textParagraph,
     textPassword,
     range,
+    readOnly,
     json,
     options,
     customComponents

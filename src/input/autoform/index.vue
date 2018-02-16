@@ -41,6 +41,7 @@ import textParagraph from '../textParagraph'
 import textPassword from '../textPassword'
 import range from '../range'
 import options from '../options'
+import readOnly from '../readOnly'
 import customComponents from '../customComponents'
 import '../../../cssImporter'
 
@@ -81,27 +82,51 @@ export default {
         }
     },
     components: {
-        boolean, options, combobox, range, date, file, json, number, textLine, textLineAutoComplete, textParagraph, textPassword, markdown
+        boolean, options, combobox, range, date, file, json, number, textLine, textLineAutoComplete, textParagraph, textPassword, markdown, readOnly
     },
     methods: {
         computeFields() {
+            // const self = this;
             const fields = this.fields;
             const model = this.d_model;
+
+            function shouldBeIncluded(f) {
+                if(typeof f.when !== 'function')
+                    return true;
+
+                try {
+                    const val = f.when(model);
+                    return val;
+                } catch(e) {
+                    return false;
+                }
+            }
+
+            function isNative(f) {
+                const native = [Boolean, Array, Object, String, Number, Date, File, JSON, Range];
+                return native.indexOf(f) !== -1;
+            }
+
             if(typeof fields !== "object"){
                 this.computedFields = this.fields;
             }
             else {
-                this.computedFields = lodash.pickBy(fields, (f) => {
-                    if(typeof f.when !== 'function')
-                        return true;
+                this.computedFields = lodash.reduce(fields, (acc, field, name) => {
+                    if(typeof field !== 'function' || isNative(field)){
+                        if(shouldBeIncluded(field))
+                            acc[name] = field;
+                        return acc;
+                    }
 
                     try {
-                        const val = f.when(model);
-                        return val;
+                        const fieldObj = field(model);
+                        if(shouldBeIncluded(fieldObj))
+                            acc[name] = fieldObj;
                     } catch(e) {
-                        return false;
+                        console.error("Error on", name, field);
                     }
-                })
+                    return acc;
+                }, {})
             }
             return this.computedFields;
         },
@@ -171,11 +196,12 @@ export default {
                 case "paragraph": return "textParagraph";
                 case "password": return "textPassword";
                 case "autocomplete": return "textLineAutoComplete";
-                case "markdown": return "markdown"
-                case "range": return "range"
-                case "slider": return "range"
-                case "options": return "options"
-                case "choices": return "options"
+                case "markdown": return "markdown";
+                case "range": return "range";
+                case "slider": return "range";
+                case "options": return "options";
+                case "choices": return "options";
+                case "readonly": return "readOnly";
 
                 case "text": return "textLine";
                 case "textLine": return "textLine";

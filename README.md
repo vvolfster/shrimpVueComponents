@@ -21,6 +21,7 @@ npm i -S shrimp-vue-components
 	6. [json](./src/input/json/docs.md) - Self explanatory.
 	7. [markdown](./src/input/markdown/docs.md) - Mark down editor.
 	8. [number](./src/input/number/docs.md) - Self explanatory.
+    8. [readOnly](./src/input/readOnly/docs.md) - Just shows a value that cannot be edited. Good for when you want to show something on the form that is a result of other parameters.
 	9. [textLine](./src/input/textLine/docs.md) - Single line text input.
 	10. [textLineAutoComplete](./src/input/textLineAutoComplete/docs.md) - Perhaps should be called a dictionary selector. Allows selection from a key value pair object with customization on what to show & what to match on.
 	11. [textParagraph](./src/input/textParagraph/docs.md) - Self explanatory.

@@ -68,8 +68,13 @@ import autoform 'shrimp-vue-components/src/input/autoform'
 ### More info about the fields object
 The fields object is what populates the autoform and is highly customizable. The structure
 of the fields object is as follows. 
+
+** NOTE: If you want to be super fancy, you can also make the field a function that returns the same
+structure. The function will be passed the current value of the form! **
+
 ```
 fields: {
+    // normal field object
     myFieldName1: {
 	    type: <one of available components, default or custom installed>,
 	    validateFn: <function that is passed the value of this object, value of the entire form>
@@ -77,12 +82,15 @@ fields: {
 	    title: <string> or <function that is passed the entire form, value of this field>
 	    options: <object> or <function that is passed the entire form, value of this field>
     },
-    myFieldName2: {
-	    type: <one of available components, default or custom installed>,
-	    validateFn: <function that is passed the value of this object, value of this entire form>
-	    when: <function that is passed the entire form>
-	    title: <string> or <function that is passed the entire form, value of this field>
-	    options: <object> or <function that is passed the entire form, value of this field>
+    // function returning a field object. MUCHO CUSTOMIZABLE.
+    myFieldName2 (formData) {
+        return {
+	        type: <one of available components, default or custom installed>,
+	        validateFn: <function that is passed the value of this object, value of this entire form>
+	        when: <function that is passed the entire form>
+	        title: <string> or <function that is passed the entire form, value of this field>
+	        options: <object> or <function that is passed the entire form, value of this field>
+        }
     }
     ...
 }
@@ -100,6 +108,7 @@ So the end output of the form will be of the like so:
 	2. options (**object | function(formData)**) : Options are specific to each component, so read more about them in the docs here. But it can either be a static object or a function that returns the object. *This allows for very dynamic forms that change based on user inputs!*
 	3. validateFn | validator (**function(thisFieldValue, formData)**): Return string error message if value is in error. Otherwise, return true.
 	4. when (**function(formData)**) : Return truthy value to include this field in the autoform. *This allows for very dynamic forms that change based on user inputs!*
+
 
 
 

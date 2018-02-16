@@ -21,6 +21,7 @@
 import autoform from '@/input/autoform'
 import Chance from 'chance'
 import combobox from '@/input/combobox'
+import lodash from 'lodash'
 
 const chance = new Chance();
 export default {
@@ -33,6 +34,18 @@ export default {
             description: chance.paragraph(),
             labelLayout: false,
             fields: {
+                formName(formData) {
+                    if(lodash.get(formData, "first.length") === 3) {
+                        return {
+                            type: "readOnly",
+                            model: "my Form",
+                            when: fd => fd.first.startsWith('s')
+                        }
+                    }
+                    return {
+                        type: String
+                    }
+                },
                 first: {
                     type: String,
                     required: true,
