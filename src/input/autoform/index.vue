@@ -2,12 +2,12 @@
     <div class="autoform">
         <div>{{ title }}</div>
         <pre class="pre">{{ description }}</pre>
-        <table class="autoComponents" v-if="computedFields" cellpadding="10" style="margin-bottom:20px;">
+        <table class="autoComponents" v-if="computedFields" style="margin-bottom:20px;">
             <tr v-for="(field, name) in computedFields" :key="name" class="relative">
-                <td v-if="labelLayout" style="text-transform:capitalize;">
+                <td v-if="labelLayout" style="text-transform:capitalize; padding:0 0 10px 0;">
                     {{ getFieldName(name) }}
                 </td>
-                <td class="autoform--input">
+                <td class="autoform--input relative" style="padding:0 0 20px 0;">
                     <component 
                         :is="field ? getComponent(field.type || field, getFieldName(name)) : null" 
                         :options="getOptions(field)"
@@ -45,12 +45,14 @@ import readOnly from '../readOnly'
 import customComponents from '../customComponents'
 import '../../../cssImporter'
 
-function getDataModel(f) {
+function getDataModel(f, subset) {
     const obj = {};
     if (!f || toString.call(f) !== '[object Object]')
         return obj;
 
-    lodash.each(f, (v, k) => {
+    const set = subset || lodash.keys(subset);
+    lodash.each(set, (k) => {
+        const v = f[k];
         lodash.set(obj, k, lodash.get(v, 'model', ''))
     })
     return obj;
@@ -68,11 +70,15 @@ export default {
             type: Boolean,
             default: false,
         },
+        fullyReactive: {
+            type: Boolean,
+            default: true
+        }
     },
     mounted() {
         this.computeFields();
         this.computeValidateFns();
-        this.d_model = getDataModel(this.computedFields);
+        // this.d_model = getDataModel(this.computedFields);
     },
     data() {
         return {
@@ -234,7 +240,9 @@ export default {
             if (!this.d_model)
                 return;
 
-            lodash.set(this.d_model, name, value);
+            if(name)
+                lodash.set(this.d_model, name, value);
+
             this.$emit('value', this.d_model);
             this.computeFields();   // recompute fields!
             // console.log('SUP', JSON.stringify(this.d_model, null, 2));
@@ -302,8 +310,35 @@ export default {
         model() {
             this.d_model = getDataModel(this.computedFields);
         },
-        computedFields() {
+        computedFields(v, ov) {
             this.computeValidateFns();
+            if(!this.fullyReactive)
+                return;
+
+            const keys = lodash.keys(v);
+            const oldKeys = lodash.keys(ov);
+
+            const newKeys = lodash.difference(keys, oldKeys);
+            const obsoleteKeys = lodash.difference(oldKeys, keys);
+
+            const model = this.d_model || {};
+
+            if(!newKeys.length && !obsoleteKeys.length)
+                return;
+
+            if(newKeys.length) {
+                const newStuff = getDataModel(this.computedFields, newKeys);
+                lodash.each(newStuff, (val, k) => {
+                    model[k] = val;
+                })
+            }
+
+            if(obsoleteKeys.length) {
+                lodash.each(obsoleteKeys, key => delete model[key])
+            }
+
+            this.d_model = model;
+            this.setValue();
         }
     },
 }

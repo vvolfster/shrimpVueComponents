@@ -165,6 +165,17 @@ flex-flow: row;
     user-select: none;
 }
 
+.datetimeRoot > input {
+    font-style: inherit;
+    font-variant: inherit;
+    font-weight: inherit;
+    font-stretch: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    background: inherit;
+    padding-left: unset !important;
+}
 
 /* ::-webkit-scrollbar-thumb{ background-color: #CCC; } 
 ::-webkit-scrollbar-thumb:hover{ background-color: #0000ff; } 

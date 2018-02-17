@@ -64,7 +64,7 @@ export default {
                 date: {
                     type: Date,
                     required: true,
-                    model: new Date(),
+                    // model: new Date(),
                     options: 'datetime'
                 },
                 password: {
@@ -102,6 +102,7 @@ export default {
                     options: {
                         allowInfinity: true,
                     },
+                    model: 9000,
                     when(v) {
                         return v.powers === 'tooPowerful'
                     },

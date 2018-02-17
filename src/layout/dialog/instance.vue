@@ -6,6 +6,7 @@
             ref="form"
             :fields="ui.form"
             :labelLayout="ui.labelLayout"
+            :fullyReactive="fullyReactive"
             @value="formVal = $event"
             :style="styles.autoform"
         />
@@ -109,11 +110,13 @@ export default {
             const style = params && params.style ? params.style : ''
             const form = params && params.form ? params.form : null;
             const labelLayout = params && params.labelLayout ? params.labelLayout : false;
+            const fullyReactive = params && typeof params.fullyReactive === 'boolean' ? params.fullyReactive : true;
             return {
                 title,
                 description,
                 style,
                 labelLayout,
+                fullyReactive,
                 form
             }
         },

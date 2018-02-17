@@ -110,7 +110,6 @@ export default {
 
 <style scoped>
 .line {
-    min-height: 32px;
     position: relative;
     width: inherit;
     height: inherit;

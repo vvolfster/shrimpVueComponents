@@ -292,11 +292,11 @@ export default {
   cursor: pointer;
 }
 .box--focused {
-    outline: 2px dashed aquamarine;
+    outline: 2px dashed #5E9ED6;
 }
 
 .aquamarine {
-    color: aquamarine;
+    color: #5E9ED6;
 }
 
 .box--hover {

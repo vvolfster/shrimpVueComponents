@@ -2,9 +2,10 @@
     <div class="datetimeRoot" :style="ui.style">
         <input ref="flatPicker" 
             class="datetime flatpickr flatpickr-input" 
+            :class="focused ? 'datetime__bordered' : ''"
             :placeholder="placeholder" 
             @keydown="openIfNotTabKey"
-            @click="openDatePicker" 
+            @click="openDatePicker"
             style="border-bottom-style:solid;"
             @input="updateValue"
             readonly='readonly'
@@ -205,7 +206,6 @@ export default {
 
 <style scoped>
 .datetimeRoot {
-    min-height: 32px;
     width: inherit;
     height: inherit;
     position: relative;
@@ -218,9 +218,22 @@ export default {
     border: solid;
     text-align: inherit;
     border-width: 0 0 1px 0;
-    padding-left: 5px;
     cursor: pointer !important;
     width: 100%;
+
+    font-style: inherit;
+    font-variant: inherit;
+    font-weight: inherit;
+    font-stretch: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    background: inherit;
+}
+
+.datetime:focus {
+    outline: 1px dotted #212121;
+    outline: 5px auto -webkit-focus-ring-color;
 }
 
 .datetime__error {

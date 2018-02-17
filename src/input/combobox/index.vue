@@ -31,6 +31,7 @@
         >
             <div 
                 ref="popoverMain"
+                style="width:100%;"
                 class="popoverz shadow-4" :style="ui.styleList"
                 @keydown.space="preventDefault"
                 @keydown.up="setCurrentIndex(-1, $event)"
@@ -211,7 +212,7 @@ export default {
         position:relative;
         width: inherit;
         height: inherit;
-        min-height: 32px;
+        
         min-width: 32px;
     }
 
@@ -237,7 +238,7 @@ export default {
         justify-content: center;
         align-content: center;
         text-align: left;
-        padding-left: 5px;
+        
         padding-right: 5px;
         cursor: pointer;
     }
