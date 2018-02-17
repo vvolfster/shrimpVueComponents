@@ -2,7 +2,6 @@
     <div class="datetimeRoot" :style="ui.style">
         <input ref="flatPicker" 
             class="datetime flatpickr flatpickr-input" 
-            :class="focused ? 'datetime__bordered' : ''"
             :placeholder="placeholder" 
             @keydown="openIfNotTabKey"
             @click="openDatePicker"
@@ -129,9 +128,9 @@ export default {
             }
         },
         updateValue(val) {
-            // console.log(`this happened`);
+            console.log(`this happened`, val);
             const v = val && val.target ? new Date(val.target.value) : val;
-            if(isNaN(v.getTime()))
+            if(!v || !v.getTime || isNaN(v.getTime()))
                 return; // invalid date
 
             if(typeof this.validateFn === 'function') {

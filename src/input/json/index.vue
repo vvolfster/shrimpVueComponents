@@ -206,7 +206,7 @@ export default {
 
             function failedValidation() {
                 if (typeof self.validateFn === 'function') {
-                    const err = this.validateFn(v);
+                    const err = self.validateFn(v);
                     self.error = typeof err === 'string' ? err : null;
                 }
                 else {
