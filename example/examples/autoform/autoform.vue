@@ -1,19 +1,18 @@
 <template>
     <div>
         <button @click="labelLayout = !labelLayout">Switch Layout</button>
-        <autoform
-            :title="title"
-            :description="description"
-            :fields="fields"
-            :labelLayout="labelLayout"
-            @value="updateJSON"
-        />
-        <br>
-        ---- JSON form value ----
-        <br>
-        <pre>
-            {{ json }}
-        </pre>
+        <div class="row">
+            <autoform
+                :title="title"
+                :description="description"
+                :fields="fields"
+                :labelLayout="labelLayout"
+                @value="updateJSON"
+            />
+            <pre>
+                {{ json }}
+            </pre>
+        </div>
     </div>
 </template>
 
