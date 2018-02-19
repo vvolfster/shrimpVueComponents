@@ -318,7 +318,19 @@ export default {
             const keys = lodash.keys(v);
             const oldKeys = lodash.keys(ov);
 
-            const newKeys = lodash.difference(keys, oldKeys);
+            // Let's find the keys whose type changed!
+            const typeChangeKeys = lodash.reduce(keys, (acc, key) => {
+                const newVal = lodash.get(v, key);
+                const oldVal = lodash.get(ov, key);
+                const newType = typeof newVal === 'function' ? newVal : lodash.get(newVal, "type", newVal);
+                const oldType = typeof oldVal === 'function' ? oldVal : lodash.get(oldVal, "type", oldVal);
+                if(newType && newType !== oldType)
+                    acc.push(key);
+                return acc;
+            }, []);
+
+            // find new Keys. TypeChangeKeys + Genuinely New Keys
+            const newKeys = lodash.uniq(typeChangeKeys.concat(lodash.difference(keys, oldKeys)));
             const obsoleteKeys = lodash.difference(oldKeys, keys);
 
             const model = this.d_model || {};

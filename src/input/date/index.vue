@@ -128,7 +128,6 @@ export default {
             }
         },
         updateValue(val) {
-            console.log(`this happened`, val);
             const v = val && val.target ? new Date(val.target.value) : val;
             if(!v || !v.getTime || isNaN(v.getTime()))
                 return; // invalid date

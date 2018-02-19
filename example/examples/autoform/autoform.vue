@@ -43,7 +43,8 @@ export default {
                         }
                     }
                     return {
-                        type: String
+                        type: String,
+                        model: "my form normal input"
                     }
                 },
                 first: {
