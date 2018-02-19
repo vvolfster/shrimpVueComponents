@@ -1,7 +1,7 @@
 <template>
     <div class="autoform">
-        <div>{{ title }}</div>
-        <pre class="pre">{{ description }}</pre>
+        <div v-if="title">{{ title }}</div>
+        <pre v-if="description" class="pre">{{ description }}</pre>
         <table class="autoComponents" v-if="computedFields" style="margin-bottom:20px;">
             <tr v-for="(field, name) in computedFields" :key="name" class="relative">
                 <td v-if="labelLayout" style="text-transform:capitalize; padding:0 0 10px 0;">
