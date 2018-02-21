@@ -7,6 +7,7 @@
             :fields="ui.form"
             :labelLayout="ui.labelLayout"
             :fullyReactive="fullyReactive"
+            :fieldSort="fieldSort"
             @value="formVal = $event"
             :style="styles.autoform"
         />
@@ -111,12 +112,14 @@ export default {
             const form = params && params.form ? params.form : null;
             const labelLayout = params && params.labelLayout ? params.labelLayout : false;
             const fullyReactive = params && typeof params.fullyReactive === 'boolean' ? params.fullyReactive : true;
+            const fieldSort = params && params.fieldSort ? params.fieldSort : null;
             return {
                 title,
                 description,
                 style,
                 labelLayout,
                 fullyReactive,
+                fieldSort,
                 form
             }
         },

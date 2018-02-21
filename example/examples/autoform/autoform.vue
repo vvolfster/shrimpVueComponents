@@ -1,11 +1,13 @@
 <template>
     <div>
         <button @click="labelLayout = !labelLayout">Switch Layout</button>
+        <button @click="toggleFieldSort">Sort {{ !fieldSort ? 'none' : typeof fieldSort === 'function' ? 'function' : 'array' }}</button>
         <div class="row">
             <autoform
                 :title="title"
                 :description="description"
                 :fields="fields"
+                :fieldSort="fieldSort"
                 :labelLayout="labelLayout"
                 @value="updateJSON"
             />
@@ -32,6 +34,7 @@ export default {
             title: chance.first(),
             description: chance.paragraph(),
             labelLayout: false,
+            fieldSort: null,
             fields: {
                 formName(formData) {
                     if(lodash.get(formData, "first.length") === 3) {
@@ -191,6 +194,21 @@ export default {
     methods: {
         updateJSON(v) {
             this.json = JSON.stringify(v, null, 2);
+        },
+        toggleFieldSort() {
+            if(!this.fieldSort) {
+                this.fieldSort = ['gender']
+            }
+            else if(toString.call(this.fieldSort) === '[object Array]'){
+                this.fieldSort = (a, b) => {
+                    if(a > b) return -1;
+                    if(a < b) return 1;
+                    return 0;
+                }
+            }
+            else {
+                this.fieldSort = null;
+            }
         }
     }
 }

@@ -54,6 +54,8 @@ import autoform 'shrimp-vue-components/src/input/autoform'
 - **description(String)** - The description of the autoform.
 - **fields(Object)** - The object that has all the fields of the form. See example.
 - **labelLayout(Boolean)** - Defaults to false. Will make the autoform be a 2 column layout with labels on the left and controls on the right.
+- **fieldSort(Array, Function, null)** - Defaults to null. If you pass it an array of fieldNames, the form will sort itself accordingly. If you pass it a function, it should be of type of a standard javascript array sort function that takes 2 inputs.
+It will be passed fieldNames.
 - **fullyReactive(Boolean)** - Defaults to true. Makes the autoform completely reactive to its data. Though it should be very
 unlikely, there is a possibility that you will hit an infinite loop. SO TAKE SOME CARE in writing your functions.
 

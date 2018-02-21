@@ -2,22 +2,22 @@
     <div class="autoform">
         <div v-if="title">{{ title }}</div>
         <pre v-if="description" class="pre">{{ description }}</pre>
-        <table class="autoComponents" v-if="computedFields" style="margin-bottom:20px;">
-            <tr v-for="(field, name) in computedFields" :key="name" class="relative">
+        <table class="autoComponents" v-if="orderedFields" style="margin-bottom:20px;">
+            <tr v-for="entry in orderedFields" :key="entry.name" class="relative">
                 <td v-if="labelLayout" style="text-transform:capitalize; padding:0 0 10px 0;">
-                    {{ getFieldName(name) }}
+                    {{ getFieldName(entry.name) }}
                 </td>
                 <td class="autoform--input relative" style="padding:0 0 20px 0;">
                     <component 
-                        :is="field ? getComponent(field.type || field, getFieldName(name)) : null" 
-                        :options="getOptions(field)"
-                        :ref="`formField_${name}`" 
-                        :value="getFieldValue(name)" 
-                        :placeholder="!labelLayout ? getFieldName(name) : ''"
-                        @value="setValue(name, $event)" 
-                        :validateFn="validateFns[name] || null"
+                        :is="entry.field ? getComponent(entry.field.type || entry.field, getFieldName(entry.name)) : null" 
+                        :options="getOptions(entry.field)"
+                        :ref="`formField_${entry.name}`" 
+                        :value="getFieldValue(entry.name)" 
+                        :placeholder="!labelLayout ? getFieldName(entry.name) : ''"
+                        @value="setValue(entry.name, $event)" 
+                        :validateFn="validateFns[entry.name] || null"
                     />
-                    <div class='requireOverlay' v-if="fieldIsMissing(name, field)">
+                    <div class='requireOverlay' v-if="fieldIsMissing(entry.name, entry.field)">
                         <i class='fa fa-asterisk'></i>
                     </div>
                 </td>
@@ -65,6 +65,10 @@ export default {
         fields: {
             type: [Object, null, undefined],
             default: null
+        },
+        fieldSort: {
+            type: [Array, Function, null, undefined],
+            default: null,
         },
         labelLayout: {
             type: Boolean,
@@ -354,8 +358,46 @@ export default {
 
             this.d_model = model;
             this.setValue();
-        }
+        },
     },
+    computed: {
+        orderedFields() {
+            const fieldSort = this.fieldSort;
+            const fields = this.computedFields;
+            if(toString.call(fields) !== '[object Object]'){
+                return [];
+            }
+
+            if(typeof fieldSort !== 'function' && toString.call(fieldSort) !== '[object Array]'){
+                return lodash.reduce(fields, (acc, field, name) => {
+                    acc.push({ name, field })
+                    return acc;
+                }, []);
+            }
+
+            const keys = lodash.keys(fields);
+            if(typeof fieldSort === 'function'){
+                const sortedKeys = keys.sort(fieldSort);
+                return lodash.reduce(sortedKeys, (acc, name) => {
+                    acc.push({ name, field: fields[name] })
+                    return acc;
+                }, []);
+            }
+
+            const out = lodash.reduce(fieldSort, (acc, name) => {
+                const field = fields[name];
+                if(field)
+                    acc.push({ name, field })
+                return acc;
+            }, []);
+            const out2 = lodash.reduce(fields, (acc, field, name) => {
+                if(!lodash.find(out, o => o.name === name))
+                    acc.push({ name, field })
+                return acc;
+            }, [])
+            return [...out, ...out2];
+        }
+    }
 }
 </script>
 
