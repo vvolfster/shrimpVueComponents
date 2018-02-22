@@ -6,8 +6,8 @@
             ref="form"
             :fields="ui.form"
             :labelLayout="ui.labelLayout"
-            :fullyReactive="fullyReactive"
-            :fieldSort="fieldSort"
+            :fullyReactive="ui.fullyReactive"
+            :fieldSort="ui.fieldSort"
             @value="formVal = $event"
             :style="styles.autoform"
         />
