@@ -308,22 +308,25 @@ export default {
         },
         giveFocus(){
             function canFocus(el) {
-                function isHidden() {
+                try {
                     const style = window.getComputedStyle(el);
-                    return (style.display === 'none') || style.visibility === 'hidden'
+                    const isHidden = (style.display === 'none') || style.visibility === 'hidden'
+                    return el.tabIndex !== -1 && !isHidden;
+                } catch(e) {
+                    console.error(el, e);
+                    return false;
                 }
-                return el.tabIndex !== -1 && !isHidden();
             }
 
             function findFocusableElementWithin(el){
                 let focusableEl = null;
-                lodash.some(el.childNodes, (child) => {
+                lodash.some(el.children, (child) => {
                     if(canFocus(child)){
                         focusableEl = child;
                         return true;
                     }
 
-                    if(child.childNodes.length){
+                    if(child.children && child.children.length){
                         const r = findFocusableElementWithin(child);
                         if(r){
                             focusableEl = r;
@@ -343,7 +346,7 @@ export default {
                 }
             }
 
-            lodash.some(this.$refs, (ref, name) => {
+            return lodash.some(this.$refs, (ref, name) => {
                 if(!name.startsWith('formField'))
                     return false;
 

@@ -33,12 +33,25 @@ The **Dialog.create** method takes a config object as shown above.
 - **class (string)** - The class to assign to the dialog object. This must be non scoped.
 - **onDismiss (function)** - The function to run on dismissal of the dialog. Optional.
 - **noDismiss (boolean)** - Cannot dismiss by clicking the background if true. Optional.
-- **form (object)** - Autoform configurator object. Auto-generates form into the Dialog and passes it along to buttons.
+- **form (object)** - Autoform configurator object. Auto-generates form into the Dialog and passes it along to buttons. Optional.
+- **formLabelLayout (boolean)** - Autoform configurator variable. Should the autoform use 2 column layout? Optional. Default is false.
+- **formFullyReactive (boolean)** - Autoform configurator variable. Should the autoform run in fully reactive mode? Optional. Default is true. Optional.
+- **formFieldSort (array, function)** - Autoform configurator variable. Should the autoform sort the keys based on an array or a std array sort function. The keys of the autoform fields will be passed to the sort fn. Default is null.
+
 - **buttons (object)** - The buttons that the dialog presents as options. Children of the buttons key must be functions or objects. The button functions are passed the user inputted **form** as well as a function called **progress** as a second parameter. If the button is performing some determinate async task, it is a good idea to call progress with a value between 0 and 1 to show the user the progress.
     - button as a function (formObject, progressFn)
     - button as an object
 	    - handler (formObject, progressFn) 
 	    - bypassForm (boolean) - Bypass the form's validation
+- **onEnter (boolean, string)** - Default true. Does one of the following upon pressing the enter key:
+	- case **true**:  Runs first button that is a function, if any. Otherwise, tries to dismiss dialog.
+	- case **false**: Does nothing.
+	- case **typeof string**: Runs the button named by this string.
+
+- **onEscape (boolean, string)** - Default true. Does one of the following upon pressing the enter key:
+	- case **true**:  Tries to dismiss dialog.
+	- case **false**: Does nothing.
+	- case **typeof string**: Runs the button named by this string.
 
 
 - returns **DialogObject** - Newly created dialog object. 
