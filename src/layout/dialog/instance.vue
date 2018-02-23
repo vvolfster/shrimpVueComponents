@@ -104,7 +104,7 @@ export default {
             self.listenToEscape = typeof e === 'boolean' || typeof e === 'string' ? e : true;
 
             if(self.listenToEnter || self.listenToEscape)
-                document.addEventListener('keyup', self.keyHandler, { capture: true });
+                document.addEventListener('keyup', self.keyHandler, true);
 
             return Promise.resolve();
         }
@@ -148,13 +148,38 @@ export default {
     computed: {
         ui() {
             const params = this.params;
-            const title = params && params.title ? params.title : ''
-            const description = params && params.description ? params.description : ''
-            const style = params && params.style ? params.style : ''
-            const form = params && params.form ? params.form : null;
-            const labelLayout = params && params.labelLayout ? params.labelLayout : false;
-            const fullyReactive = params && typeof params.fullyReactive === 'boolean' ? params.fullyReactive : true;
-            const fieldSort = params && params.fieldSort ? params.fieldSort : null;
+
+            let title = "";
+            let description = "";
+            let style = "";
+            let form = null;
+            let labelLayout = false;
+            let fullyReactive = true;
+            let fieldSort = null;
+
+            if(params) {
+                if(params.title)
+                    title = params.title;
+
+                if(params.description)
+                    description = params.description;
+
+                if(params.style)
+                    style = params.style;
+
+                if(params.form)
+                    form = params.form;
+
+                labelLayout = params.labelLayout || params.formLabelLayout || false;
+
+                if(typeof params.fullyReactive === 'boolean')
+                    fullyReactive = params.fullyReactive;
+                else if(typeof params.formFullyReactive === 'boolean')
+                    fullyReactive = params.formFullyReactive;
+
+                fieldSort = params.formFieldSort || params.fieldSort || null;
+            }
+
             return {
                 title,
                 description,
@@ -296,19 +321,26 @@ export default {
                 return defaultFn;
             }
 
-            if(e.keyCode === 13 && self.listenToEnter){
+            if(e.keyCode === 13 && self.listenToEnter && !e.shiftKey && !e.ctrlKey){
+                console.log(e);
                 // const d = new Date();
                 // console.log("ENTER HANDLER", lodash.get(self, "params.title") || self.$el.id, d.getHours(), ":", d.getMinutes(), ":", d.getSeconds(), ":", d.getMilliseconds());
                 const btnFn = getButton(self.listenToEnter);
                 if(e.stopPropagation)
                     e.stopPropagation();
+                if(e.preventDefault)
+                    e.preventDefault();
+
                 btnFn();
             }
-            else if(e.keyCode === 27 && self.listenToEscape){
+            else if(e.keyCode === 27 && self.listenToEscape && !e.shiftKey && !e.ctrlKey){
                 const defaultFn = lodash.get(self.params, "noDismiss") ? shake : self.close;
                 const btnFn = typeof self.listenToEscape === 'string' ? getButton(self.listenToEscape) : defaultFn;
                 if(e.stopPropagation)
                     e.stopPropagation();
+                if(e.preventDefault)
+                    e.preventDefault();
+
                 btnFn();
             }
         },
