@@ -305,6 +305,69 @@ export default {
                 return false;
 
             return typeof cmp.isEmpty === 'function' ? cmp.isEmpty() : cmp.getValue();
+        },
+        giveFocus(){
+            function canFocus(el) {
+                function isHidden() {
+                    const style = window.getComputedStyle(el);
+                    return (style.display === 'none') || style.visibility === 'hidden'
+                }
+                return el.tabIndex !== -1 && !isHidden();
+            }
+
+            function findFocusableElementWithin(el){
+                let focusableEl = null;
+                lodash.some(el.childNodes, (child) => {
+                    if(canFocus(child)){
+                        focusableEl = child;
+                        return true;
+                    }
+
+                    if(child.childNodes.length){
+                        const r = findFocusableElementWithin(child);
+                        if(r){
+                            focusableEl = r;
+                            return true;
+                        }
+                    }
+
+                    return false;
+                })
+                return focusableEl;
+            }
+
+            function setFocusTo(el) {
+                el.focus();
+                if(lodash.isFunction(el.select)){
+                    el.select();
+                }
+            }
+
+            lodash.some(this.$refs, (ref, name) => {
+                if(!name.startsWith('formField'))
+                    return false;
+
+                const entry = ref[0];
+                if(!entry)
+                    return false;
+
+                // look in this item and try to give focus!!
+                const el = entry.$el || entry;
+                if(!el)
+                    return false;
+
+                if(canFocus(el)){
+                    setFocusTo(el)
+                    return true;
+                }
+
+                const focusableEl = findFocusableElementWithin(el);
+                if(!focusableEl)
+                    return false;
+
+                setFocusTo(focusableEl);
+                return true;
+            })
         }
     },
     watch: {

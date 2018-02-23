@@ -71,6 +71,22 @@ export default {
         const animationDuration = this.duration;
         const modal = this.$el;
         const container = this.$el.parentNode;
+        const self = this;
+
+        function setFocus() {
+            const form = self.$refs.form;
+            if(form)
+                form.giveFocus();
+            return Promise.resolve();
+        }
+
+        function setKeyhandlers() {
+            const p = lodash.get(self.params, "acceptOnEnter");
+            // TODO URH ERE 
+
+            document.addEventListener('keyup', self.keyHandler)
+            return Promise.resolve();
+        }
 
         const fnNames = {
             up: "animateInTop",
@@ -96,12 +112,17 @@ export default {
                     elementParent: container,
                     startingPosition: startingPos[animation],
                     duration: animationDuration
-                });
+                })
+                .then(setFocus)
+                .then(setKeyhandlers)
             })
         }
         else {
-            this.$nextTick(() => animator.setPositionWithinParent({ element: modal, position }))
+            this.$nextTick(() => animator.setPositionWithinParent({ element: modal, position }).then(setFocus).then(setKeyhandlers))
         }
+    },
+    beforeDestroy() {
+        document.removeEventListener('keyup', this.keyHandler);
     },
     computed: {
         ui() {
@@ -206,6 +227,17 @@ export default {
             }
             else {
                 this.close();
+            }
+        },
+        keyHandler(e){
+            console.log(e);
+            function targetIsChild(){
+
+            }
+
+
+            if(e.keyCode === 13 && targetIsChild(e.target)){   // enter key
+
             }
         },
         doNothing(){ /* this is just so we absorb the click */ }

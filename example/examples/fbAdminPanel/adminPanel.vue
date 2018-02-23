@@ -1,6 +1,9 @@
 <template>
     <div>
-        <fbAdminPanel :config="config">
+        <div v-if="!config.fbConfig">
+            <button @click.stop="getConfig">Set Firebase Config</button>
+        </div> 
+        <fbAdminPanel v-else :config="config">
             <!-- 
                         <openHousePosting slot="test"/>
                     -->
@@ -12,14 +15,15 @@
 import lodash from 'lodash'
 import fbAdminPanel from '@/bigTools/firebaseAdminPanel'
 import person from './person'
-import fbconf from './fbconf'
+import fbConfig from './fbConfig'
 
 export default {
     components: { fbAdminPanel, person },
     data() {
         return {
             config: {
-                fbConfig: fbconf.db,
+                // fbConfig: fbconf.db,
+                fbConfig: null,
                 // authConfig: fbconf.master,
                 // remoteRestAuthLinkFunction: 'https://<DOMAIN>.cloudfunctions.net/remoteRestAuthLink',
                 createNewUsers: false, // defaults to true. SignUp if user don't exist
@@ -104,6 +108,17 @@ export default {
                 },
                 signInOptions: ["google"]
             }
+        }
+    },
+    mounted() {
+        this.getConfig();
+    },
+    methods: {
+        getConfig(){
+            const self = this;
+            fbConfig.getConf().then((conf) => {
+                self.config.fbConfig = conf;
+            })
         }
     }
 }
