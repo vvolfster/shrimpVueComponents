@@ -322,7 +322,6 @@ export default {
             }
 
             if(e.keyCode === 13 && self.listenToEnter && !e.shiftKey && !e.ctrlKey){
-                console.log(e);
                 // const d = new Date();
                 // console.log("ENTER HANDLER", lodash.get(self, "params.title") || self.$el.id, d.getHours(), ":", d.getMinutes(), ":", d.getSeconds(), ":", d.getMilliseconds());
                 const btnFn = getButton(self.listenToEnter);
