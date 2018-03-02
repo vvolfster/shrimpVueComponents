@@ -149,8 +149,12 @@ const Dialog = {
      * @function dismissAll dismisses all dialogs.
      */
     dismissAll() {
-        if(zshared && zshared.dialogs && zshared.dialogs.dismissAll)
+        if(zshared && zshared.dialogs && zshared.dialogs.dismissAll){
             zshared.dialogs.dismissAll();
+            zshared.dialogListeners.unsubAll();
+        }
+
+
         // also delete remove any dangling diaogs that may be left from last reload
         const remainingDialogs = document.querySelectorAll('*[id^="dialogContainer_"]');
         lodash.each(remainingDialogs, dialog => dialog.parentNode.removeChild(dialog))

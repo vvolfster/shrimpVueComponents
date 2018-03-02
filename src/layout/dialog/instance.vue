@@ -31,6 +31,7 @@
 <script>
 import lodash from 'lodash'
 import '../modal/modal.css'
+import shared from '../shared'
 import autoform from '../../input/autoform'
 import animator from '../../misc/animator'
 import fns from '../../misc/functions'
@@ -104,7 +105,7 @@ export default {
             self.listenToEscape = typeof e === 'boolean' || typeof e === 'string' ? e : true;
 
             if(self.listenToEnter || self.listenToEscape)
-                document.addEventListener('keyup', self.keyHandler, true);
+                shared.dialogListeners.sub(self, 'keyup', self.keyHandler);
 
             return Promise.resolve();
         }
@@ -143,7 +144,7 @@ export default {
         }
     },
     beforeDestroy() {
-        document.removeEventListener('keyup', this.keyHandler);
+        shared.dialogListeners.unsub(this);
     },
     computed: {
         ui() {

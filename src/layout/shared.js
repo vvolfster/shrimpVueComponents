@@ -1,6 +1,43 @@
 import lodash from 'lodash'
 
-const shared = {}
+const shared = {
+    dialogListeners: {
+        listeners: {
+
+        },
+        unsubAll() {
+            lodash.each(this.listeners, (arr, key) => {
+                lodash.eachRight(arr, (d, idx) => {
+                    window.removeEventListener(d.event, d.fn)
+                    arr.splice(idx, 1);
+                })
+                delete this.listeners[key];
+            })
+            // console.log(JSON.stringify(this.listeners, null, 2));
+        },
+        sub(dialog, event, fn) {
+            if(!this.listeners[dialog.$el.id]) {
+                this.listeners[dialog.$el.id] = [];
+            }
+
+            window.addEventListener(event, fn);
+            this.listeners[dialog.$el.id].push({ event, fn })
+            // console.log(this.listeners);
+        },
+        unsub(dialog) {
+            const d = lodash.get(this.listeners, dialog.$el.id);
+            if(!d)
+                return;
+
+            lodash.eachRight(d, (entry, idx) => {
+                window.removeEventListener(entry.event, entry.fn);
+                d.splice(idx, 1);
+            })
+            delete this.listeners[dialog.$el.id];
+            // console.log(JSON.stringify(this.listeners, null, 2));
+        }
+    }
+}
 
 function generator(key) {
     return {
