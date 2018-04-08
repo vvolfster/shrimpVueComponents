@@ -63,7 +63,7 @@ function GenericSubscriptionWrapper(params) {
         if(optId !== undefined && optId !== null){
             const foundIndex = lodash.findIndex(self.subscriptions, s => s && s.id === optId)
             if(foundIndex === -1)
-                return Promise.reject("No such id");
+                return Promise.resolve("No such id");
 
             const entry = self.subscriptions[foundIndex];
             entry.element[unlisten](entry.eventType, entry.fn);
