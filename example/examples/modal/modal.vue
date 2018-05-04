@@ -27,7 +27,7 @@
         </modal>
 
         <modal ref="modal1" :animation="chosen.animation" :position="chosen.position">
-            <div style="width:100vw; display:block;">
+            <div style="max-width:90vw; max-height:90vh; display:block;">
                 {{ superLongText }}
             </div>
         </modal>

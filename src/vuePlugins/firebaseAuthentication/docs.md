@@ -10,12 +10,17 @@ There are a few ways to use this:
 ```javascript
 import svt from 'shrimp-vue-components'
 import Vue from 'vue'
-import configObj from './localConfigObj'
+import fbConfig from './localConfigObj'
 
 // Inits all plugins. Passes the respective config object to each plugin.
 // In this case, the value denoted by "firebaseAuthentication" shall be passed in
 Vue.use(svt, {
-	firebaseAuthentication: configObj
+    firebaseAuthentication: {
+        fbConfig,
+        onAuthChanged(user) {
+            return user ? console.log("loggedin") : console.log("loggedout")
+        }   
+    },
 })
 
 // OR
@@ -123,6 +128,8 @@ Properties
 - **authRequiredHtml (optional Html | String)** - This html will be embedded into all Vue Components if they require the user to be authenticated & the user isn't. By default, this is a login button.
 
 - **signInOptions (optional Array | Object)** - Defaults to ["email", "google"]. Options are ["email", "google", "twitter", "github" ]
+
+- **onAuthChanged(user) (optional Function | null)** - This optional function will be called when the user logs in or out.
 
 -----
 

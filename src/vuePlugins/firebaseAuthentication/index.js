@@ -44,6 +44,7 @@ const state = {
         app: null,
         auth: null
     },
+    onAuthChangedFn: null,
     otherApps: {},
 }
 
@@ -282,6 +283,7 @@ const exportFunctions = {
             VuePtr.fbApps = {}
 
         state.opts = opts;
+        state.onAuthChangedFn = lodash.get(opts, "onAuthChanged")
         state.loginFlow = new LoginFlow(opts, `firebaseAuthentication`);
         const authChangedEventName = state.loginFlow.authChgEvent;
 
@@ -322,6 +324,11 @@ const exportFunctions = {
             VuePtr.fbAuthenticationUser.dbUser =  {
                 app: state.dbUser.app,
                 auth: state.dbUser.auth
+            }
+
+            // handle function from here from login
+            if(lodash.isFunction(state.onAuthChangedFn)) {
+                state.onAuthChangedFn(state.dbUser.app)
             }
         }, VuePtr)
 

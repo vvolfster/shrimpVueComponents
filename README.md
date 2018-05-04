@@ -2,6 +2,8 @@
 
 > Imagishrimp's Vue Component Emporium
 
+To follow the links in this file, you should go to the [github repo](https://github.com/vvolfster/shrimpVueComponents)
+
 ## Installation
 ```
 npm i -S shrimp-vue-components
