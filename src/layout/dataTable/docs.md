@@ -74,6 +74,7 @@ export default {
 
 
 ### Props
+```
 **- title (String)** - Optional. The title of the table. Appears @ topleft.
 
 **- rows (Object[])** - The model or data source of the table.
@@ -124,3 +125,4 @@ export default {
 - **selectAll()** - select every row.
 - **deselectAll()** - deselect every row.
 - **select(row)** - select the param: row.
+```
