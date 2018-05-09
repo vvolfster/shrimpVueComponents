@@ -1,3 +1,4 @@
+
 ## dataTable (Vue component)
 
 Easy visualization of large data sets. Very performant. Forked from [vue-materialize-datatable](https://github.com/MicroDroid/vue-materialize-datatable). Has a lot of extra features & performance optimizations.
@@ -74,12 +75,11 @@ export default {
 
 
 ### Props
-```
-**- title (String)** - Optional. The title of the table. Appears @ topleft.
+- **title (String)** - Optional. The title of the table. Appears @ topleft.
 
-**- rows (Object[])** - The model or data source of the table.
+- **rows (Object[])** - The model or data source of the table.
 
-**- columns (Object[])** - Required. The columns to display from the rows property.
+- **columns (Object[])** - Required. The columns to display from the rows property.
   
   - column Object:
 	  - field (String | Function) - Required.
@@ -93,29 +93,29 @@ export default {
 			  - 1 if a > b 
       - html (Boolean) - Defaults to false. Escapes output if false.
 
-**- perPage (Array)** - Per page options. Defaults to  [10, 20, 30, 40, 50]. Include -1 or "all" to have an all option.
-**- defaultPerPage(Number)** - Defaults to first perPage option. Set to -1 to show all.
+- **perPage (Array)** - Per page options. Defaults to  [10, 20, 30, 40, 50]. Include -1 or "all" to have an all option.
+- **defaultPerPage(Number)** - Defaults to first perPage option. Set to -1 to show all.
 
-**- filters (Object)** - Key Function pair.
+- **filters (Object)** - Key Function pair.
 
 - FilterFunction(row) - Must return truthy value to pass the filter.
 
-**- enumerable (Boolean)** - Defaults to true. Can the table rows show their indices? Hides the button to toggle that feature.
-**- searchable (Boolean)** - Defaults to true. Can the table be searched?
-**- clickable (Boolean)** - Defaults to true. Are rows clickable?
-**- sortable (Boolean)** - Defaults to true. Can the table be sorted?
-**- paginate (Boolean)** - Defaults to true. Can the table be paginated?
-**- exportable (Boolean)** - Defaults to true. Can the table be exported as a csv
-**- printable(Boolean)** - Defaults to true. Can the table be printed?
-**- exactSearch (Boolean)** - Defaults to false. Uses contains by default.
-**- filterMode (One of ["OR", "AND"])** - Defaults to "OR".
+- **enumerable (Boolean)** - Defaults to true. Can the table rows show their indices? Hides the button to toggle that feature.
+- **searchable (Boolean)** - Defaults to true. Can the table be searched?
+- **clickable (Boolean)** - Defaults to true. Are rows clickable?
+- **sortable (Boolean)** - Defaults to true. Can the table be sorted?
+- **paginate (Boolean)** - Defaults to true. Can the table be paginated?
+- **exportable (Boolean)** - Defaults to true. Can the table be exported as a csv
+- **printable(Boolean)** - Defaults to true. Can the table be printed?
+- **exactSearch (Boolean)** - Defaults to false. Uses contains by default.
+- **filterMode (One of ["OR", "AND"])** - Defaults to "OR".
 
   - "OR" - Result is the union of all the filters.
   - "AND" - Result is the intersection of all the filters.
   
 ### Events
-**-  click({ row, selection, el })** - Emitted when a row is clicked & clickable is true.
-**-  selection(selection)** - Emitted when the selection changes.
+- **click({ row, selection, el })** - Emitted when a row is clicked & clickable is true.
+- **selection(selection)** - Emitted when the selection changes.
 
 ### Methods
 - **nextPage()** - Go to next page.
@@ -125,4 +125,3 @@ export default {
 - **selectAll()** - select every row.
 - **deselectAll()** - deselect every row.
 - **select(row)** - select the param: row.
-```
