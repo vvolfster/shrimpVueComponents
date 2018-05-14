@@ -44,7 +44,7 @@ import json from '../../../../input/json'
 import Toast from '../../../../vuePlugins/toasts'
 import Dialog from '../../../../layout/dialog'
 import fbase from '../../fbase'
-import '../../../../../cssImporter'
+import '../../../../css'
 
 
 export default {

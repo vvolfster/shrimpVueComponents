@@ -28,7 +28,7 @@
 import lodash from 'lodash'
 import fileDropper from '../../misc/fileDropper'
 import Toast from '../../vuePlugins/toasts'
-import '../../../cssImporter'
+import '../../css'
 
 function getOptions(options) {
     if(!options)

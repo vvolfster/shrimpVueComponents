@@ -59,7 +59,7 @@
 <script>
 import animator from '../../misc/animator'
 import popover from '../../layout/popover'
-import '../../../cssImporter'
+import '../../css'
 
 export default {
     components: {

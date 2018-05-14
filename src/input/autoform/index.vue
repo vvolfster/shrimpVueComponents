@@ -43,7 +43,7 @@ import range from '../range'
 import options from '../options'
 import readOnly from '../readOnly'
 import customComponents from '../customComponents'
-import '../../../cssImporter'
+import '../../css'
 
 function getDataModel(f, subset) {
     const obj = {};

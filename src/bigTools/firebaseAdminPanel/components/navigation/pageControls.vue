@@ -11,7 +11,7 @@
 </template>
 
 <script>
-    import "../../../../../cssImporter"
+    import "../../../../css"
 
     export default {
         props: {

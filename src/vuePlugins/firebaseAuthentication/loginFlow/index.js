@@ -9,7 +9,7 @@ import GenericSubscriptionWrapper from '../../../misc/genericSubscriptionWrapper
 import Dialog from '../../../layout/dialog'
 import Toast from '../../toasts'
 import gFuncs from '../../../misc/functions'
-import '../css.css'
+import '../firebaseAuthentication.css'
 
 const references = {
 

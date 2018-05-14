@@ -26,7 +26,7 @@
 <script>
 import lodash from 'lodash'
 import animator from '../../misc/animator'
-import '../../../cssImporter'
+import '../../css'
 
 function extractValue(v, options) {
     const choices = lodash.get(options, "options") || lodash.get(options, "choices") || [];

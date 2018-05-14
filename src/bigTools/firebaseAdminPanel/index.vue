@@ -52,7 +52,7 @@ import fbase from './fbase'
 import Dialog from '../../layout/dialog'
 import tableEditor from "./components/tableEditor"
 import navigation from './components/navigation'
-import '../../../cssImporter'
+import '../../css'
 
 function getURLParameter(name) {
     /* eslint-disable prefer-template */

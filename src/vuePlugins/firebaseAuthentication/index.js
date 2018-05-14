@@ -3,8 +3,8 @@ import lodash from 'lodash'
 import MouseTrap from 'mousetrap'
 import GenericSubscriptionWrapper from '../../misc/genericSubscriptionWrapper'
 import LoginFlow from './loginFlow'
-import '../../../cssImporter'
-import './css.css'
+import '../../css'
+import './firebaseAuthentication.css'
 import gFuncs from '../../misc/functions'
 
 function getApp(id) { return lodash.find(Firebase.apps, v => v.options.projectId === id) }

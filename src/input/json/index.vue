@@ -15,8 +15,8 @@ import JsonEditor from 'jsoneditor'
 import lodash from 'lodash'
 import "jsoneditor/dist/jsoneditor.min.css"
 import animator from '../../misc/animator'
-import '../../../cssImporter'
-import './css.css'
+import '../../css'
+import './jsoneditorOverride.css'
 
 function getMode(options) {
     if (!options || !options.mode)

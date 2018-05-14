@@ -14,7 +14,7 @@ import lodash from 'lodash'
 import Showdown from 'showdown'
 import SimpleMDE from 'simplemde'
 import 'simplemde/dist/simplemde.min.css'
-import '../../../cssImporter'
+import '../../css'
 import './simpleMdeStyleOverride.css'
 
 

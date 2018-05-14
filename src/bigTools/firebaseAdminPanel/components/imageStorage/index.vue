@@ -8,7 +8,7 @@
     import lodash from 'lodash'
     import imageGrid from '../../../../image/imageGrid'
     import fbase from '../../fbase'
-    import "../../../../../cssImporter"
+    import "../../../../css"
 
     export default {
         data() {

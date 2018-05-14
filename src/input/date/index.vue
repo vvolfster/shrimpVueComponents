@@ -21,7 +21,7 @@ import moment from 'moment'
 import lodash from 'lodash'
 import flatpickr from 'flatpickr'
 import animator from '../../misc/animator'
-import '../../../cssImporter'
+import '../../css'
 
 export default {
     props: {

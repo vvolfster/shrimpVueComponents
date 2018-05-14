@@ -30,7 +30,7 @@ import lodash from 'lodash'
 import combobox from '../../../../input/combobox'
 import fbase from '../../fbase'
 import pageControls from "./pageControls"
-import "../../../../../cssImporter"
+import "../../../../css"
 
 
 export default {

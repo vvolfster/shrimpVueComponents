@@ -147,7 +147,7 @@ import Dialog from '../../../../layout/dialog'
 import collapsible from '../../../../misc/collapsible'
 import Toast from '../../../../vuePlugins/toasts'
 import importedFunctions from '../../../../misc/functions'
-import '../../../../../cssImporter'
+import '../../../../css'
 
 const functions = {
     getColumns(data, storageKey) {

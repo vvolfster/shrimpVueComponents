@@ -32,7 +32,7 @@ import lodash from 'lodash'
 import BLI from 'blueimp-load-image'
 import idGen from './idGen'
 import fns from '../functions'
-import '../../../cssImporter'
+import '../../css'
 import Toast from '../../vuePlugins/toasts'
 
 

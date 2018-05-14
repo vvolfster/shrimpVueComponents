@@ -170,7 +170,7 @@
 import lodash from 'lodash'
 import virtualList from '../virtualList'
 import svcInput from '../../input'
-import '../../../cssImporter'
+import '../../css'
 
 function Selection({ getRealIndexFn }) {
     const arr = [];

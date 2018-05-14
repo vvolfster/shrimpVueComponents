@@ -33,7 +33,7 @@
 import lodash from 'lodash'
 import animator from '../../misc/animator'
 import idGen from './idGen'
-import '../../../cssImporter'
+import '../../css'
 
 export default {
     // directives: { resize: vueResize },
