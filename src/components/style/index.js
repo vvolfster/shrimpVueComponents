@@ -34,18 +34,6 @@ const SVCStyle = Vue.component('SVCStyleSingleton', {
                         body: `14px`,
                         bodySmall: `13px`,
                         supplmentary: `12px`,
-                    },
-                    components: {
-                        main: {
-                            outline: 'none',
-                        },
-                        button: {
-                            padding: `10px`,
-                            minHeight: `40px`,
-                            borderWidth: `1px`,
-                            borderStyle: 'solid',
-                            borderRadius: `3px`
-                        }
                     }
                 },
             },
@@ -66,11 +54,6 @@ const SVCStyle = Vue.component('SVCStyleSingleton', {
                 borderColor: style.colors.border,
                 ...main
             };
-        },
-        button() {
-            const button = this.activeStyle.components.button || {}
-            const main = this.main
-            return { ...main, ...button }
         }
     },
     methods: {

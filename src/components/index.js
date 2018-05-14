@@ -1,12 +1,8 @@
-import "./components.css"
-
-const components = {
-    typography: null,
-}
+import "./_css/components.css"
+import sBtn from "./sBtn"
+import rc from './_registeredComponents'
 
 export default {
-    components,
-    setDefaultComponent(name, vueComponent) {
-        components[name] = vueComponent
-    },
+    sBtn,
+    registerComponent: rc.register
 }

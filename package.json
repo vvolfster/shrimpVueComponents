@@ -32,6 +32,8 @@
     "showdown": "^1.7.4",
     "simplemde": "^1.11.2",
     "velocity-animate": "^1.5.0",
+    "vue": "^2.5.16",
+    "vue-color": "^2.4.6",
     "vue-resize": "^0.4.2"
   },
   "peerDependencies": {
