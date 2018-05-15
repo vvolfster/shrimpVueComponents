@@ -17,7 +17,7 @@ const template = `
                 <slot :value="value.value">
                     <!-- fallback -->
                     <div @click.stop="$emit('click', value.value)" class="s-tree-node-content">
-                        {{value}}
+                        {{value.value}}
                     </div>
                 </slot>
             </template>
