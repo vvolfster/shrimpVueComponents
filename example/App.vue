@@ -35,6 +35,7 @@ import virtualList from './examples/virtualList';
 import datatable from './examples/datatable';
 import combobox from './examples/combobox';
 import components from './examples/components';
+import tree from './examples/tree';
 
 export default {
     name: 'app',
@@ -57,7 +58,8 @@ export default {
                 'adder',
                 'virtualList',
                 'datatable',
-                'components'
+                'components',
+                'tree'
             ].sort(),
         };
     },
@@ -77,6 +79,7 @@ export default {
         adder,
         jsonEditor,
         virtualList,
+        tree,
         components
     },
 };
