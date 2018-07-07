@@ -258,7 +258,13 @@ export default {
             // console.log(this.$refs.input.value);
             this.$refs.input.value = '';
         },
-        doNothing() { /* this is called when we are already uploading something. */ }
+        doNothing() { /* this is called when we are already uploading something. */ },
+        /* requires a real click event */
+        openPicker() {
+            const { input } = this.$refs
+            if(input)
+                input.click()
+        }
     },
     computed: {
         accepts() {

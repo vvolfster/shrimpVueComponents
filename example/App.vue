@@ -29,6 +29,7 @@ import jsonEditor from './examples/jsonEditor/jsonEditor'
 import virtualList from './examples/virtualList'
 import datatable from './examples/datatable'
 import combobox from './examples/combobox'
+import imageGrid from "./examples/imageGrid"
 
 export default {
     name: 'app',
@@ -36,11 +37,12 @@ export default {
         return {
             myComponent: null,
             userIsActive: true,
-            examples: ["combobox", "fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "autoformWithCustomComponents", "jsonEditor", "dialogExample", "fileExample", "adder", "virtualList", "datatable"].sort()
+            examples: ["combobox", "imageGrid", "fbAdminPanel", "fbAuthentication", "animator", "toast", "modal", "autoform", "autoformWithCustomComponents", "jsonEditor", "dialogExample", "fileExample", "adder", "virtualList", "datatable"].sort()
         }
     },
     components: {
         combobox,
+        imageGrid,
         toggleButton,
         fbAdminPanel,
         fbAuthentication,

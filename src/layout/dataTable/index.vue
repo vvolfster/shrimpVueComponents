@@ -76,7 +76,7 @@
                     @mouseleave="hoverColumn = -1"
                 >
                     <div class="row items-center no-wrap" :class="sortColumn === index ? 'text-blue-2' : ''">
-                        <div>{{ typeof column === 'string' ? column : column.label || (typeof column.field === 'string' ? column.field : '') }}&nbsp</div>
+                        <div>{{ typeof column === 'string' ? column : column.label || (typeof column.field === 'string' ? column.field : '') }}&nbsp;</div>
                         <i 
                             v-if="sortable" 
                             class="fa" 
@@ -127,7 +127,7 @@
         <div v-if="paginate" class="table-footer row items-center justify-between"  style="flex: 0 0 64px;">
             <div class="row items-center no-wrap">
                 <div v-if="selection && selection.length" class="row items-center">
-                    <span>Selection:&nbsp</span>
+                    <span>Selection:&nbsp;</span>
                     <div>{{ selection.length }} Row(s)</div>
                 </div>
             </div>

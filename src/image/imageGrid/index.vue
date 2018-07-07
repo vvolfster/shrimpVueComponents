@@ -1,15 +1,22 @@
 <template>
     <div ref="root" class="imageGridRoot">
-        <fileDropper v-if="typeof addFn === 'function'" 
+        <fileDropper
+            ref="fileDropper"
+            v-if="typeof addFn === 'function'" 
             :fn="addFn"
             class="cell cell--add" 
             :style="ui.cellStyle"
+            v-show="!hideDropper"
         />
-        <div v-for="(url, key, index) in collection" :key="key" style="display:inline-block; position:relative;">
-            <img :src="url" class="cell" :style="ui.cellStyle">
-            <div v-if="typeof removeFn === 'function'" class="cell__remove" :style="ui.removeStyle" @click.stop.prevent="removeFn({ url, key, index })">
-                <i class="fa fa-trash cell__removeIcon"></i>
-            </div>
+        <div v-for="(url, key, index) in urls" :key="key">
+            <slot :url="url" :removeFn="typeof removeFn === 'function' ? () => removeFn({ url, key, index }) : null">
+                <div style="display:inline-block; position:relative;">
+                    <img :src="url" class="cell" :style="ui.cellStyle">
+                    <div v-if="typeof removeFn === 'function'" class="cell__remove" :style="ui.removeStyle" @click.stop.prevent="removeFn({ url, key, index })">
+                        <i class="fa fa-trash cell__removeIcon"></i>
+                    </div>
+                </div>
+            </slot>
         </div>
     </div>
 </template>
@@ -35,7 +42,9 @@
         props: {
             collection: {
                 type: [Object, Array],
-                default: {}
+                default() {
+                    return {}
+                }
             },
             cellSize: {
                 type: [Number, String],
@@ -48,17 +57,37 @@
             removeFn: {
                 type: [Function, null],
                 default: null
+            },
+            hideDropper: {
+                type: Boolean,
+                default: false
             }
         },
         computed: {
+            urls() {
+                const { collection } = this
+                if(!collection)
+                    return []
+
+                return Object.keys(collection).map((k) => {
+                    const val = collection[k]
+                    const isBlob = val instanceof Blob
+                    const isFile = val instanceof File
+                    return (isBlob || isFile) ? URL.createObjectURL(val) : val
+                })
+            },
             ui() {
                 const cellStyle = getCellStyle(this.cellSize);
                 const removeStyle = getRemoveStyle(this.cellSize);
-                return {
-                    cellStyle, removeStyle
-                }
+                return { cellStyle, removeStyle }
             }
         },
+        methods: {
+            openPicker() {
+                if(this.addFn && this.$refs.fileDropper)
+                    this.$refs.fileDropper.openPicker()
+            }
+        }
     }
 </script>
 
@@ -94,6 +123,11 @@
     display: table-cell;
     vertical-align: middle;
     cursor: pointer;
+}
+
+.imageGridRoot {
+    display: flex;
+    flex-wrap: wrap;
 }
 
 </style>

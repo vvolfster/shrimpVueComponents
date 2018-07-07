@@ -1,6 +1,12 @@
 <template>
     <div style="position=relative;">
-        <imageGrid :collection="storage" cellSize="10em" :addFn="add" :removeFn="remove" />
+        <imageGrid hideDropper :collection="storage" cellSize="10em" :addFn="add" :removeFn="remove">
+            <template slot-scope="cell">
+                <slot :url="cell.url" :removeFn="cell.removeFn">
+                    <img :src="cell.url" class="cell">
+                </slot>
+            </template>
+        </imageGrid>
     </div>
 </template>
 
@@ -11,6 +17,35 @@
     import "../../../../../cssImporter"
 
     export default {
+        props: {
+            hideDropper: {
+                type: Boolean,
+                default: false
+            },
+            collectionName: { type: String, default: '' },
+            collectionKey: { type: String, default: '' },
+            collectionStoragePath: { type: String, default: '' }
+        },
+        mounted() {
+            const validProps = [this.collectionName, this.collectionKey, this.collectionStoragePath].filter(v => !!v)
+            if(validProps.length === 3) {
+                const [name, id, storageKey] = validProps
+                this.init({ name, id, storageKey })
+            }
+        },
+        computed: {
+            validProps() {
+                return [this.collectionName, this.collectionKey, this.collectionStoragePath].filter(v => !!v)
+            }
+        },
+        watch: {
+            validProps(v) {
+                if(v.length === 3) {
+                    const [name, id, storageKey] = v
+                    this.init({ name, id, storageKey })
+                }
+            }
+        },
         data() {
             return {
                 storage: {},
@@ -35,8 +70,8 @@
 
                     function getTableRef() {
                         return new Promise((resolve, reject) => {
-                            fbase.getTableRef(vm.name).then((ref) => {
-                                dbStorageObject = ref.child(vm.id).child(vm.storageKey);
+                            fbase.getTableRef(`${vm.name}/${vm.id}/${vm.storageKey}`).then((ref) => {
+                                dbStorageObject = ref
                                 resolve();
                             }).catch(reject);
                         })
@@ -92,8 +127,8 @@
                 return new Promise((resolve, reject) => {
                     function removeFromDb() {
                         return new Promise((resolve, reject) => {
-                            fbase.getTableRef(vm.name).then((ref) => {
-                                const dbStorageObject = ref.child(vm.id).child(vm.storageKey).child(key);
+                            fbase.getTableRef(`${vm.name}/${vm.id}/${vm.storageKey}`).then((ref) => {
+                                const dbStorageObject = ref.child(key);
                                 dbStorageObject.remove().then(resolve).catch(reject);
                             }).catch(reject);
                         })
