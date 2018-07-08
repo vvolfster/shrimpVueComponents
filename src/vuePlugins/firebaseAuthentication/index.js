@@ -23,7 +23,7 @@ const state = {
     defaults: {
         authRequiredHtml: `<div class='column items-center justify-center fill'>
             <div class="row items-center">
-                You must be &nbsp<b>logged in</b>&nbsp to view this page.
+                You must be &nbsp;<b>logged in</b>&nbsp; to view this page.
             </div>
             <button qa="authRequiredBtn" class="svtbtn black-border bg-primary text-white rounded margin-top text-no-transform">
                 Log in

@@ -23,7 +23,7 @@ const helpers = {
             d1Reject: null,
             callbacks: {
                 signInSuccess() {
-                    if (instance.d2)
+                    if (instance.d2 && instance.d2.showBusy)
                         instance.d2.showBusy();
                     return false;
                 }
@@ -307,7 +307,8 @@ function builder(conf, id) {
                 return acc;
             }, [])
 
-            if (!document.getElementById('firebaseui-auth-container')) {
+            let uiContainerId = `firebaseui-auth-container`
+            if (!document.getElementById(uiContainerId)) {
                 const frag = document.createDocumentFragment();
                 const topLevelNode = document.createElement('div');
                 topLevelNode.className = 'absolute fill column justify-center items-center'
@@ -349,6 +350,7 @@ function builder(conf, id) {
 
                 const authUIContainerNode = document.createElement('div');
                 authUIContainerNode.id = `firebaseui-auth-container_${fbAppAuth.options.projectId}`;
+                uiContainerId = authUIContainerNode.id
                 authUIContainerNode.style.paddingTop = "15px";
 
                 backgroundNode.appendChild(authUIContainerNode);
@@ -376,7 +378,7 @@ function builder(conf, id) {
             }
 
             const callbacks = dialogs.callbacks;
-            ui.start(`#firebaseui-auth-container_${fbAppAuth.options.projectId}`, lodash.assign({ signInOptions, callbacks }, DEFAULT.uiConfig));
+            ui.start(uiContainerId, lodash.assign({ signInOptions, callbacks }, DEFAULT.uiConfig));
         }
     }
 
@@ -408,10 +410,7 @@ function builder(conf, id) {
         subscribeToAuthChangeOnChild() {
             const authNeeded = !!(lodash.get(opts, "authRequired") || lodash.get(opts, "requiresAuth"))
 
-            function greet(user) {
-                if (!state.currentUser.auth)
-                    Toast.positive(`${id}: Welcome ${helpers.getUserDisplayName(user)}`)
-
+            function greet() {
                 dialogs.dismiss();
                 state.isVisible = false;
             }
@@ -475,10 +474,6 @@ function builder(conf, id) {
                     }
                 }
                 else {
-                    // if there was a user in our state, that means we logged out here.
-                    if (state.currentUser.auth)
-                        Toast(`${id}: Logged out`);
-
                     if (authNeeded) {
                         // console.log("AUTH IS NEEDED START THE LOGIN FLOW", opts)
                         loginFlow.start()
