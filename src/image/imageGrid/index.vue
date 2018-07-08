@@ -8,11 +8,11 @@
             :style="ui.cellStyle"
             v-show="!hideDropper"
         />
-        <div v-for="(url, key, index) in urls" :key="key">
-            <slot :url="url" :removeFn="typeof removeFn === 'function' ? () => removeFn({ url, key, index }) : null">
+        <div v-for="(entry, key) in uiCollection" :key="key">
+            <slot :url="entry.url" :removeFn="entry.removeFn">
                 <div style="display:inline-block; position:relative;">
-                    <img :src="url" class="cell" :style="ui.cellStyle">
-                    <div v-if="typeof removeFn === 'function'" class="cell__remove" :style="ui.removeStyle" @click.stop.prevent="removeFn({ url, key, index })">
+                    <img :src="entry.url" class="cell" :style="ui.cellStyle">
+                    <div v-if="typeof removeFn === 'function'" class="cell__remove" :style="ui.removeStyle" @click.stop.prevent="entry.removeFn">
                         <i class="fa fa-trash cell__removeIcon"></i>
                     </div>
                 </div>
@@ -64,22 +64,33 @@
             }
         },
         computed: {
-            urls() {
+            uiCollection() {
                 const { collection } = this
                 if(!collection)
                     return []
 
-                return Object.keys(collection).map((k) => {
+                const blankFn = ({ url, key, index }) => console.error(`Does not have a removeFn: ${url} ${key} ${index}`)
+                const removeFn = this.removeFn ? this.removeFn : blankFn
+                return Object.keys(collection).map((k, i) => {
                     const val = collection[k]
                     const isBlob = val instanceof Blob
                     const isFile = val instanceof File
-                    return (isBlob || isFile) ? URL.createObjectURL(val) : val
+                    const url = (isBlob || isFile) ? URL.createObjectURL(val) : val
+                    return {
+                        url,
+                        removeFn: () => removeFn({ url, key: k, index: i })
+                    }
                 })
             },
             ui() {
                 const cellStyle = getCellStyle(this.cellSize);
                 const removeStyle = getRemoveStyle(this.cellSize);
                 return { cellStyle, removeStyle }
+            }
+        },
+        watch: {
+            uiCollection(v) {
+                this.$emit('collection', v)
             }
         },
         methods: {

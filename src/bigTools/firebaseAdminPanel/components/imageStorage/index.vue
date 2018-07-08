@@ -1,9 +1,22 @@
 <template>
     <div style="position=relative;">
-        <imageGrid :hideDropper="hideDropper" :collection="storage" cellSize="10em" :addFn="add" :removeFn="remove">
+        <imageGrid
+            ref="grid" 
+            :hideDropper="hideDropper"
+            :collection="storage"
+            cellSize="10em"
+            :addFn="add"
+            :removeFn="remove"
+            @collection="$emit('collection', $event)"
+        >
             <template slot-scope="cell">
                 <slot :url="cell.url" :removeFn="cell.removeFn">
-                    <img :src="cell.url" class="cell">
+                    <div style="display:inline-block; position:relative;">
+                        <img :src="cell.url" class="cell">
+                        <div v-if="typeof cell.removeFn === 'function'" class="cell__remove" @click.stop.prevent="cell.removeFn">
+                            <i class="fa fa-trash cell__removeIcon"></i>
+                        </div>
+                    </div>
                 </slot>
             </template>
         </imageGrid>
@@ -65,6 +78,11 @@
             this.removeSubscriptions();
         },
         methods: {
+            openPicker() {
+                if(this.$refs.grid)
+                    this.$refs.grid.openPicker()
+            },
+
             add(files) {
                 const vm = this;
                 const { fbApp } = vm
