@@ -192,14 +192,14 @@
                         return reject("property: storageKey missing. The storageKey is required to create subscriptions on storage. THIS IS NOT CONSIDERED A FAILURE. We assume the table has no storage.");
 
                     // console.log(`fbase storage subscription @ ${self.name}/${self.id}/${self.storageKey}`)
-                    return fbase.getTableRef(self.name, fbApp).then((ref) => {
-                        const poi = ref.child(self.id).child(self.storageKey);  // this is the path we are interested at!
-
+                    return fbase.getTableRef(`${self.name}/${self.id}/${self.storageKey}`, fbApp).then((poi) => {
                         const subscriptions = {
                             addOrChange(snap) {
                                 // console.log("ADD", snap.key, snap.val());
                                 const path = snap.val();
-                                fbase.getStorageUrl(path, fbApp).then(url => self.$set(self.storage, snap.key, url))
+                                const expectedPath = `${self.name}/${self.id}/${snap.key}`;
+                                const p = typeof path === 'string' ? path : expectedPath
+                                fbase.getStorageUrl(p, fbApp).then(url => self.$set(self.storage, snap.key, url))
                             },
                             remove(snap) {
                                 if(self.storage[snap.key])
