@@ -1,6 +1,6 @@
 {
   "name": "shrimp-vue-components",
-  "version": "1.2.57",
+  "version": "1.2.58",
   "description": "Imagishrimp's Vue Component Emporium",
   "author": "Shahan <shahan@iii.global>",
   "private": false,
@@ -15,8 +15,7 @@
     "babel-preset-env": "^1.6.0",
     "blueimp-load-image": "^2.17.0",
     "fastclick": "^1.0.6",
-    "firebase": "^4.2.0",
-    "firebaseui": "^2.3.0",
+    "firebaseui": "^2.7.0",
     "flatpickr": "^3.0.7",
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
@@ -36,7 +35,8 @@
     "vue-resize": "^0.4.2"
   },
   "peerDependencies": {
-    "vue": "^2.0.0"
+    "firebase": ">4.2.0",
+    "vue": ">2.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
