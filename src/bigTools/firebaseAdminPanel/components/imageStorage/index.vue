@@ -1,6 +1,6 @@
 <template>
     <div style="position=relative;">
-        <imageGrid hideDropper :collection="storage" cellSize="10em" :addFn="add" :removeFn="remove">
+        <imageGrid :hideDropper="hideDropper" :collection="storage" cellSize="10em" :addFn="add" :removeFn="remove">
             <template slot-scope="cell">
                 <slot :url="cell.url" :removeFn="cell.removeFn">
                     <img :src="cell.url" class="cell">
