@@ -146,6 +146,17 @@ const functions = {
             return !isVisible ? state.loginFlow.start() : false;
             // return !state.loginFlow.isVisible() ? state.loginFlow.start() : false;
         })
+    },
+
+    getAppComponent(app, thing) {
+        if(app) {
+            return lodash.isFunction(app[thing]) ? app[thing]() : null
+        } else if(state.appVars[thing]){
+            return state.appVars[thing]
+        } else if(state.app && lodash.isFunction(state.app[thing])) {
+            return state.app[thing]()
+        }
+        return null
     }
 }
 
@@ -230,36 +241,35 @@ const exportObj = {
             return functions.shallowGet(url).then(data => resolve(lodash.keys(data))).catch(reject);
         })
     },
-    getTableRef(name) {
+    getTableRef(name, app) {
         return new Promise((resolve, reject) => {
-            if (!state.appVars)
+            const db = functions.getAppComponent(app, "database")
+            if (!db)
                 return reject('app is not initialized');
 
-            const db = state.appVars.database || state.app.database();
             const tableRef = db.ref(name);
             return resolve(tableRef);
         })
     },
-    getStorageUrl(path) {
+    getStorageUrl(path, app) {
         return new Promise((resolve, reject) => {
-            if (!state.appVars)
+            const storage = functions.getAppComponent(app, "storage")
+            if (!storage)
                 return reject('app is not initialized');
 
-            const storage = state.appVars.storage || state.app.storage();
             const pathRef = storage.ref(path);
-            // console.log(`resolve the path`)
             return pathRef.getDownloadURL().then((url) => {
                 // console.log(`resolved ${path} to ${url}`)
                 resolve(url);
             }).catch(reject);
         })
     },
-    getStorageRef(path) {
+    getStorageRef(path, app) {
         return new Promise((resolve, reject) => {
-            if (!state.appVars)
+            const storage = functions.getAppComponent(app, "storage")
+            if (!storage)
                 return reject('app is not initialized');
 
-            const storage = state.appVars.storage || state.app.storage();
             return resolve(storage.ref(path));
         })
     },

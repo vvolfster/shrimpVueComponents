@@ -22,6 +22,10 @@
                 type: Boolean,
                 default: false
             },
+            fbApp: {
+                type: Object,
+                default: () => null
+            },
             collectionName: { type: String, default: '' },
             collectionKey: { type: String, default: '' },
             collectionStoragePath: { type: String, default: '' }
@@ -63,6 +67,7 @@
         methods: {
             add(files) {
                 const vm = this;
+                const { fbApp } = vm
                 let dbStorageObject = null;
                 return new Promise((resolve) => {
                     if(!files)
@@ -70,7 +75,7 @@
 
                     function getTableRef() {
                         return new Promise((resolve, reject) => {
-                            fbase.getTableRef(`${vm.name}/${vm.id}/${vm.storageKey}`).then((ref) => {
+                            fbase.getTableRef(`${vm.name}/${vm.id}/${vm.storageKey}`, fbApp).then((ref) => {
                                 dbStorageObject = ref
                                 resolve();
                             }).catch(reject);
@@ -88,7 +93,7 @@
                             function uploadToStorage({ key }) { // snap is passed here
                                 return new Promise((resolve, reject) => {
                                     const path = `${vm.name}/${vm.id}/${key}`;
-                                    fbase.getStorageRef(path).then((storageRef) => {
+                                    fbase.getStorageRef(path, fbApp).then((storageRef) => {
                                         storageRef.put(file).then(() => {
                                             resolve({ key, path })
                                         }).catch(reject);
@@ -124,10 +129,11 @@
             // { url, key, index }
             remove({ key }) {
                 const vm = this;
+                const { fbApp } = vm
                 return new Promise((resolve, reject) => {
                     function removeFromDb() {
                         return new Promise((resolve, reject) => {
-                            fbase.getTableRef(`${vm.name}/${vm.id}/${vm.storageKey}`).then((ref) => {
+                            fbase.getTableRef(`${vm.name}/${vm.id}/${vm.storageKey}`, fbApp).then((ref) => {
                                 const dbStorageObject = ref.child(key);
                                 dbStorageObject.remove().then(resolve).catch(reject);
                             }).catch(reject);
@@ -137,7 +143,7 @@
                     function removeFromStorage() {
                         const path = `${vm.name}/${vm.id}/${key}`;
                         return new Promise((resolve, reject) => {
-                            fbase.getStorageRef(path).then((storageRef) => {
+                            fbase.getStorageRef(path, fbApp).then((storageRef) => {
                                 storageRef.delete().then(resolve).catch(reject);
                             }).catch(reject);
                         })
@@ -174,6 +180,7 @@
             },
             createSubscriptions() {
                 const self = this;
+                const { fbApp } = self
                 return new Promise((resolve, reject) => {
                     if(!self.name)
                         return reject("property: name missing. The table name is required to create subscriptions on storage");
@@ -185,14 +192,14 @@
                         return reject("property: storageKey missing. The storageKey is required to create subscriptions on storage. THIS IS NOT CONSIDERED A FAILURE. We assume the table has no storage.");
 
                     // console.log(`fbase storage subscription @ ${self.name}/${self.id}/${self.storageKey}`)
-                    return fbase.getTableRef(self.name).then((ref) => {
+                    return fbase.getTableRef(self.name, fbApp).then((ref) => {
                         const poi = ref.child(self.id).child(self.storageKey);  // this is the path we are interested at!
 
                         const subscriptions = {
                             addOrChange(snap) {
                                 // console.log("ADD", snap.key, snap.val());
                                 const path = snap.val();
-                                fbase.getStorageUrl(path).then(url => self.$set(self.storage, snap.key, url))
+                                fbase.getStorageUrl(path, fbApp).then(url => self.$set(self.storage, snap.key, url))
                             },
                             remove(snap) {
                                 if(self.storage[snap.key])
