@@ -378,7 +378,7 @@ function builder(conf, id) {
             }
 
             const callbacks = dialogs.callbacks;
-            ui.start(uiContainerId, lodash.assign({ signInOptions, callbacks }, DEFAULT.uiConfig));
+            ui.start(`#${uiContainerId}`, lodash.assign({ signInOptions, callbacks }, DEFAULT.uiConfig));
         }
     }
 
